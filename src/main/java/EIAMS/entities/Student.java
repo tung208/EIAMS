@@ -25,5 +25,4 @@ public class Student {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "semester_id", nullable = false)
     private Semester semester;
-
 }
