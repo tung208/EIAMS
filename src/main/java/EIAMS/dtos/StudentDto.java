@@ -18,5 +18,6 @@ public class StudentDto implements Serializable {
     Integer id;
     String email;
     String subject;
+    String studentCode;
     Integer semesterId;
 }

@@ -16,6 +16,9 @@ public class Student {
     @Column(name = "id", nullable = false)
     private Integer id;
 
+    @Column(name = "student-code",unique = true, nullable = false, length = 8)
+    private String studentCode;
+
     @Column(name = "email", nullable = false, length = 64)
     private String email;
 

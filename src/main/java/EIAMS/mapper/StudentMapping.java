@@ -10,6 +10,7 @@ public class StudentMapping {
                 .id(studentDto.getId())
                 .email(studentDto.getEmail())
                 .subject(studentDto.getSubject())
+                .studentCode(studentDto.getStudentCode())
                 .build();
     }
 
@@ -20,6 +21,7 @@ public class StudentMapping {
                 .semesterId(student.getSemester().getId())
                 .subject(student.getSubject())
                 .email(student.getEmail())
+                .studentCode(student.getStudentCode())
                 .build();
     }
 }

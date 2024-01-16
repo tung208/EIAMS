@@ -7,6 +7,8 @@ import EIAMS.repositories.StudentRepository;
 import EIAMS.services.interfaces.FileCsvServiceInterface;
 import com.opencsv.CSVWriter;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.io.BufferedReader;
@@ -21,6 +23,8 @@ import java.util.Optional;
 public class FileCsvService implements FileCsvServiceInterface {
     private final SemesterRepository semesterRepository;
     private final StudentRepository studentRepository;
+    private static final Logger logger = LoggerFactory.getLogger(FileCsvService.class);
+
 
     @Override
     public void exportToCsv(List<Student> students, String filePath) {
@@ -41,37 +45,49 @@ public class FileCsvService implements FileCsvServiceInterface {
             }
             System.out.println("CSV file exported successfully!");
         } catch (IOException e) {
-            e.printStackTrace();
-            // Handle exception appropriately, e.g., log it or throw a custom exception
+            logger.error(e.getMessage());
         }
     }
 
     @Override
     public void importCsvData(String filePath) {
 
-//        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
-//            String line;
-//            while ((line = br.readLine()) != null) {
-//                String[] data = line.split(",");
-//
-//                // Assuming the order of columns in the CSV is: id,email,subject,semester_id
-//                int id = Integer.parseInt(data[0]);
-//                String email = data[1];
-//                String subject = data[2];
-//                int semesterId = Integer.parseInt(data[3]);
-//
-//                Student student = new Student();
-//                student.setId(id);
-//                student.setEmail(email);
-//                student.setSubject(subject);
-//                // Assuming Semester entity has a method to find by id
-//                Optional<Semester> semester = semesterRepository.findById(semesterId);
-//                semester.ifPresent(student::setSemester);
-//
-//                studentRepository.save(student);
-//            }
-//        } catch (IOException e) {
-//            throw new RuntimeException(e);
-//        }
+        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                String[] data = line.split(",");
+
+                // Assuming the order of columns in the CSV is: id,email,subject,semester_id
+                int id = data[0] != null ? Integer.parseInt(data[0]) : 0;
+                String studentCode = data[1];
+                String email = data[2];
+                String subject = data[3];
+                int semesterId = data[4] != null ? Integer.parseInt(data[4]) : 0;
+
+                Optional<Student> student = studentRepository.findById(id);
+
+                if(student.isEmpty() && !studentCode.isEmpty() && !email.isEmpty()) {
+                    Student s = new Student();
+                    s.setEmail(email);
+                    s.setSubject(subject);
+                    s.setStudentCode(studentCode);
+                    Optional<Semester> semester = semesterRepository.findById(semesterId);
+                    semester.ifPresent(s::setSemester);
+                    studentRepository.save(s);
+                }
+                if(student.isPresent() && !studentCode.isEmpty() && !email.isEmpty()) {
+                    Student s = student.get();
+                    s.setEmail(email);
+                    s.setSubject(subject);
+                    s.setStudentCode(studentCode);
+                    Optional<Semester> semester = semesterRepository.findById(semesterId);
+                    semester.ifPresent(s::setSemester);
+                    studentRepository.save(s);
+                }
+
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
