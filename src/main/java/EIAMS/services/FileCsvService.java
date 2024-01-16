@@ -27,7 +27,7 @@ public class FileCsvService implements FileCsvServiceInterface {
 
 
     @Override
-    public void exportToCsv(List<Student> students, String filePath) {
+    public void exportListStudent(List<Student> students, String filePath) {
         try (CSVWriter csvWriter = new CSVWriter(new FileWriter(filePath))) {
             // Writing header
             String[] header = {"ID", "Email", "Subject", "Semester"};
@@ -50,7 +50,7 @@ public class FileCsvService implements FileCsvServiceInterface {
     }
 
     @Override
-    public void importCsvData(String filePath) {
+    public void importListStudent(String filePath) {
 
         try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
             String line;

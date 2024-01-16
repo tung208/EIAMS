@@ -5,6 +5,6 @@ import EIAMS.entities.Student;
 import java.util.List;
 
 public interface FileCsvServiceInterface {
-    void exportToCsv(List<Student> students, String filePath);
-    void importCsvData(String filePath);
+    void exportListStudent(List<Student> students, String filePath);
+    void importListStudent(String filePath);
 }
