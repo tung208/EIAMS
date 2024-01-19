@@ -11,4 +11,7 @@ public interface SemesterServiceInterface {
     List<Semester> list();
     void update(int id, SemesterDto dto);
     void delete(int id);
+
+    void exportListSemester(List<Semester> students, String filePath);
+    void importListSemester(String filePath);
 }

@@ -3,7 +3,6 @@ package EIAMS.controllers;
 import EIAMS.dtos.StudentDto;
 import EIAMS.entities.ResponseObject;
 import EIAMS.entities.Student;
-import EIAMS.services.interfaces.FileCsvServiceInterface;
 import EIAMS.services.interfaces.StudentServiceInterface;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -19,7 +18,6 @@ import java.util.List;
 public class StudentController {
 
     private final StudentServiceInterface studentService;
-    private final FileCsvServiceInterface csvService;
 
     @GetMapping(path = "/index")
     public ResponseEntity<ResponseObject> list(
@@ -41,7 +39,7 @@ public class StudentController {
 
         String filePath = "src/main/resources/export/students.csv";
 
-        csvService.exportToCsv(studentList, filePath);
+        studentService.exportListStudent(studentList, filePath);
     }
 
     @PostMapping("/update")
