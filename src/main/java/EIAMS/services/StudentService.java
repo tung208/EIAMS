@@ -15,11 +15,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -88,12 +86,13 @@ public class StudentService implements StudentServiceInterface {
     }
 
     @Override
-    public void importListStudent(String filePath) throws IOException {
+    public void importListStudent(MultipartFile file) throws IOException {
         Map<Integer, Student> csvDataMap = new HashMap<>();
 
         // Load CSV Data
         String subject = null;
-        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
+        Semester semester = null;
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(file.getInputStream()))) {
             String line;
             while ((line = br.readLine()) != null) {
                 String[] data = line.split(",");
@@ -103,7 +102,7 @@ public class StudentService implements StudentServiceInterface {
                 subject = StringUtils.hasText(data[2]) ? data[2] : null;
                 String semesterName = StringUtils.hasText(data[2]) ? data[3] : null;
 
-                Semester semester = semesterName != null ? semesterRepository.findByName(semesterName).get() : null;
+                semester = semesterName != null ? semesterRepository.findByName(semesterName).get() : null;
 
                 if (id != null && email != null && subject != null && semester != null) {
                     Student student = new Student();
@@ -120,7 +119,7 @@ public class StudentService implements StudentServiceInterface {
         }
 
         // Update Existing Records and Delete Records Not Present in CSV
-        List<Student> existingStudents = studentRepository.findAllBySubject(subject);
+        List<Student> existingStudents = studentRepository.findAllBySubjectAndSemesterId(subject,semester.getId());
 
         for (Student existingStudent : existingStudents) {
             Integer id = existingStudent.getId();

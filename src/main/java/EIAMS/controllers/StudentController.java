@@ -9,6 +9,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -34,17 +35,33 @@ public class StudentController {
     }
 
     @GetMapping("/export")
-    public void exportStudents() {
-        List<Student> studentList = studentService.list();
+    public ResponseEntity<ResponseObject> exportStudents() {
+        try {
+            List<Student> studentList = studentService.list();
+            String filePath = "src/main/resources/export/students.csv";
+            studentService.exportListStudent(studentList, filePath);
+            return ResponseEntity.status(HttpStatus.OK).body(
+                    new ResponseObject("OK", "Export Success", null));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ResponseObject("FAIL", "Export Fail", e.getMessage()));
+        }
 
-        String filePath = "src/main/resources/export/students.csv";
+    }
 
-        studentService.exportListStudent(studentList, filePath);
+    @GetMapping("/import")
+    public ResponseEntity<ResponseObject> importStudents(@RequestParam("file") MultipartFile file) {
+        try {
+            studentService.importListStudent(file);
+            return ResponseEntity.status(HttpStatus.OK).body(
+                    new ResponseObject("OK", "Import Success", null));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ResponseObject("FAIL", "Import Fail", e.getMessage()));
+        }
     }
 
     @PostMapping("/update")
     public void update(@RequestParam int id, @RequestBody StudentDto dto) {
-        studentService.update(id,dto);
+        studentService.update(id, dto);
     }
 
     @DeleteMapping("/delete")
