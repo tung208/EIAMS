@@ -19,7 +19,7 @@ public class Semester {
     @Column(name = "id", nullable = false)
     private Integer id;
 
-    @Column(name = "name", nullable = false, length = 64)
+    @Column(name = "name", nullable = false, unique = true, length = 64)
     private String name;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
