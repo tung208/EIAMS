@@ -18,10 +18,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -88,7 +85,7 @@ public class StudentService implements StudentServiceInterface {
     @Override
     public void importListStudent(MultipartFile file) throws IOException {
         Map<Integer, Student> csvDataMap = new HashMap<>();
-
+        List<Student> newStudents = new ArrayList<>();
         // Load CSV Data
         String subject = null;
         Semester semester = null;
@@ -97,10 +94,10 @@ public class StudentService implements StudentServiceInterface {
             while ((line = br.readLine()) != null) {
                 String[] data = line.split(",");
 
-                Integer id = StringUtils.hasText(data[2]) ? Integer.parseInt(data[0]) : null;
+                Integer id = StringUtils.hasText(data[0]) ? Integer.parseInt(data[0]) : null;
                 String email = StringUtils.hasText(data[1]) ? data[1] : null;
                 subject = StringUtils.hasText(data[2]) ? data[2] : null;
-                String semesterName = StringUtils.hasText(data[2]) ? data[3] : null;
+                String semesterName = StringUtils.hasText(data[3]) ? data[3] : null;
 
                 semester = semesterName != null ? semesterRepository.findByName(semesterName).get() : null;
 
@@ -111,6 +108,12 @@ public class StudentService implements StudentServiceInterface {
                     student.setSubject(subject);
                     student.setSemester(semester);
                     csvDataMap.put(id, student);
+                } else if (id == null && email != null && subject != null && semester != null) {
+                    Student student = new Student();
+                    student.setEmail(email);
+                    student.setSubject(subject);
+                    student.setSemester(semester);
+                    newStudents.add(student);
                 } else {
                     // Handle the case where any required field is missing or invalid
                     System.out.println("Skipping invalid data: " + line);
@@ -136,8 +139,6 @@ public class StudentService implements StudentServiceInterface {
                 studentRepository.delete(existingStudent);
             }
         }
-
-        // Save New Records
-        studentRepository.saveAll(csvDataMap.values());
+        studentRepository.saveAll(newStudents);
     }
 }

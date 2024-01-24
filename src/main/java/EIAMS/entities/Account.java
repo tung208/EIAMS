@@ -2,6 +2,7 @@ package EIAMS.entities;
 
 import jakarta.persistence.*;
 import lombok.*;
+import javax.validation.constraints.Email;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -23,6 +24,7 @@ public class Account {
     private Integer active;
 
     @Column(name = "email", nullable = false, length = 64)
+    @Email(message = "Invalid email format")
     private String email;
 
     @Column(name = "password", nullable = false, length = 256)
