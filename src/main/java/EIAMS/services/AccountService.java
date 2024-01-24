@@ -43,7 +43,7 @@ public class AccountService implements AccountServiceInterface {
     public void exportListAccount(List<Account> accounts, String filePath) {
         try (CSVWriter csvWriter = new CSVWriter(new FileWriter(filePath))) {
             // Writing header
-            String[] header = {"ID", "Active", "Email", "Role", "Username"};
+            String[] header = {"ID", "Active", "Email", "Role"};
             csvWriter.writeNext(header);
 
             // Writing data
@@ -102,9 +102,15 @@ public class AccountService implements AccountServiceInterface {
             if (csvDataMap.containsKey(id)) {
                 //TODO: update exist account and delete not exist
                 Account accountUpdate = csvDataMap.get(id);
+                existingAccount.setRole(accountUpdate.getRole());
+                existingAccount.setActive(accountUpdate.getActive());
+                existingAccount.setEmail(accountUpdate.getEmail());
+                existingAccount.setUsername(accountUpdate.getUsername());
+                accountRepository.save(accountUpdate);
+            }else {
+                accountRepository.delete(existingAccount);
             }
         }
-
         accountRepository.saveAll(newAccount);
 
     }
