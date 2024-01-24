@@ -16,9 +16,6 @@ public class Student {
     @Column(name = "id", nullable = false)
     private Integer id;
 
-    @Column(name = "student-code",unique = true, nullable = false, length = 8)
-    private String studentCode;
-
     @Column(name = "email", nullable = false, length = 64)
     private String email;
 
@@ -28,4 +25,8 @@ public class Student {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "semester_id", nullable = false)
     private Semester semester;
+
+    @Column(name = "student_code", nullable = false, length = 8, unique = true)
+    private String studentCode;
+
 }

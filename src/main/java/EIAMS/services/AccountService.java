@@ -1,7 +1,6 @@
 package EIAMS.services;
 
 import EIAMS.entities.Account;
-import EIAMS.entities.Student;
 import EIAMS.helper.Pagination;
 import EIAMS.repositories.AccountRepository;
 import EIAMS.services.interfaces.AccountServiceInterface;
@@ -37,6 +36,36 @@ public class AccountService implements AccountServiceInterface {
     @Override
     public List<Account> list() {
         return accountRepository.findAll();
+    }
+
+    @Override
+    public Optional<Account> getAccountDetail(int id) {
+        return accountRepository.findById(id);
+    }
+
+    @Override
+    public void create(Account account) {
+        accountRepository.save(account);
+    }
+
+    @Override
+    public void update(int id, Account account) {
+        Optional<Account> a = accountRepository.findById(id);
+        if(a.isPresent()){
+            Account accountUpdate = a.get();
+            accountUpdate.setActive(account.getActive());
+            accountUpdate.setEmail(account.getEmail());
+            accountUpdate.setPassword(account.getPassword());
+            accountUpdate.setRole(account.getRole());
+            accountUpdate.setUsername(getUserName(account.getEmail()));
+
+            accountRepository.save(accountUpdate);
+        }
+    }
+
+    @Override
+    public void delete(int id) {
+
     }
 
     @Override

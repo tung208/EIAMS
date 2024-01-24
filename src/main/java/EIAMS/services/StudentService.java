@@ -4,6 +4,7 @@ import EIAMS.dtos.StudentDto;
 import EIAMS.entities.Semester;
 import EIAMS.entities.Student;
 import EIAMS.helper.Pagination;
+import EIAMS.mapper.StudentMapping;
 import EIAMS.repositories.SemesterRepository;
 import EIAMS.repositories.StudentRepository;
 import EIAMS.services.interfaces.StudentServiceInterface;
@@ -40,8 +41,13 @@ public class StudentService implements StudentServiceInterface {
     }
 
     @Override
-    public void update(int id, StudentDto dto) {
+    public void create(StudentDto dto) {
+        Student s = StudentMapping.toEntity(dto);
+        studentRepository.save(s);
+    }
 
+    @Override
+    public void update(int id, StudentDto dto) {
         Optional<Student> student = studentRepository.findById(id);
         if (student.isPresent()) {
             Student s = student.get();
@@ -52,6 +58,11 @@ public class StudentService implements StudentServiceInterface {
             semester.ifPresent(s::setSemester);
             studentRepository.save(s);
         }
+    }
+
+    @Override
+    public Optional<Student> getStudentDetail(int id) {
+        return studentRepository.findById(id);
     }
 
     @Override

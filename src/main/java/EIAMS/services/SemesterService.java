@@ -5,6 +5,7 @@ import EIAMS.entities.Account;
 import EIAMS.entities.Semester;
 import EIAMS.entities.Student;
 import EIAMS.helper.Pagination;
+import EIAMS.mapper.SemesterMapping;
 import EIAMS.repositories.AccountRepository;
 import EIAMS.repositories.SemesterRepository;
 import EIAMS.services.interfaces.SemesterServiceInterface;
@@ -15,13 +16,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.List;
-import java.util.Optional;
+import java.io.*;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -40,6 +39,12 @@ public class SemesterService implements SemesterServiceInterface {
     @Override
     public List<Semester> list() {
         return semesterRepository.findAll();
+    }
+
+    @Override
+    public void create(SemesterDto dto) {
+        Semester s = SemesterMapping.toEntity(dto);
+        semesterRepository.save(s);
     }
 
     @Override
@@ -82,36 +87,51 @@ public class SemesterService implements SemesterServiceInterface {
     }
 
     @Override
-    public void importListSemester(String filePath) {
-        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
+    public void importListSemester(MultipartFile file) {
+        Map<Integer, Semester> csvDataMap = new HashMap<>();
+        List<Semester> newSemesters = new ArrayList<>();
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(file.getInputStream()))) {
             String line;
             while ((line = br.readLine()) != null) {
                 String[] data = line.split(",");
+                Integer id = data[0] != null ? Integer.parseInt(data[0]) : null;
+                String name = StringUtils.hasText(data[2]) ? data[2] : null;
+                String creatorEmail = StringUtils.hasText(data[2]) ? data[2] : null;
 
-                // Assuming the order of columns in the CSV is: id,email,subject,semester_id
-                int id = data[0] != null ? Integer.parseInt(data[0]) : 0;
-                String name = data[1];
-                String creatorEmail = data[2];
-
-                Optional<Semester> semester = semesterRepository.findById(id);
-
-                if (semester.isEmpty() && !name.isEmpty() && !creatorEmail.isEmpty()) {
-                    Semester s = new Semester();
-                    s.setName(name);
+                if (id != null && name != null && creatorEmail != null) {
+                    Semester semester = new Semester();
+                    semester.setId(id);
+                    semester.setName(name);
                     Optional<Account> account = accountRepository.getAccountByEmail(creatorEmail);
-                    account.ifPresent(s::setCreator);
-                    semesterRepository.save(s);
-                }
-                if (semester.isPresent() && !name.isEmpty() && !creatorEmail.isEmpty()) {
-                    Semester s = semester.get();
-                    s.setName(name);
+                    account.ifPresent(semester::setCreator);
+                    csvDataMap.put(id, semester);
+                } else if (id == null && name != null && creatorEmail != null) {
+                    Semester semester = new Semester();
+                    semester.setName(name);
                     Optional<Account> account = accountRepository.getAccountByEmail(creatorEmail);
-                    account.ifPresent(s::setCreator);
-                    semesterRepository.save(s);
+                    account.ifPresent(semester::setCreator);
+                    newSemesters.add(semester);
+                } else {
+                    // Handle the case where any required field is missing or invalid
+                    System.out.println("Skipping invalid data: " + line);
                 }
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+        List<Semester> existSemesters = semesterRepository.findAll();
+        for (Semester existSemester : existSemesters) {
+            int id = existSemester.getId();
+            if (csvDataMap.containsKey(id)) {
+                //TODO: update exist account and delete not exist
+                Semester semesterUpdate = csvDataMap.get(id);
+                existSemester.setName(semesterUpdate.getName());
+                existSemester.setCreator(semesterUpdate.getCreator());
+                semesterRepository.save(semesterUpdate);
+            }else {
+                semesterRepository.delete(existSemester);
+            }
+        }
+        semesterRepository.saveAll(newSemesters);
     }
 }
