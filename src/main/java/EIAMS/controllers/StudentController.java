@@ -1,6 +1,5 @@
 package EIAMS.controllers;
 
-import EIAMS.dtos.StudentDto;
 import EIAMS.entities.ResponseObject;
 import EIAMS.entities.Student;
 import EIAMS.services.interfaces.StudentServiceInterface;
@@ -60,7 +59,7 @@ public class StudentController {
     }
 
     @PostMapping("/update")
-    public void update(@RequestParam int id, @RequestBody StudentDto dto) {
+    public void update(@RequestParam int id, @RequestBody Student dto) {
         studentService.update(id, dto);
     }
 

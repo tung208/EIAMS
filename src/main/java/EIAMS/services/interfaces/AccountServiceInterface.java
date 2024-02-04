@@ -15,9 +15,9 @@ public interface AccountServiceInterface {
 
     Optional<Account> getAccountDetail(int id);
 
-    void create(Account dto);
+    void create(Account account);
 
-    void update(int id,Account dto);
+    void update(int id,Account account);
 
     void delete(int id);
 

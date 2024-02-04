@@ -9,20 +9,23 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Table(name = "room", schema = "eiams")
-public class Room {
+@Table(name = "exam_code", schema = "eiams")
+public class ExamCode {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Integer id;
 
-    @Column(name = "name", nullable = false, length = 64)
-    private String name;
+    @Column(name = "Subject_id")
+    private String subjectId;
 
-    @Column(name = "type", length = 32)
+    @Column(name = "type")
     private String type;
 
-    @Column(name = "quantity_student")
-    private Integer quantityStudent;
+    @Column(name = "Semester_id")
+    private Integer semesterId;
+
+    @Column(name = "Slot_id")
+    private Integer slotId;
 
 }

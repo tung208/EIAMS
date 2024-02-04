@@ -1,11 +1,8 @@
 package EIAMS.services;
 
-import EIAMS.dtos.SemesterDto;
 import EIAMS.entities.Account;
 import EIAMS.entities.Semester;
-import EIAMS.entities.Student;
 import EIAMS.helper.Pagination;
-import EIAMS.mapper.SemesterMapping;
 import EIAMS.repositories.AccountRepository;
 import EIAMS.repositories.SemesterRepository;
 import EIAMS.services.interfaces.SemesterServiceInterface;
@@ -42,20 +39,18 @@ public class SemesterService implements SemesterServiceInterface {
     }
 
     @Override
-    public void create(SemesterDto dto) {
-        Semester s = SemesterMapping.toEntity(dto);
-        semesterRepository.save(s);
+    public void create(Semester semester) {
+        semesterRepository.save(semester);
     }
 
     @Override
-    public void update(int id, SemesterDto dto) {
-        Optional<Semester> semester = semesterRepository.findById(id);
-        if (semester.isPresent()) {
-            Semester s = semester.get();
-            s.setName(dto.getName());
-            Optional<Account> account = accountRepository.findById(dto.getCreatorId());
-            account.ifPresent(s::setCreator);
-            semesterRepository.save(s);
+    public void update(int id, Semester semester) {
+        Optional<Semester> s = semesterRepository.findById(id);
+        if (s.isPresent()) {
+            Semester semesterUpdate = s.get();
+            semesterUpdate.setName(semester.getName());
+            semesterUpdate.setCreatorId(semester.getCreatorId());
+            semesterRepository.save(semesterUpdate);
         }
     }
 
@@ -76,7 +71,7 @@ public class SemesterService implements SemesterServiceInterface {
                 String[] data = {
                         String.valueOf(semester.getId()),
                         semester.getName(),
-                        semester.getCreator().getEmail(),
+                        accountRepository.findById(semester.getCreatorId()).get().getEmail(),
                 };
                 csvWriter.writeNext(data);
             }
@@ -103,13 +98,13 @@ public class SemesterService implements SemesterServiceInterface {
                     semester.setId(id);
                     semester.setName(name);
                     Optional<Account> account = accountRepository.getAccountByEmail(creatorEmail);
-                    account.ifPresent(semester::setCreator);
+                    account.ifPresent(value -> semester.setCreatorId(value.getId()));
                     csvDataMap.put(id, semester);
                 } else if (id == null && name != null && creatorEmail != null) {
                     Semester semester = new Semester();
                     semester.setName(name);
                     Optional<Account> account = accountRepository.getAccountByEmail(creatorEmail);
-                    account.ifPresent(semester::setCreator);
+                    account.ifPresent(value -> semester.setCreatorId(value.getId()));
                     newSemesters.add(semester);
                 } else {
                     // Handle the case where any required field is missing or invalid
@@ -126,7 +121,7 @@ public class SemesterService implements SemesterServiceInterface {
                 //TODO: update exist account and delete not exist
                 Semester semesterUpdate = csvDataMap.get(id);
                 existSemester.setName(semesterUpdate.getName());
-                existSemester.setCreator(semesterUpdate.getCreator());
+                existSemester.setCreatorId(semesterUpdate.getCreatorId());
                 semesterRepository.save(semesterUpdate);
             }else {
                 semesterRepository.delete(existSemester);

@@ -1,6 +1,5 @@
 package EIAMS.dtos;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,11 +14,12 @@ import java.time.LocalDate;
 @Data
 @AllArgsConstructor
 @Builder
-public class SchedulerDto implements Serializable {
+public class SchedulerDto {
     Integer id;
-    Integer quantitySupervisor;
     Integer semesterId;
-    Integer roomId;
     Integer slotId;
-    LocalDate examDate;
+    Integer roomId;
+    String examCodeId;
+    String studentId;
+    LocalDate startDate;
 }

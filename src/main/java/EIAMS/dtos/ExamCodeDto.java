@@ -8,18 +8,15 @@ import lombok.Value;
 import java.io.Serializable;
 
 /**
- * DTO for {@link EIAMS.entities.Student}
+ * DTO for {@link EIAMS.entities.ExamCode}
  */
 @Data
 @AllArgsConstructor
 @Builder
-public class StudentDto {
+public class ExamCodeDto {
     Integer id;
-    String subjectCode;
-    String rollNumber;
-    String memberCode;
-    String fullName;
-    String cmtnd;
+    String subjectId;
+    String type;
     Integer semesterId;
-    String blackList;
+    Integer slotId;
 }
