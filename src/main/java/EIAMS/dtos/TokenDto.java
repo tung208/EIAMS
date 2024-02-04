@@ -1,6 +1,5 @@
 package EIAMS.dtos;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,7 +13,7 @@ import java.io.Serializable;
 @Data
 @AllArgsConstructor
 @Builder
-public class TokenDto implements Serializable {
+public class TokenDto {
     Integer id;
     Integer expired;
     Integer revoked;

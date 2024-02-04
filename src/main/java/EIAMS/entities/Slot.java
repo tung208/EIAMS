@@ -3,16 +3,13 @@ package EIAMS.entities;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.LinkedHashSet;
-import java.util.Set;
-
 @Getter
 @Setter
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Table(name = "slot")
+@Table(name = "slot", schema = "eiams")
 public class Slot {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,8 +24,5 @@ public class Slot {
 
     @Column(name = "end_time", length = 64)
     private String endTime;
-
-    @OneToMany(mappedBy = "slot")
-    private Set<Scheduler> schedulers = new LinkedHashSet<>();
 
 }

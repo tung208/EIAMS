@@ -1,7 +1,6 @@
 package EIAMS.services;
 
 import EIAMS.entities.Account;
-import EIAMS.entities.Student;
 import EIAMS.helper.Pagination;
 import EIAMS.repositories.AccountRepository;
 import EIAMS.services.interfaces.AccountServiceInterface;
@@ -40,10 +39,40 @@ public class AccountService implements AccountServiceInterface {
     }
 
     @Override
+    public Optional<Account> getAccountDetail(int id) {
+        return accountRepository.findById(id);
+    }
+
+    @Override
+    public void create(Account account) {
+        accountRepository.save(account);
+    }
+
+    @Override
+    public void update(int id, Account account) {
+        Optional<Account> a = accountRepository.findById(id);
+        if(a.isPresent()){
+            Account accountUpdate = a.get();
+            accountUpdate.setActive(account.getActive());
+            accountUpdate.setEmail(account.getEmail());
+            accountUpdate.setPassword(account.getPassword());
+            accountUpdate.setRole(account.getRole());
+            accountUpdate.setUsername(getUserName(account.getEmail()));
+
+            accountRepository.save(accountUpdate);
+        }
+    }
+
+    @Override
+    public void delete(int id) {
+
+    }
+
+    @Override
     public void exportListAccount(List<Account> accounts, String filePath) {
         try (CSVWriter csvWriter = new CSVWriter(new FileWriter(filePath))) {
             // Writing header
-            String[] header = {"ID", "Active", "Email", "Role", "Username"};
+            String[] header = {"ID", "Active", "Email", "Role"};
             csvWriter.writeNext(header);
 
             // Writing data
@@ -102,9 +131,15 @@ public class AccountService implements AccountServiceInterface {
             if (csvDataMap.containsKey(id)) {
                 //TODO: update exist account and delete not exist
                 Account accountUpdate = csvDataMap.get(id);
+                existingAccount.setRole(accountUpdate.getRole());
+                existingAccount.setActive(accountUpdate.getActive());
+                existingAccount.setEmail(accountUpdate.getEmail());
+                existingAccount.setUsername(accountUpdate.getUsername());
+                accountRepository.save(accountUpdate);
+            }else {
+                accountRepository.delete(existingAccount);
             }
         }
-
         accountRepository.saveAll(newAccount);
 
     }
