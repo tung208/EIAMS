@@ -1,6 +1,5 @@
 package EIAMS.dtos;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,8 +13,9 @@ import java.io.Serializable;
 @Data
 @AllArgsConstructor
 @Builder
-public class RoomDto implements Serializable {
+public class RoomDto {
     Integer id;
     String name;
     String type;
+    Integer quantityStudent;
 }

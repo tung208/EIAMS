@@ -3,16 +3,16 @@ package EIAMS.entities;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.LinkedHashSet;
-import java.util.Set;
-
 @Getter
 @Setter
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Table(name = "account")
+@Table(name = "account", schema = "eiams", indexes = {
+        @Index(name = "email", columnList = "email", unique = true),
+        @Index(name = "username", columnList = "username", unique = true)
+})
 public class Account {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -36,11 +36,5 @@ public class Account {
 
     @Column(name = "username", nullable = false, length = 64)
     private String username;
-
-    @OneToMany(mappedBy = "creator")
-    private Set<Semester> semesters = new LinkedHashSet<>();
-
-    @OneToMany(mappedBy = "account")
-    private Set<Token> tokens = new LinkedHashSet<>();
 
 }

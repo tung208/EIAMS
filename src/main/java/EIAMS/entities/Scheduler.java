@@ -11,29 +11,29 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Table(name = "scheduler")
+@Table(name = "scheduler", schema = "eiams")
 public class Scheduler {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Integer id;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "semester_id", nullable = false)
-    private Semester semester;
+    @Column(name = "semester_id", nullable = false)
+    private Integer semesterId;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "room_id", nullable = false)
-    private Room room;
+    @Column(name = "slot_id")
+    private Integer slotId;
 
-    @Column(name = "quantity_supervisor", nullable = false)
-    private Integer quantitySupervisor;
+    @Column(name = "room_id", nullable = false)
+    private Integer roomId;
 
-    @Column(name = "exam_date")
-    private LocalDate examDate;
+    @Column(name = "exam_code_id")
+    private String examCodeId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "slot_id")
-    private Slot slot;
+    @Column(name = "student_id")
+    private String studentId;
+
+    @Column(name = "start_date")
+    private LocalDate startDate;
 
 }
