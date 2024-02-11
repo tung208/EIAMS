@@ -1,6 +1,6 @@
 package EIAMS.controllers;
 
-import EIAMS.entities.ResponseObject;
+import EIAMS.entities.responeObject.ResponseObject;
 import EIAMS.entities.Student;
 import EIAMS.services.interfaces.StudentServiceInterface;
 import lombok.RequiredArgsConstructor;
@@ -38,7 +38,7 @@ public class StudentController {
         try {
             List<Student> studentList = studentService.list();
             String filePath = "src/main/resources/export/students.csv";
-            studentService.exportListStudent(studentList, filePath);
+//            studentService.exportListStudent(studentList, filePath);
             return ResponseEntity.status(HttpStatus.OK).body(
                     new ResponseObject("OK", "Export Success", null));
         } catch (Exception e) {

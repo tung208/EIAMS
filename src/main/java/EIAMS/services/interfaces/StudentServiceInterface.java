@@ -19,6 +19,6 @@ public interface StudentServiceInterface {
      void update(int id, Student student);
      Optional<Student> getStudentDetail(int id);
      void delete(int id);
-     void exportListStudent(List<Student> students, String filePath) throws JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException, JobParametersInvalidException, JobRestartException;
+//     void exportListStudent(List<Student> students, String filePath) throws JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException, JobParametersInvalidException, JobRestartException;
      void importListStudent(MultipartFile file) throws IOException;
 }

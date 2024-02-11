@@ -1,8 +1,10 @@
 package EIAMS.services;
 
+import EIAMS.dtos.SemesterDto;
 import EIAMS.entities.Account;
 import EIAMS.entities.Semester;
 import EIAMS.helper.Pagination;
+import EIAMS.mapper.SemesterMapping;
 import EIAMS.repositories.AccountRepository;
 import EIAMS.repositories.SemesterRepository;
 import EIAMS.services.interfaces.SemesterServiceInterface;
@@ -11,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -29,7 +32,7 @@ public class SemesterService implements SemesterServiceInterface {
 
     @Override
     public Page<Semester> list(Integer page, Integer limit) {
-        Pageable pageable = pagination.getPageable(page, limit);
+        Pageable pageable = PageRequest.of(page - 1, limit);
         return semesterRepository.findAll(pageable);
     }
 
@@ -39,8 +42,9 @@ public class SemesterService implements SemesterServiceInterface {
     }
 
     @Override
-    public void create(Semester semester) {
-        semesterRepository.save(semester);
+    public Semester create(SemesterDto semesterDto) {
+        Semester semester = SemesterMapping.toEntity(semesterDto);
+        return semesterRepository.save(semester);
     }
 
     @Override

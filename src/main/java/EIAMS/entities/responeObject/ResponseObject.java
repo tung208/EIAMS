@@ -1,4 +1,4 @@
-package EIAMS.entities;
+package EIAMS.entities.responeObject;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;

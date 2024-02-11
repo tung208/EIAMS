@@ -37,8 +37,8 @@ public class StudentService implements StudentServiceInterface {
     @Autowired
     private JobLauncher jobLauncher;
 
-    @Autowired
-    private Job exportCsvJob;
+//    @Autowired
+//    private Job exportCsvJob;
 
     @Override
     public Page<Student> list(Integer page, Integer limit) {
@@ -82,42 +82,42 @@ public class StudentService implements StudentServiceInterface {
         studentRepository.deleteById(id);
     }
 
-    @Override
-    public void exportListStudent(List<Student> students, String filePath) {
-        // Create a JobParameters with the file path as a parameter
-        Map<String, JobParameter> parameters = new HashMap<>();
-        parameters.put("filePath", new JobParameter(filePath));
-
-        JobParameters jobParameters = new JobParameters(parameters);
-
-        // Create a StepExecutionListener to set the list of students as a JobExecutionParameter
-        StepExecutionListener stepExecutionListener = new StepExecutionListener() {
-            @Override
-            public void beforeStep(StepExecution stepExecution) {
-                ExecutionContext executionContext = stepExecution.getExecutionContext();
-                executionContext.put("students", students);
-            }
-
-            @Override
-            public ExitStatus afterStep(StepExecution stepExecution) {
-                return null;
-            }
-        };
-
-        // Launch the export job
-        try {
-            JobExecution jobExecution = jobLauncher.run(exportCsvJob, jobParameters);
-
-            // Optional: Monitor job execution if needed
-            BatchStatus batchStatus = jobExecution.getStatus();
-            if (batchStatus != BatchStatus.COMPLETED) {
-                // Handle job failure or other statuses
-            }
-        } catch (Exception e) {
-            // Handle job launching exception
-            e.printStackTrace();
-        }
-    }
+//    @Override
+//    public void exportListStudent(List<Student> students, String filePath) {
+//        // Create a JobParameters with the file path as a parameter
+//        Map<String, JobParameter> parameters = new HashMap<>();
+//        parameters.put("filePath", new JobParameter(filePath));
+//
+//        JobParameters jobParameters = new JobParameters(parameters);
+//
+//        // Create a StepExecutionListener to set the list of students as a JobExecutionParameter
+//        StepExecutionListener stepExecutionListener = new StepExecutionListener() {
+//            @Override
+//            public void beforeStep(StepExecution stepExecution) {
+//                ExecutionContext executionContext = stepExecution.getExecutionContext();
+//                executionContext.put("students", students);
+//            }
+//
+//            @Override
+//            public ExitStatus afterStep(StepExecution stepExecution) {
+//                return null;
+//            }
+//        };
+//
+//        // Launch the export job
+//        try {
+//            JobExecution jobExecution = jobLauncher.run(exportCsvJob, jobParameters);
+//
+//            // Optional: Monitor job execution if needed
+//            BatchStatus batchStatus = jobExecution.getStatus();
+//            if (batchStatus != BatchStatus.COMPLETED) {
+//                // Handle job failure or other statuses
+//            }
+//        } catch (Exception e) {
+//            // Handle job launching exception
+//            e.printStackTrace();
+//        }
+//    }
 
     @Override
     public void importListStudent(MultipartFile file) throws IOException {
