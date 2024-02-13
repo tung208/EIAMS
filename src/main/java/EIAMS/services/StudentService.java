@@ -10,6 +10,13 @@ import com.opencsv.CSVWriter;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.batch.core.*;
+import org.springframework.batch.core.launch.JobLauncher;
+import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
+import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
+import org.springframework.batch.core.repository.JobRestartException;
+import org.springframework.batch.item.ExecutionContext;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -26,6 +33,15 @@ public class StudentService implements StudentServiceInterface {
     private final SemesterRepository semesterRepository;
     private final Pagination pagination;
     private static final Logger logger = LoggerFactory.getLogger(StudentService.class);
+
+    @Autowired
+    private JobLauncher jobLauncher;
+
+    @Autowired
+    private Job exportCsvJob;
+
+    @Autowired
+    private Job importStudentJob;
 
     @Override
     public Page<Student> list(Integer page, Integer limit) {
@@ -71,11 +87,46 @@ public class StudentService implements StudentServiceInterface {
 
     @Override
     public void exportListStudent(List<Student> students, String filePath) {
+        // Create a JobParameters with the file path as a parameter
+        Map<String, JobParameter> parameters = new HashMap<>();
+        parameters.put("filePath", new JobParameter(filePath));
 
+        JobParameters jobParameters = new JobParameters(parameters);
+
+        // Create a StepExecutionListener to set the list of students as a JobExecutionParameter
+        StepExecutionListener stepExecutionListener = new StepExecutionListener() {
+            @Override
+            public void beforeStep(StepExecution stepExecution) {
+                ExecutionContext executionContext = stepExecution.getExecutionContext();
+                executionContext.put("students", students);
+            }
+
+            @Override
+            public ExitStatus afterStep(StepExecution stepExecution) {
+                return null;
+            }
+        };
+
+        // Launch the export job
+        try {
+            JobExecution jobExecution = jobLauncher.run(exportCsvJob, jobParameters);
+
+            // Optional: Monitor job execution if needed
+            BatchStatus batchStatus = jobExecution.getStatus();
+            if (batchStatus != BatchStatus.COMPLETED) {
+                // Handle job failure or other statuses
+            }
+        } catch (Exception e) {
+            // Handle job launching exception
+            e.printStackTrace();
+        }
     }
 
     @Override
-    public void importListStudent(MultipartFile file) throws IOException {
-
+    public void importListStudent(MultipartFile file) throws IOException, JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException, JobParametersInvalidException, JobRestartException {
+        JobParameters jobParameters = new JobParametersBuilder()
+                .addString("input.file.name", file.getOriginalFilename())
+                .toJobParameters();
+        jobLauncher.run(importStudentJob, jobParameters);
     }
 }
