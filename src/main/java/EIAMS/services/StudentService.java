@@ -40,6 +40,9 @@ public class StudentService implements StudentServiceInterface {
     @Autowired
     private Job exportCsvJob;
 
+    @Autowired
+    private Job importStudentJob;
+
     @Override
     public Page<Student> list(Integer page, Integer limit) {
         Pageable pageable = pagination.getPageable(page, limit);
@@ -120,7 +123,10 @@ public class StudentService implements StudentServiceInterface {
     }
 
     @Override
-    public void importListStudent(MultipartFile file) throws IOException {
-
+    public void importListStudent(MultipartFile file) throws IOException, JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException, JobParametersInvalidException, JobRestartException {
+        JobParameters jobParameters = new JobParametersBuilder()
+                .addString("input.file.name", file.getOriginalFilename())
+                .toJobParameters();
+        jobLauncher.run(importStudentJob, jobParameters);
     }
 }

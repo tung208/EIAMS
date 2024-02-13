@@ -49,6 +49,9 @@ public class StudentController {
 
     @GetMapping("/import")
     public ResponseEntity<ResponseObject> importStudents(@RequestParam("file") MultipartFile file) {
+        if (file.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ResponseObject("FAIL", "Please select a file to upload", ""));
+        }
         try {
             studentService.importListStudent(file);
             return ResponseEntity.status(HttpStatus.OK).body(
