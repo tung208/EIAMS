@@ -7,6 +7,7 @@ import EIAMS.helper.Pagination;
 import EIAMS.repositories.SemesterRepository;
 import EIAMS.repositories.StudentRepository;
 import EIAMS.services.interfaces.StudentServiceInterface;
+import EIAMS.services.thread.SaveStudent;
 import com.opencsv.CSVWriter;
 import com.opencsv.bean.CsvToBean;
 import com.opencsv.bean.CsvToBeanBuilder;
@@ -39,8 +40,6 @@ public class StudentService implements StudentServiceInterface {
     private final SemesterRepository semesterRepository;
     private final Pagination pagination;
     private static final Logger logger = LoggerFactory.getLogger(StudentService.class);
-    @Autowired
-    private TransactionTemplate transactionTemplate;
 
 //    @Autowired
 //    private Job exportCsvJob;
@@ -141,26 +140,20 @@ public class StudentService implements StudentServiceInterface {
                 keepAliveTime,
                 TimeUnit.SECONDS,
                 new ArrayBlockingQueue<>(queueCapacity)); // Hàng đợi dùng để lưu trữ các nhiệm vụ chưa được thực hiện
-        for (int i = 0; i < 20; i++) {
-            int finalI = i;
-//            executor.execute(()-> {
-//                System.out.println("Task " + finalI + " executed by thread: " + Thread.currentThread().getName());
-//            });
-            executor.execute(new TestThread(i));
+
+        // Kích thước của danh sách con
+        int sublistSize = 1000;
+
+        // Chia danh sách gốc thành các danh sách con
+        for (int i = 0; i < students.size(); i += sublistSize) {
+            int endIndex = Math.min(i + sublistSize, students.size());
+            List<Student> sublist = students.subList(i, endIndex);
+            executor.execute(new SaveStudent(sublist,i,studentRepository));
         }
-//        System.out.println(students.size());
+
         return students.size();
     }
 
-    private void saveStudent(List<Student> students){
-        for (Student element : students) {
-            try{
-                studentRepository.save(element);
-            } catch (DataIntegrityViolationException e){
-//                e.printStackTrace();
-            }
-        }
-    }
     private List<Student> parseCsv(MultipartFile file) throws IOException {
         try(Reader reader = new BufferedReader(new InputStreamReader(file.getInputStream()))) {
             HeaderColumnNameMappingStrategy<DSSVCsvRepresentation> strategy =
