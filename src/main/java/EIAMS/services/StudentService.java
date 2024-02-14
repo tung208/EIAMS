@@ -6,6 +6,7 @@ import EIAMS.entities.csvRepresentation.DSSVCsvRepresentation;
 import EIAMS.helper.Pagination;
 import EIAMS.repositories.SemesterRepository;
 import EIAMS.repositories.StudentRepository;
+import EIAMS.repositories.StudentSubjectRepository;
 import EIAMS.services.interfaces.StudentServiceInterface;
 import EIAMS.services.thread.SaveStudent;
 import com.opencsv.CSVWriter;
@@ -37,6 +38,7 @@ import java.util.stream.Collectors;
 public class StudentService implements StudentServiceInterface {
 
     private final StudentRepository studentRepository;
+    private final StudentSubjectRepository studentSubjectRepository;
     private final SemesterRepository semesterRepository;
     private final Pagination pagination;
     private static final Logger logger = LoggerFactory.getLogger(StudentService.class);
@@ -126,8 +128,8 @@ public class StudentService implements StudentServiceInterface {
     }
 
     @Override
-    public Integer uploadStudents(MultipartFile file) throws IOException {
-        List<Student> students = parseCsv(file);
+    public Integer uploadStudents(MultipartFile file, int semester_id) throws IOException {
+        List<DSSVCsvRepresentation> dssvCsvRepresentations = parseCsv(file);
 
         int corePoolSize = 5;
         int maximumPoolSize = 10;
@@ -145,16 +147,16 @@ public class StudentService implements StudentServiceInterface {
         int sublistSize = 1000;
 
         // Chia danh sách gốc thành các danh sách con
-        for (int i = 0; i < students.size(); i += sublistSize) {
-            int endIndex = Math.min(i + sublistSize, students.size());
-            List<Student> sublist = students.subList(i, endIndex);
-            executor.execute(new SaveStudent(sublist,i,studentRepository));
+        for (int i = 0; i < dssvCsvRepresentations.size(); i += sublistSize) {
+            int endIndex = Math.min(i + sublistSize, dssvCsvRepresentations.size());
+            List<DSSVCsvRepresentation> sublist = dssvCsvRepresentations.subList(i, endIndex);
+            executor.execute(new SaveStudent(sublist,semester_id,studentRepository,studentSubjectRepository));
         }
 
-        return students.size();
+        return dssvCsvRepresentations.size();
     }
 
-    private List<Student> parseCsv(MultipartFile file) throws IOException {
+    private List<DSSVCsvRepresentation> parseCsv(MultipartFile file) throws IOException {
         try(Reader reader = new BufferedReader(new InputStreamReader(file.getInputStream()))) {
             HeaderColumnNameMappingStrategy<DSSVCsvRepresentation> strategy =
                     new HeaderColumnNameMappingStrategy<>();
@@ -165,15 +167,16 @@ public class StudentService implements StudentServiceInterface {
                             .withIgnoreEmptyLine(true)
                             .withIgnoreLeadingWhiteSpace(true)
                             .build();
-            return csvToBean.parse()
-                    .stream()
-                    .map(csvLine -> Student.builder()
-                            .rollNumber(csvLine.getRollNumber())
-                            .memberCode(csvLine.getMemberCode())
-                            .fullName(csvLine.getFullName())
-                            .build()
-                    )
-                    .collect(Collectors.toList());
+//            return csvToBean.parse()
+//                    .stream()
+//                    .map(csvLine -> Student.builder()
+//                            .rollNumber(csvLine.getRollNumber())
+//                            .memberCode(csvLine.getMemberCode())
+//                            .fullName(csvLine.getFullName())
+//                            .build()
+//                    )
+//                    .collect(Collectors.toList());
+            return csvToBean.parse().stream().collect(Collectors.toList());
         }
     }
 }

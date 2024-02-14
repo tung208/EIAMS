@@ -19,5 +19,5 @@ public interface StudentServiceInterface {
 //     void exportListStudent(List<Student> students, String filePath) throws JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException, JobParametersInvalidException, JobRestartException;
 
      void saveCustomersToDatabase(MultipartFile file);
-     Integer uploadStudents(MultipartFile file) throws IOException;
+     Integer uploadStudents(MultipartFile file, int semester_id) throws IOException;
 }
