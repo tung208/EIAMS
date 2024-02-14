@@ -38,7 +38,7 @@ CREATE TABLE `Student` (
   `roll_number` varchar(128) UNIQUE NOT NULL,
   `member_code` varchar(128) UNIQUE NOT NULL,
   `full_name` varchar(128),
-  `CMTND` varchar(64) UNIQUE NOT NULL
+  `CMTND` varchar(64) UNIQUE NULL
 );
 
 CREATE TABLE `Subject` (

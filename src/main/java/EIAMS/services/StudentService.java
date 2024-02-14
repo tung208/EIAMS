@@ -15,14 +15,20 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
 import java.util.*;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.RejectedExecutionHandler;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Service
@@ -33,7 +39,8 @@ public class StudentService implements StudentServiceInterface {
     private final SemesterRepository semesterRepository;
     private final Pagination pagination;
     private static final Logger logger = LoggerFactory.getLogger(StudentService.class);
-
+    @Autowired
+    private TransactionTemplate transactionTemplate;
 
 //    @Autowired
 //    private Job exportCsvJob;
@@ -121,12 +128,40 @@ public class StudentService implements StudentServiceInterface {
 
     @Override
     public Integer uploadStudents(MultipartFile file) throws IOException {
-        Set<Student> students = parseCsv(file);
-        studentRepository.saveAll(students);
+        List<Student> students = parseCsv(file);
+
+        int corePoolSize = 5;
+        int maximumPoolSize = 10;
+        long keepAliveTime = 60L;
+        int queueCapacity = 100;
+        // Tạo một ThreadPoolExecutor với các tham số đã cho
+        ThreadPoolExecutor executor = new ThreadPoolExecutor(
+                corePoolSize,
+                maximumPoolSize,
+                keepAliveTime,
+                TimeUnit.SECONDS,
+                new ArrayBlockingQueue<>(queueCapacity)); // Hàng đợi dùng để lưu trữ các nhiệm vụ chưa được thực hiện
+        for (int i = 0; i < 20; i++) {
+            int finalI = i;
+//            executor.execute(()-> {
+//                System.out.println("Task " + finalI + " executed by thread: " + Thread.currentThread().getName());
+//            });
+            executor.execute(new TestThread(i));
+        }
+//        System.out.println(students.size());
         return students.size();
     }
 
-    private Set<Student> parseCsv(MultipartFile file) throws IOException {
+    private void saveStudent(List<Student> students){
+        for (Student element : students) {
+            try{
+                studentRepository.save(element);
+            } catch (DataIntegrityViolationException e){
+//                e.printStackTrace();
+            }
+        }
+    }
+    private List<Student> parseCsv(MultipartFile file) throws IOException {
         try(Reader reader = new BufferedReader(new InputStreamReader(file.getInputStream()))) {
             HeaderColumnNameMappingStrategy<DSSVCsvRepresentation> strategy =
                     new HeaderColumnNameMappingStrategy<>();
@@ -145,7 +180,7 @@ public class StudentService implements StudentServiceInterface {
                             .fullName(csvLine.getFullName())
                             .build()
                     )
-                    .collect(Collectors.toSet());
+                    .collect(Collectors.toList());
         }
     }
 }
