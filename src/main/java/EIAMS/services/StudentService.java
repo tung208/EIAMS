@@ -1,33 +1,26 @@
 package EIAMS.services;
 
-import EIAMS.entities.Semester;
 import EIAMS.entities.Student;
 import EIAMS.entities.csvRepresentation.DSSVCsvRepresentation;
 import EIAMS.helper.Pagination;
 import EIAMS.repositories.SemesterRepository;
 import EIAMS.repositories.StudentRepository;
+import EIAMS.repositories.StudentSubjectRepository;
 import EIAMS.services.interfaces.StudentServiceInterface;
 import EIAMS.services.thread.SaveStudent;
-import com.opencsv.CSVWriter;
 import com.opencsv.bean.CsvToBean;
 import com.opencsv.bean.CsvToBeanBuilder;
 import com.opencsv.bean.HeaderColumnNameMappingStrategy;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.web.multipart.MultipartFile;
-
 import java.io.*;
 import java.util.*;
 import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -38,6 +31,7 @@ public class StudentService implements StudentServiceInterface {
 
     private final StudentRepository studentRepository;
     private final SemesterRepository semesterRepository;
+    private final StudentSubjectRepository studentSubjectRepository;
     private final Pagination pagination;
     private static final Logger logger = LoggerFactory.getLogger(StudentService.class);
 
