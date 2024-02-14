@@ -16,26 +16,16 @@ public class Student {
     @Column(name = "id", nullable = false)
     private Integer id;
 
-    @Column(name = "SubjectCode", length = 128)
-    private String subjectCode;
-
-    @Column(name = "RollNumber", length = 128)
+    @Column(name = "roll_number", length = 128, unique = true)
     private String rollNumber;
 
-    @Column(name = "MemberCode", length = 128)
+    @Column(name = "member_code", length = 128, unique = true)
     private String memberCode;
 
-    @Column(name = "FullName", length = 128)
+    @Column(name = "full_name", length = 128)
     private String fullName;
 
-    @Column(name = "CMTND", length = 64)
+    @Column(name = "CMTND", length = 64, unique = true)
     private String cmtnd;
-
-    @Column(name = "semester_id", nullable = false)
-    private Integer semesterId;
-
-    @Lob
-    @Column(name = "black_list")
-    private String blackList;
 
 }

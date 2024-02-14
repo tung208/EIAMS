@@ -2,20 +2,18 @@ package EIAMS.services;
 
 import EIAMS.entities.Semester;
 import EIAMS.entities.Student;
+import EIAMS.entities.csvRepresentation.DSSVCsvRepresentation;
 import EIAMS.helper.Pagination;
 import EIAMS.repositories.SemesterRepository;
 import EIAMS.repositories.StudentRepository;
 import EIAMS.services.interfaces.StudentServiceInterface;
 import com.opencsv.CSVWriter;
+import com.opencsv.bean.CsvToBean;
+import com.opencsv.bean.CsvToBeanBuilder;
+import com.opencsv.bean.HeaderColumnNameMappingStrategy;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.batch.core.*;
-import org.springframework.batch.core.launch.JobLauncher;
-import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
-import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
-import org.springframework.batch.core.repository.JobRestartException;
-import org.springframework.batch.item.ExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -25,17 +23,17 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class StudentService implements StudentServiceInterface {
+
     private final StudentRepository studentRepository;
     private final SemesterRepository semesterRepository;
     private final Pagination pagination;
     private static final Logger logger = LoggerFactory.getLogger(StudentService.class);
 
-    @Autowired
-    private JobLauncher jobLauncher;
 
 //    @Autowired
 //    private Job exportCsvJob;
@@ -62,12 +60,9 @@ public class StudentService implements StudentServiceInterface {
         if (s.isPresent()) {
             Student studentUpdate = s.get();
             studentUpdate.setRollNumber(student.getRollNumber());
-            studentUpdate.setSubjectCode(student.getSubjectCode());
             studentUpdate.setFullName(student.getFullName());
-            studentUpdate.setSemesterId(student.getSemesterId());
             studentUpdate.setCmtnd(student.getCmtnd());
             studentUpdate.setMemberCode(student.getMemberCode());
-            studentUpdate.setBlackList(student.getBlackList());
             studentRepository.save(studentUpdate);
         }
     }
@@ -120,7 +115,37 @@ public class StudentService implements StudentServiceInterface {
 //    }
 
     @Override
-    public void importListStudent(MultipartFile file) throws IOException {
+    public void saveCustomersToDatabase(MultipartFile file){
 
+    }
+
+    @Override
+    public Integer uploadStudents(MultipartFile file) throws IOException {
+        Set<Student> students = parseCsv(file);
+        studentRepository.saveAll(students);
+        return students.size();
+    }
+
+    private Set<Student> parseCsv(MultipartFile file) throws IOException {
+        try(Reader reader = new BufferedReader(new InputStreamReader(file.getInputStream()))) {
+            HeaderColumnNameMappingStrategy<DSSVCsvRepresentation> strategy =
+                    new HeaderColumnNameMappingStrategy<>();
+            strategy.setType(DSSVCsvRepresentation.class);
+            CsvToBean<DSSVCsvRepresentation> csvToBean =
+                    new CsvToBeanBuilder<DSSVCsvRepresentation>(reader)
+                            .withMappingStrategy(strategy)
+                            .withIgnoreEmptyLine(true)
+                            .withIgnoreLeadingWhiteSpace(true)
+                            .build();
+            return csvToBean.parse()
+                    .stream()
+                    .map(csvLine -> Student.builder()
+                            .rollNumber(csvLine.getRollNumber())
+                            .memberCode(csvLine.getMemberCode())
+                            .fullName(csvLine.getFullName())
+                            .build()
+                    )
+                    .collect(Collectors.toSet());
+        }
     }
 }

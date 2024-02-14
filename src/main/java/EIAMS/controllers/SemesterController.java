@@ -26,6 +26,11 @@ public class SemesterController {
         return new PageResponse<>(page.getNumber() + 1, page.getTotalPages(), page.getSize(), page.getContent());
     }
 
+//    @GetMapping(path = "/test")
+//    public String test(){
+//        return "Xin chao 123";
+//    }
+
     @PostMapping()
     public ResponseEntity<ResponseObject> postSemester(@RequestBody SemesterDto semesterDto){
         Semester semester = semesterService.create(semesterDto);

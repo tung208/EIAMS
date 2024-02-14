@@ -4,12 +4,15 @@ import EIAMS.entities.responeObject.ResponseObject;
 import EIAMS.entities.Student;
 import EIAMS.services.interfaces.StudentServiceInterface;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -17,6 +20,7 @@ import java.util.List;
 @RequestMapping(value = "/api/v1/student")
 public class StudentController {
 
+    @Autowired
     private final StudentServiceInterface studentService;
 
     @GetMapping(path = "/index")
@@ -47,15 +51,11 @@ public class StudentController {
 
     }
 
-    @GetMapping("/import")
-    public ResponseEntity<ResponseObject> importStudents(@RequestParam("file") MultipartFile file) {
-        try {
-            studentService.importListStudent(file);
-            return ResponseEntity.status(HttpStatus.OK).body(
-                    new ResponseObject("OK", "Import Success", null));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ResponseObject("FAIL", "Import Fail", e.getMessage()));
-        }
+    @PostMapping("/import")
+    public ResponseEntity<ResponseObject> importStudents(@RequestParam("file") MultipartFile file) throws IOException {
+        studentService.uploadStudents(file);
+        return ResponseEntity.status(HttpStatus.OK).body(
+                new ResponseObject("OK", "Import Success", "Xin chao the gioi"));
     }
 
     @PostMapping("/update")
@@ -67,4 +67,6 @@ public class StudentController {
     public void delete(@RequestParam int id) {
         studentService.delete(id);
     }
+
+
 }

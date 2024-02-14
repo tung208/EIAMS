@@ -35,25 +35,30 @@ CREATE TABLE `Semester` (
 
 CREATE TABLE `Student` (
   `id` int(11) PRIMARY KEY AUTO_INCREMENT,
-  `SubjectCode` varchar(128),
-  `RollNumber` varchar(128),
-  `MemberCode` varchar(128),
-  `FullName` varchar(128),
-  `CMTND` varchar(64),
-  `semester_id` int(11) NOT NULL,
-  `black_list` longtext
+  `roll_number` varchar(128) UNIQUE NOT NULL,
+  `member_code` varchar(128) UNIQUE NOT NULL,
+  `full_name` varchar(128),
+  `CMTND` varchar(64) UNIQUE NOT NULL
 );
 
 CREATE TABLE `Subject` (
   `id` int(11) PRIMARY KEY AUTO_INCREMENT,
   `semester_id` int(11) NOT NULL,
-  `Subject_Code` varchar(255),
-  `Old_Subject_Code` varchar(255),
-  `Short_Name` varchar(255),
-  `Subject_Name` varchar(255),
-  `No_Lab` int,
-  `Dont_mix` int,
-  `Replaced_by` varchar(255)
+  `subject_code` longtext,
+  `old_subject_code` varchar(255),
+  `short_name` varchar(255),
+  `subject_name` varchar(255),
+  `no_lab` int,
+  `dont_mix` int,
+  `replaced_by` varchar(255)
+);
+
+CREATE TABLE `StudentSubject` (
+  `id` int(11) PRIMARY KEY AUTO_INCREMENT,
+  `semester_id` int,
+  `roll_number` varchar(128),
+  `subject_code` varchar(128),
+  `black_list` int
 );
 
 CREATE TABLE `Scheduler` (
@@ -68,10 +73,11 @@ CREATE TABLE `Scheduler` (
 
 CREATE TABLE `Exam_Code` (
   `id` int(11) PRIMARY KEY AUTO_INCREMENT,
-  `Subject_id` varchar(255),
+  `subject_id` varchar(255),
   `type` varchar(255),
-  `Semester_id` int,
-  `Slot_id` int
+  `semester_id` int,
+  `slot_id` int,
+  INDEX semester (semester_id)
 );
 
 CREATE TABLE `Slot` (
@@ -80,3 +86,15 @@ CREATE TABLE `Slot` (
   `start_time` varchar(64),
   `end_time` varchar(64)
 );
+
+CREATE TABLE `Test` (
+  `id` int(11) PRIMARY KEY AUTO_INCREMENT,
+  `member_code` varchar(64),
+  `roll_number` varchar(64),
+  `full_name` varchar(64)
+);
+
+
+CREATE INDEX semester_index ON Subject(semester_id);
+CREATE INDEX semester_index1 ON StudentSubject(semester_id);
+CREATE INDEX semester_index2 ON Exam_Code(semester_id);

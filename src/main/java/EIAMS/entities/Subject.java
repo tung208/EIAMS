@@ -19,25 +19,25 @@ public class Subject {
     @Column(name = "semester_id", nullable = false)
     private Integer semesterId;
 
-    @Column(name = "Subject_Code")
+    @Column(name = "subject_code")
     private String subjectCode;
 
-    @Column(name = "Old_Subject_Code")
+    @Column(name = "old_subject_code")
     private String oldSubjectCode;
 
-    @Column(name = "Short_Name")
+    @Column(name = "short_name")
     private String shortName;
 
-    @Column(name = "Subject_Name")
+    @Column(name = "subject_name")
     private String subjectName;
 
-    @Column(name = "No_Lab")
+    @Column(name = "no_lab")
     private Integer noLab;
 
-    @Column(name = "Dont_mix")
+    @Column(name = "dont_mix")
     private Integer dontMix;
 
-    @Column(name = "Replaced_by")
+    @Column(name = "replaced_by")
     private String replacedBy;
 
 }
