@@ -144,7 +144,8 @@ public class StudentService implements StudentServiceInterface {
                 new ArrayBlockingQueue<>(queueCapacity)); // Hàng đợi dùng để lưu trữ các nhiệm vụ chưa được thực hiện
 
         // Kích thước của danh sách con
-        int sublistSize = 1000;
+        int sublistSize = 2000;
+
 
         // Chia danh sách gốc thành các danh sách con
         for (int i = 0; i < dssvCsvRepresentations.size(); i += sublistSize) {

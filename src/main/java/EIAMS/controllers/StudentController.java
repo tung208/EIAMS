@@ -19,9 +19,8 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping(value = "/api/v1/student")
 public class StudentController {
-
     @Autowired
-    private final StudentServiceInterface studentService;
+    private StudentServiceInterface studentService;
 
     @GetMapping(path = "/index")
     public ResponseEntity<ResponseObject> list(
@@ -54,6 +53,12 @@ public class StudentController {
     @PostMapping("/import")
     public ResponseEntity<ResponseObject> importStudents(@RequestParam("file") MultipartFile file,@RequestParam("semester_id") int semesterId) throws IOException {
         studentService.uploadStudents(file,semesterId);
+        return ResponseEntity.status(HttpStatus.OK).body(
+                new ResponseObject("OK", "Import Success", "Xin chao the gioi"));
+    }
+
+    @PostMapping("/test")
+    public ResponseEntity<ResponseObject> test() {
         return ResponseEntity.status(HttpStatus.OK).body(
                 new ResponseObject("OK", "Import Success", "Xin chao the gioi"));
     }
