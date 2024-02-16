@@ -7,44 +7,27 @@ import EIAMS.repositories.StudentRepository;
 import EIAMS.repositories.StudentSubjectRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @RequiredArgsConstructor
 public class SaveStudent implements Runnable{
 
-    private final List<DSSVCsvRepresentation> students;
+    private final List<Student> students;
     private final int semester_id;
     private final StudentRepository studentRepository;
-    private final StudentSubjectRepository studentSubjectRepository;
-
+    private final int i;
     @Override
     public void run() {
-        for (DSSVCsvRepresentation element : students) {
-            StudentSubject studentSubject = StudentSubject
-                    .builder()
-                    .semesterId(semester_id)
-                    .rollNumber(element.getRollNumber())
-                    .subjectCode(element.getSubjectCode())
-                    .build();
-            try {
-                studentSubjectRepository.save(studentSubject);
-            } catch (DataIntegrityViolationException e){
-                e.printStackTrace();
-            }
-
-            Student student = Student
-                    .builder()
-                    .rollNumber(element.getRollNumber())
-                    .memberCode(element.getMemberCode())
-                    .fullName(element.getFullName())
-                    .build();
+//        studentRepository.saveAll(students);
+        for (Student element : students) {
             try{
-                studentRepository.save(student);
+                studentRepository.save(element);
             } catch (DataIntegrityViolationException e){
 //                e.printStackTrace();
             }
         }
-        System.out.println("Task " + semester_id + " executed by thread: " + Thread.currentThread().getName());
+        System.out.println("Task student " + i + " executed by thread: " + Thread.currentThread().getName());
     }
 }

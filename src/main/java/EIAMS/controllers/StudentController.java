@@ -57,6 +57,13 @@ public class StudentController {
                 new ResponseObject("OK", "Import Success", "Xin chao the gioi"));
     }
 
+    @PostMapping("/import-profile")
+    public ResponseEntity<ResponseObject> importStudentProfile(@RequestParam("file") MultipartFile file,@RequestParam("semester_id") int semesterId) throws IOException {
+        studentService.uploadStudents(file,semesterId);
+        return ResponseEntity.status(HttpStatus.OK).body(
+                new ResponseObject("OK", "Import Success", "Xin chao the gioi"));
+    }
+
     @PostMapping("/test")
     public ResponseEntity<ResponseObject> test() {
         return ResponseEntity.status(HttpStatus.OK).body(

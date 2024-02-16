@@ -2,6 +2,7 @@ package EIAMS.services;
 
 import EIAMS.entities.Semester;
 import EIAMS.entities.Student;
+import EIAMS.entities.StudentSubject;
 import EIAMS.entities.csvRepresentation.DSSVCsvRepresentation;
 import EIAMS.helper.Pagination;
 import EIAMS.repositories.SemesterRepository;
@@ -9,10 +10,12 @@ import EIAMS.repositories.StudentRepository;
 import EIAMS.repositories.StudentSubjectRepository;
 import EIAMS.services.interfaces.StudentServiceInterface;
 import EIAMS.services.thread.SaveStudent;
+import EIAMS.services.thread.SaveStudentSubject;
 import com.opencsv.CSVWriter;
 import com.opencsv.bean.CsvToBean;
 import com.opencsv.bean.CsvToBeanBuilder;
 import com.opencsv.bean.HeaderColumnNameMappingStrategy;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,11 +24,11 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
+import java.sql.Struct;
 import java.util.*;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.RejectedExecutionHandler;
@@ -128,11 +131,14 @@ public class StudentService implements StudentServiceInterface {
     }
 
     @Override
+    @Transactional
     public Integer uploadStudents(MultipartFile file, int semester_id) throws IOException {
         List<DSSVCsvRepresentation> dssvCsvRepresentations = parseCsv(file);
+        Map<String,Student> students = new HashMap<>();
+        List<StudentSubject> studentSubjects = new ArrayList<>();
 
-        int corePoolSize = 5;
-        int maximumPoolSize = 10;
+        int corePoolSize = 10;
+        int maximumPoolSize = 15;
         long keepAliveTime = 60L;
         int queueCapacity = 100;
         // Tạo một ThreadPoolExecutor với các tham số đã cho
@@ -146,12 +152,44 @@ public class StudentService implements StudentServiceInterface {
         // Kích thước của danh sách con
         int sublistSize = 2000;
 
+        for (DSSVCsvRepresentation element: dssvCsvRepresentations) {
+            Student student = Student.builder()
+                                        .rollNumber(element.getRollNumber().toUpperCase().trim())
+                                        .memberCode(element.getMemberCode().trim())
+                                        .fullName(element.getFullName().trim())
+                                        .build();
+            students.put(element.getRollNumber().toUpperCase().trim(), student);
 
-        // Chia danh sách gốc thành các danh sách con
-        for (int i = 0; i < dssvCsvRepresentations.size(); i += sublistSize) {
-            int endIndex = Math.min(i + sublistSize, dssvCsvRepresentations.size());
-            List<DSSVCsvRepresentation> sublist = dssvCsvRepresentations.subList(i, endIndex);
-            executor.execute(new SaveStudent(sublist,semester_id,studentRepository,studentSubjectRepository));
+            StudentSubject studentSubject = StudentSubject.builder()
+                                                        .semesterId(semester_id)
+                                                        .rollNumber(element.getRollNumber().toUpperCase().trim())
+                                                        .subjectCode(element.getSubjectCode().trim())
+                                                        .build();
+            studentSubjects.add(studentSubject);
+        }
+
+
+        List<Student> listStudent = students.values().stream().collect(Collectors.toList());
+        List<String> listKeyStudent = new ArrayList<>(students.keySet());
+
+        System.out.println("size of dssv: "+dssvCsvRepresentations.size());
+        System.out.println("list student: " + listStudent.size());
+
+        studentRepository.deleteByRollNumberIn(listKeyStudent);
+        List<Student> ss = studentRepository.findAll();
+        System.out.println("ss size "+ss.size());
+        for (int i = 0; i < listStudent.size(); i += sublistSize) {
+            int endIndex = Math.min(i + sublistSize, listStudent.size());
+            List<Student> sublistStudent = listStudent.subList(i, endIndex);
+            executor.execute(new SaveStudent(sublistStudent,semester_id,studentRepository,i));
+        }
+
+        System.out.println("list student subject: " + studentSubjects.size());
+        studentSubjectRepository.deleteBySemesterId(semester_id);
+        for (int i = 0; i < studentSubjects.size(); i += sublistSize) {
+            int endIndex = Math.min(i + sublistSize, studentSubjects.size());
+            List<StudentSubject> sublist = studentSubjects.subList(i, endIndex);
+            executor.execute(new SaveStudentSubject(sublist,studentSubjectRepository,i));
         }
 
         return dssvCsvRepresentations.size();
