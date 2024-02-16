@@ -3,6 +3,7 @@ package EIAMS.services;
 import EIAMS.entities.Semester;
 import EIAMS.entities.Student;
 import EIAMS.entities.StudentSubject;
+import EIAMS.entities.csvRepresentation.CMNDCsvRepresentation;
 import EIAMS.entities.csvRepresentation.DSSVCsvRepresentation;
 import EIAMS.helper.Pagination;
 import EIAMS.repositories.SemesterRepository;
@@ -202,6 +203,81 @@ public class StudentService implements StudentServiceInterface {
             strategy.setType(DSSVCsvRepresentation.class);
             CsvToBean<DSSVCsvRepresentation> csvToBean =
                     new CsvToBeanBuilder<DSSVCsvRepresentation>(reader)
+                            .withMappingStrategy(strategy)
+                            .withIgnoreEmptyLine(true)
+                            .withIgnoreLeadingWhiteSpace(true)
+                            .build();
+            return csvToBean.parse().stream().collect(Collectors.toList());
+        }
+    }
+
+    @Override
+    @Transactional
+    public Integer uploadProfile(MultipartFile file, int semester_id) throws IOException {
+        List<CMNDCsvRepresentation> cmndCsvRepresentations = parseCMNDCsv(file);
+        Map<String,Student> students = new HashMap<>();
+
+        int corePoolSize = 10;
+        int maximumPoolSize = 15;
+        long keepAliveTime = 60L;
+        int queueCapacity = 100;
+        // Tạo một ThreadPoolExecutor với các tham số đã cho
+        ThreadPoolExecutor executor = new ThreadPoolExecutor(
+                corePoolSize,
+                maximumPoolSize,
+                keepAliveTime,
+                TimeUnit.SECONDS,
+                new ArrayBlockingQueue<>(queueCapacity)); // Hàng đợi dùng để lưu trữ các nhiệm vụ chưa được thực hiện
+
+        // Kích thước của danh sách con
+        int sublistSize = 2000;
+
+        for (CMNDCsvRepresentation element: cmndCsvRepresentations) {
+            Student student = Student.builder()
+                    .rollNumber(element.getRollNumber().toUpperCase().trim())
+                    .memberCode(element.getMemberCode().trim())
+                    .fullName(element.getFullName().trim())
+                    .build();
+            students.put(element.getRollNumber().toUpperCase().trim(), student);
+
+            StudentSubject studentSubject = StudentSubject.builder()
+                    .semesterId(semester_id)
+                    .rollNumber(element.getRollNumber().toUpperCase().trim())
+                    .subjectCode(element.getSubjectCode().trim())
+                    .build();
+            studentSubjects.add(studentSubject);
+        }
+
+
+        List<Student> listStudent = students.values().stream().collect(Collectors.toList());
+        List<String> listKeyStudent = new ArrayList<>(students.keySet());
+        
+        studentRepository.deleteByRollNumberIn(listKeyStudent);
+        List<Student> ss = studentRepository.findAll();
+        System.out.println("ss size "+ss.size());
+        for (int i = 0; i < listStudent.size(); i += sublistSize) {
+            int endIndex = Math.min(i + sublistSize, listStudent.size());
+            List<Student> sublistStudent = listStudent.subList(i, endIndex);
+            executor.execute(new SaveStudent(sublistStudent,semester_id,studentRepository,i));
+        }
+
+        System.out.println("list student subject: " + studentSubjects.size());
+        studentSubjectRepository.deleteBySemesterId(semester_id);
+        for (int i = 0; i < studentSubjects.size(); i += sublistSize) {
+            int endIndex = Math.min(i + sublistSize, studentSubjects.size());
+            List<StudentSubject> sublist = studentSubjects.subList(i, endIndex);
+            executor.execute(new SaveStudentSubject(sublist,studentSubjectRepository,i));
+        }
+
+        return dssvCsvRepresentations.size();
+    }
+    private List<CMNDCsvRepresentation> parseCMNDCsv(MultipartFile file) throws IOException {
+        try(Reader reader = new BufferedReader(new InputStreamReader(file.getInputStream()))) {
+            HeaderColumnNameMappingStrategy<CMNDCsvRepresentation> strategy =
+                    new HeaderColumnNameMappingStrategy<>();
+            strategy.setType(CMNDCsvRepresentation.class);
+            CsvToBean<CMNDCsvRepresentation> csvToBean =
+                    new CsvToBeanBuilder<CMNDCsvRepresentation>(reader)
                             .withMappingStrategy(strategy)
                             .withIgnoreEmptyLine(true)
                             .withIgnoreLeadingWhiteSpace(true)
