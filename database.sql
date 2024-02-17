@@ -21,7 +21,8 @@ CREATE TABLE `Room` (
   `id` int(11) PRIMARY KEY AUTO_INCREMENT,
   `name` varchar(64) NOT NULL,
   `type` varchar(32),
-  `quantity_student` int(3)
+  `quantity_student` int(3),
+  `semester_id` int(11)
 );
 
 CREATE TABLE `Semester` (
