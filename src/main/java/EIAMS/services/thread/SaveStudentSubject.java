@@ -20,6 +20,6 @@ public class SaveStudentSubject implements Runnable{
         } catch (DataIntegrityViolationException e){
 //                e.printStackTrace();
         }
-        System.out.println("Task student object "+i+" executed by thread: " + Thread.currentThread().getName());
+        System.out.println("Task student subject "+i+" executed by thread: " + Thread.currentThread().getName());
     }
 }

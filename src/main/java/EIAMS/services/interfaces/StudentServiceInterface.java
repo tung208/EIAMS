@@ -21,5 +21,5 @@ public interface StudentServiceInterface {
      void saveCustomersToDatabase(MultipartFile file);
      Integer uploadStudents(MultipartFile file, int semester_id) throws IOException;
 
-     Integer uploadProfile(MultipartFile file, int semester_id) throws IOException;
+     Integer uploadCMND(MultipartFile file, int semester_id) throws IOException;
 }

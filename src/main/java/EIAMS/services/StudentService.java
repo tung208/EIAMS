@@ -9,7 +9,10 @@ import EIAMS.helper.Pagination;
 import EIAMS.repositories.SemesterRepository;
 import EIAMS.repositories.StudentRepository;
 import EIAMS.repositories.StudentSubjectRepository;
+import EIAMS.services.excel.ExcelCMND;
+import EIAMS.services.excel.ExcelDSSV;
 import EIAMS.services.interfaces.StudentServiceInterface;
+import EIAMS.services.thread.SaveCMND;
 import EIAMS.services.thread.SaveStudent;
 import EIAMS.services.thread.SaveStudentSubject;
 import com.opencsv.CSVWriter;
@@ -134,7 +137,9 @@ public class StudentService implements StudentServiceInterface {
     @Override
     @Transactional
     public Integer uploadStudents(MultipartFile file, int semester_id) throws IOException {
-        List<DSSVCsvRepresentation> dssvCsvRepresentations = parseCsv(file);
+//        List<DSSVCsvRepresentation> dssvCsvRepresentations = parseCsv(file);
+        List<DSSVCsvRepresentation> dssvCsvRepresentations = new ExcelDSSV().getDataFromExcel(file.getInputStream());
+
         Map<String,Student> students = new HashMap<>();
         List<StudentSubject> studentSubjects = new ArrayList<>();
 
@@ -148,25 +153,30 @@ public class StudentService implements StudentServiceInterface {
                 maximumPoolSize,
                 keepAliveTime,
                 TimeUnit.SECONDS,
-                new ArrayBlockingQueue<>(queueCapacity)); // Hàng đợi dùng để lưu trữ các nhiệm vụ chưa được thực hiện
+                new ArrayBlockingQueue<>(queueCapacity));
+        // Hàng đợi dùng để lưu trữ các nhiệm vụ chưa được thực hiện
 
         // Kích thước của danh sách con
         int sublistSize = 2000;
 
         for (DSSVCsvRepresentation element: dssvCsvRepresentations) {
-            Student student = Student.builder()
-                                        .rollNumber(element.getRollNumber().toUpperCase().trim())
-                                        .memberCode(element.getMemberCode().trim())
-                                        .fullName(element.getFullName().trim())
-                                        .build();
-            students.put(element.getRollNumber().toUpperCase().trim(), student);
+            try {
+                Student student = Student.builder()
+                        .rollNumber(element.getRollNumber().toUpperCase().trim())
+                        .memberCode(element.getMemberCode().trim())
+                        .fullName(element.getFullName().trim())
+                        .build();
+                students.put(element.getRollNumber().toUpperCase().trim(), student);
 
-            StudentSubject studentSubject = StudentSubject.builder()
-                                                        .semesterId(semester_id)
-                                                        .rollNumber(element.getRollNumber().toUpperCase().trim())
-                                                        .subjectCode(element.getSubjectCode().trim())
-                                                        .build();
-            studentSubjects.add(studentSubject);
+                StudentSubject studentSubject = StudentSubject.builder()
+                        .semesterId(semester_id)
+                        .rollNumber(element.getRollNumber().toUpperCase().trim())
+                        .subjectCode(element.getSubjectCode().trim())
+                        .build();
+                studentSubjects.add(studentSubject);
+            } catch (Exception e){
+                System.out.println(element.getRollNumber());
+            }
         }
 
 
@@ -176,9 +186,7 @@ public class StudentService implements StudentServiceInterface {
         System.out.println("size of dssv: "+dssvCsvRepresentations.size());
         System.out.println("list student: " + listStudent.size());
 
-        studentRepository.deleteByRollNumberIn(listKeyStudent);
-        List<Student> ss = studentRepository.findAll();
-        System.out.println("ss size "+ss.size());
+        studentRepository.deleteByRollNumbers(listKeyStudent);
         for (int i = 0; i < listStudent.size(); i += sublistSize) {
             int endIndex = Math.min(i + sublistSize, listStudent.size());
             List<Student> sublistStudent = listStudent.subList(i, endIndex);
@@ -196,25 +204,26 @@ public class StudentService implements StudentServiceInterface {
         return dssvCsvRepresentations.size();
     }
 
-    private List<DSSVCsvRepresentation> parseCsv(MultipartFile file) throws IOException {
-        try(Reader reader = new BufferedReader(new InputStreamReader(file.getInputStream()))) {
-            HeaderColumnNameMappingStrategy<DSSVCsvRepresentation> strategy =
-                    new HeaderColumnNameMappingStrategy<>();
-            strategy.setType(DSSVCsvRepresentation.class);
-            CsvToBean<DSSVCsvRepresentation> csvToBean =
-                    new CsvToBeanBuilder<DSSVCsvRepresentation>(reader)
-                            .withMappingStrategy(strategy)
-                            .withIgnoreEmptyLine(true)
-                            .withIgnoreLeadingWhiteSpace(true)
-                            .build();
-            return csvToBean.parse().stream().collect(Collectors.toList());
-        }
-    }
+//    private List<DSSVCsvRepresentation> parseCsv(MultipartFile file) throws IOException {
+//        try(Reader reader = new BufferedReader(new InputStreamReader(file.getInputStream()))) {
+//            HeaderColumnNameMappingStrategy<DSSVCsvRepresentation> strategy =
+//                    new HeaderColumnNameMappingStrategy<>();
+//            strategy.setType(DSSVCsvRepresentation.class);
+//            CsvToBean<DSSVCsvRepresentation> csvToBean =
+//                    new CsvToBeanBuilder<DSSVCsvRepresentation>(reader)
+//                            .withMappingStrategy(strategy)
+//                            .withIgnoreEmptyLine(true)
+//                            .withIgnoreLeadingWhiteSpace(true)
+//                            .build();
+//            return csvToBean.parse().stream().collect(Collectors.toList());
+//        }
+//    }
 
     @Override
     @Transactional
-    public Integer uploadProfile(MultipartFile file, int semester_id) throws IOException {
-        List<CMNDCsvRepresentation> cmndCsvRepresentations = parseCMNDCsv(file);
+    public Integer uploadCMND(MultipartFile file, int semester_id) throws IOException {
+//        List<CMNDCsvRepresentation> cmndCsvRepresentations = parseCMNDCsv(file);
+        List<CMNDCsvRepresentation> cmndCsvRepresentations = new ExcelCMND().getDataFromExcel(file.getInputStream());
         Map<String,Student> students = new HashMap<>();
 
         int corePoolSize = 10;
@@ -227,7 +236,8 @@ public class StudentService implements StudentServiceInterface {
                 maximumPoolSize,
                 keepAliveTime,
                 TimeUnit.SECONDS,
-                new ArrayBlockingQueue<>(queueCapacity)); // Hàng đợi dùng để lưu trữ các nhiệm vụ chưa được thực hiện
+                new ArrayBlockingQueue<>(queueCapacity));
+        // Hàng đợi dùng để lưu trữ các nhiệm vụ chưa được thực hiện
 
         // Kích thước của danh sách con
         int sublistSize = 2000;
@@ -235,63 +245,19 @@ public class StudentService implements StudentServiceInterface {
         for (CMNDCsvRepresentation element: cmndCsvRepresentations) {
             Student student = Student.builder()
                     .rollNumber(element.getRollNumber().toUpperCase().trim())
-                    .memberCode(element.getMemberCode().trim())
-                    .fullName(element.getFullName().trim())
+                    .cmtnd(element.getCmtnd().trim())
                     .build();
             students.put(element.getRollNumber().toUpperCase().trim(), student);
-
-            StudentSubject studentSubject = StudentSubject.builder()
-                    .semesterId(semester_id)
-                    .rollNumber(element.getRollNumber().toUpperCase().trim())
-                    .subjectCode(element.getSubjectCode().trim())
-                    .build();
-            studentSubjects.add(studentSubject);
         }
 
 
         List<Student> listStudent = students.values().stream().collect(Collectors.toList());
-        List<String> listKeyStudent = new ArrayList<>(students.keySet());
-        
-        studentRepository.deleteByRollNumberIn(listKeyStudent);
-        List<Student> ss = studentRepository.findAll();
-        System.out.println("ss size "+ss.size());
         for (int i = 0; i < listStudent.size(); i += sublistSize) {
             int endIndex = Math.min(i + sublistSize, listStudent.size());
             List<Student> sublistStudent = listStudent.subList(i, endIndex);
-            executor.execute(new SaveStudent(sublistStudent,semester_id,studentRepository,i));
+            executor.execute(new SaveCMND(sublistStudent,studentRepository));
         }
 
-        System.out.println("list student subject: " + studentSubjects.size());
-        studentSubjectRepository.deleteBySemesterId(semester_id);
-        for (int i = 0; i < studentSubjects.size(); i += sublistSize) {
-            int endIndex = Math.min(i + sublistSize, studentSubjects.size());
-            List<StudentSubject> sublist = studentSubjects.subList(i, endIndex);
-            executor.execute(new SaveStudentSubject(sublist,studentSubjectRepository,i));
-        }
-
-        return dssvCsvRepresentations.size();
-    }
-    private List<CMNDCsvRepresentation> parseCMNDCsv(MultipartFile file) throws IOException {
-        try(Reader reader = new BufferedReader(new InputStreamReader(file.getInputStream()))) {
-            HeaderColumnNameMappingStrategy<CMNDCsvRepresentation> strategy =
-                    new HeaderColumnNameMappingStrategy<>();
-            strategy.setType(CMNDCsvRepresentation.class);
-            CsvToBean<CMNDCsvRepresentation> csvToBean =
-                    new CsvToBeanBuilder<CMNDCsvRepresentation>(reader)
-                            .withMappingStrategy(strategy)
-                            .withIgnoreEmptyLine(true)
-                            .withIgnoreLeadingWhiteSpace(true)
-                            .build();
-//            return csvToBean.parse()
-//                    .stream()
-//                    .map(csvLine -> Student.builder()
-//                            .rollNumber(csvLine.getRollNumber())
-//                            .memberCode(csvLine.getMemberCode())
-//                            .fullName(csvLine.getFullName())
-//                            .build()
-//                    )
-//                    .collect(Collectors.toList());
-            return csvToBean.parse().stream().collect(Collectors.toList());
-        }
+        return cmndCsvRepresentations.size();
     }
 }
