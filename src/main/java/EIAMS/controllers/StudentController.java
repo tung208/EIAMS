@@ -2,7 +2,7 @@ package EIAMS.controllers;
 
 import EIAMS.entities.responeObject.ResponseObject;
 import EIAMS.entities.Student;
-import EIAMS.services.interfaces.StudentServiceInterface;
+import EIAMS.services.StudentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -20,7 +20,7 @@ import java.util.List;
 @RequestMapping(value = "/api/v1/student")
 public class StudentController {
     @Autowired
-    private StudentServiceInterface studentService;
+    private StudentService studentService;
 
     @GetMapping(path = "/index")
     public ResponseEntity<ResponseObject> list(

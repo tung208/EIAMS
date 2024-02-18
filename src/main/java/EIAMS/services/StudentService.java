@@ -1,6 +1,5 @@
 package EIAMS.services;
 
-import EIAMS.entities.Semester;
 import EIAMS.entities.Student;
 import EIAMS.entities.StudentSubject;
 import EIAMS.entities.csvRepresentation.CMNDCsvRepresentation;
@@ -15,24 +14,18 @@ import EIAMS.services.interfaces.StudentServiceInterface;
 import EIAMS.services.thread.SaveCMND;
 import EIAMS.services.thread.SaveStudent;
 import EIAMS.services.thread.SaveStudentSubject;
-import com.opencsv.CSVWriter;
-import com.opencsv.bean.CsvToBean;
-import com.opencsv.bean.CsvToBeanBuilder;
-import com.opencsv.bean.HeaderColumnNameMappingStrategy;
+
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.support.TransactionTemplate;
+
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
-import java.sql.Struct;
 import java.util.*;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.RejectedExecutionHandler;
@@ -137,7 +130,6 @@ public class StudentService implements StudentServiceInterface {
     @Override
     @Transactional
     public Integer uploadStudents(MultipartFile file, int semester_id) throws IOException {
-//        List<DSSVCsvRepresentation> dssvCsvRepresentations = parseCsv(file);
         List<DSSVCsvRepresentation> dssvCsvRepresentations = new ExcelDSSV().getDataFromExcel(file.getInputStream());
 
         Map<String,Student> students = new HashMap<>();
@@ -222,7 +214,6 @@ public class StudentService implements StudentServiceInterface {
     @Override
     @Transactional
     public Integer uploadCMND(MultipartFile file, int semester_id) throws IOException {
-//        List<CMNDCsvRepresentation> cmndCsvRepresentations = parseCMNDCsv(file);
         List<CMNDCsvRepresentation> cmndCsvRepresentations = new ExcelCMND().getDataFromExcel(file.getInputStream());
         Map<String,Student> students = new HashMap<>();
 

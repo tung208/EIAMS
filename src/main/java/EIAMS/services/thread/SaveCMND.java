@@ -25,6 +25,6 @@ public class SaveCMND implements Runnable{
                 }
             }
         }
-        System.out.println("Task student executed by thread: " + Thread.currentThread().getName());
+        System.out.println("Task cmnd executed by thread: " + Thread.currentThread().getName());
     }
 }

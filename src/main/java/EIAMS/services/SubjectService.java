@@ -1,0 +1,73 @@
+package EIAMS.services;
+
+import EIAMS.entities.StudentSubject;
+import EIAMS.entities.Subject;
+import EIAMS.entities.csvRepresentation.SubjectCsvRepresentation;
+import EIAMS.repositories.SubjectRepository;
+import EIAMS.services.excel.ExcelSubject;
+import EIAMS.services.interfaces.SubjectServiceInterface;
+import EIAMS.services.thread.SaveStudentSubject;
+import EIAMS.services.thread.SaveSubject;
+import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+
+@Service
+@RequiredArgsConstructor
+public class SubjectService implements SubjectServiceInterface {
+    private final SubjectRepository subjectRepository;
+    private static final Logger logger = LoggerFactory.getLogger(StudentService.class);
+    @Override
+    @Transactional
+    public Integer uploadSubject(MultipartFile file, int semester_id) throws IOException {
+        List<SubjectCsvRepresentation> subjectCsvRepresentations = new ExcelSubject().getDataFromExcel(file.getInputStream());
+
+        List<Subject> subjectList = new ArrayList<>();
+
+        int corePoolSize = 5;
+        int maximumPoolSize = 10;
+        long keepAliveTime = 60L;
+        int queueCapacity = 100;
+
+        // Tạo một ThreadPoolExecutor với các tham số đã cho
+        ThreadPoolExecutor executor = new ThreadPoolExecutor(
+                corePoolSize,
+                maximumPoolSize,
+                keepAliveTime,
+                TimeUnit.SECONDS,
+                new ArrayBlockingQueue<>(queueCapacity));
+
+        // Kích thước của danh sách con
+        int sublistSize = 500;
+        for (SubjectCsvRepresentation element: subjectCsvRepresentations) {
+            Subject subject = Subject.builder()
+                    .semesterId(semester_id)
+                    .subjectCode(element.getSubjectCode())
+                    .oldSubjectCode(element.getOldSubjectCode())
+//                    .shortName(element.getShortName())
+                    .subjectName(element.getSubjectName())
+                    .replacedBy(element.getReplacedBy())
+                    .build();
+            System.out.println(element.getShortName());
+            subjectList.add(subject);
+        }
+//        subjectRepository.deleteBySemesterId(semester_id);
+//        for (int i = 0; i < subjectList.size(); i += sublistSize) {
+//            int endIndex = Math.min(i + sublistSize, subjectList.size());
+//            List<Subject> sublist = subjectList.subList(i, endIndex);
+//            executor.execute(new SaveSubject(sublist,subjectRepository));
+//        }
+        System.out.println("aaaa");
+        return null;
+    }
+}
