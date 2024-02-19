@@ -47,25 +47,14 @@ public class ExcelSubject {
                     // Map cellValue với header ở đây
                     // Ví dụ: header là "A", "B", "C", ...
                     String header = String.valueOf((char) ('A' + i));
-                    System.out.println("Header: " + header + ", Cell Value: " + cellValue);
+//                    System.out.println("Header: " + header + ", Cell Value: " + cellValue);
                 }
 
-//                while (cellIterator.hasNext()){
-//                    Cell cell = cellIterator.next();
-//                    if (cell.getCellType() != CellType.BLANK){
-//                        System.out.println(cell.getCellType() + " "+cellIndex);
-//                    }
-//                    switch (cellIndex){
-//                        case 0 -> element.setSubjectCode(cell.getStringCellValue().toUpperCase().trim());
-//                        case 1 -> element.setOldSubjectCode(cell.getStringCellValue().toUpperCase().trim());
-//                        case 2 -> element.setShortName(cell.getStringCellValue());
-////                        case 3 -> element.setSubjectName(cell.getStringCellValue().trim());
-////                        case 8 -> element.setReplacedBy(cell.getStringCellValue().toUpperCase().trim());
-//                        default -> {
-//                        }
-//                    }
-//                    cellIndex++;
-//                }
+                element.setSubjectCode(isValidExcel.getValueFromCell(row.getCell(0)));
+                element.setOldSubjectCode(isValidExcel.getValueFromCell(row.getCell(1)));
+                element.setShortName(isValidExcel.getValueFromCell(row.getCell(2)));
+                element.setSubjectName(isValidExcel.getValueFromCell(row.getCell(3)));
+                element.setReplacedBy(isValidExcel.getValueFromCell(row.getCell(8)));
                 subjectCsvRepresentations.add(element);
             }
         } catch (IOException e) {

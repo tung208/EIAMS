@@ -52,22 +52,29 @@ public class SubjectService implements SubjectServiceInterface {
         for (SubjectCsvRepresentation element: subjectCsvRepresentations) {
             Subject subject = Subject.builder()
                     .semesterId(semester_id)
-                    .subjectCode(element.getSubjectCode())
-                    .oldSubjectCode(element.getOldSubjectCode())
-//                    .shortName(element.getShortName())
-                    .subjectName(element.getSubjectName())
-                    .replacedBy(element.getReplacedBy())
+                    .subjectCode(safeTrim(element.getSubjectCode(),1))
+                    .oldSubjectCode(safeTrim(element.getOldSubjectCode(),1))
+                    .shortName(safeTrim(element.getShortName(),1))
+                    .subjectName(safeTrim(element.getSubjectName(),0))
+                    .replacedBy(safeTrim(element.getReplacedBy(),1))
                     .build();
-            System.out.println(element.getShortName());
             subjectList.add(subject);
         }
-//        subjectRepository.deleteBySemesterId(semester_id);
-//        for (int i = 0; i < subjectList.size(); i += sublistSize) {
-//            int endIndex = Math.min(i + sublistSize, subjectList.size());
-//            List<Subject> sublist = subjectList.subList(i, endIndex);
-//            executor.execute(new SaveSubject(sublist,subjectRepository));
-//        }
-        System.out.println("aaaa");
+        System.out.println(subjectList.size());
+        subjectRepository.deleteBySemesterId(semester_id);
+        for (int i = 0; i < subjectList.size(); i += sublistSize) {
+            int endIndex = Math.min(i + sublistSize, subjectList.size());
+            List<Subject> sublist = subjectList.subList(i, endIndex);
+            executor.execute(new SaveSubject(sublist,subjectRepository));
+        }
         return null;
+    }
+
+    public static String safeTrim(String str,int mode) {
+        if (mode == 1){
+            return str == null ? null : str.toUpperCase().trim();
+        } else {
+            return str == null ? null : str.trim();
+        }
     }
 }
