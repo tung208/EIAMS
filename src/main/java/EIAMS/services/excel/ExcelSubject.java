@@ -37,18 +37,18 @@ public class ExcelSubject {
                 }
                 SubjectCsvRepresentation element = new SubjectCsvRepresentation();
 
-                // Lấy chỉ số của ô cuối cùng trong hàng
-                int lastCellIndex = row.getLastCellNum();
-                // Lặp qua từng ô trong hàng
-                for (int i = 0; i < lastCellIndex; i++) {
-                    Cell cell = row.getCell(i);
-                    String cellValue = isValidExcel.getValueFromCell(cell);
-
-                    // Map cellValue với header ở đây
-                    // Ví dụ: header là "A", "B", "C", ...
-                    String header = String.valueOf((char) ('A' + i));
+//                // Lấy chỉ số của ô cuối cùng trong hàng
+//                int lastCellIndex = row.getLastCellNum();
+//                // Lặp qua từng ô trong hàng
+//                for (int i = 0; i < lastCellIndex; i++) {
+//                    Cell cell = row.getCell(i);
+//                    String cellValue = isValidExcel.getValueFromCell(cell);
+//
+//                    // Map cellValue với header ở đây
+//                    // Ví dụ: header là "A", "B", "C", ...
+//                    String header = String.valueOf((char) ('A' + i));
 //                    System.out.println("Header: " + header + ", Cell Value: " + cellValue);
-                }
+//                }
 
                 element.setSubjectCode(isValidExcel.getValueFromCell(row.getCell(0)));
                 element.setOldSubjectCode(isValidExcel.getValueFromCell(row.getCell(1)));
