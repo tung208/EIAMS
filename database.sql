@@ -59,6 +59,7 @@ CREATE TABLE `StudentSubject` (
   `semester_id` int,
   `roll_number` varchar(128),
   `subject_code` varchar(128),
+  `group_name` varchar(128),
   `black_list` int
 );
 

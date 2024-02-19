@@ -22,4 +22,6 @@ public interface StudentServiceInterface {
      Integer uploadStudents(MultipartFile file, int semester_id) throws IOException;
 
      Integer uploadCMND(MultipartFile file, int semester_id) throws IOException;
+
+     Integer uploadBlackList(MultipartFile file, int semester_id) throws IOException;
 }

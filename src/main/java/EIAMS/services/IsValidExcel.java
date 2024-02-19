@@ -16,7 +16,7 @@ public class IsValidExcel {
     // Phương thức để lấy giá trị từ ô
     public String getValueFromCell(Cell cell) {
         if (cell != null) {
-            if (cell.getCellType() == CellType.STRING) {
+            if (cell.getCellType() == CellType.STRING || cell.getCellType() == CellType.FORMULA) {
                 return cell.getStringCellValue();
             } else if (cell.getCellType() == CellType.NUMERIC) {
                 return String.valueOf(cell.getNumericCellValue());

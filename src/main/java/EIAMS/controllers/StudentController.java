@@ -64,8 +64,9 @@ public class StudentController {
                 new ResponseObject("OK", "Import Success", "Xin chao the gioi"));
     }
 
-    @PostMapping("/test")
-    public ResponseEntity<ResponseObject> test() {
+    @PostMapping("/import-blacklist")
+    public ResponseEntity<ResponseObject> importBlackList(@RequestParam("file") MultipartFile file,@RequestParam("semester_id") int semesterId) throws IOException {
+        studentService.uploadBlackList(file,semesterId);
         return ResponseEntity.status(HttpStatus.OK).body(
                 new ResponseObject("OK", "Import Success", "Xin chao the gioi"));
     }

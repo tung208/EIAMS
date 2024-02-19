@@ -25,6 +25,9 @@ public class StudentSubject {
     @Column(name = "subject_code")
     private String subjectCode;
 
+    @Column(name = "group_name")
+    private String groupName;
+
     @Column(name = "black_list")
     private int blackList;
 
