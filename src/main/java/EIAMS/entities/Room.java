@@ -9,7 +9,7 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Table(name = "room")
+@Table(name = "room", schema = "eiams")
 public class Room {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,6 +25,7 @@ public class Room {
     @Column(name = "quantity_student")
     private Integer quantityStudent;
 
-    @Column(name = "semester_id", nullable = false)
+    @Column(name = "semester_id")
     private Integer semesterId;
+
 }

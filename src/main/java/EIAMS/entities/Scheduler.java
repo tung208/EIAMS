@@ -27,13 +27,22 @@ public class Scheduler {
     @Column(name = "room_id", nullable = false)
     private Integer roomId;
 
+    @Lob
+    @Column(name = "subject_code")
+    private String subjectCode;
+
+    @Lob
     @Column(name = "exam_code_id")
     private String examCodeId;
 
+    @Lob
     @Column(name = "student_id")
     private String studentId;
 
     @Column(name = "start_date")
     private LocalDate startDate;
+
+    @Column(name = "end_date")
+    private LocalDate endDate;
 
 }
