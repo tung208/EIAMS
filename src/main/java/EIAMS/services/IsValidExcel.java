@@ -26,6 +26,6 @@ public class IsValidExcel {
                 return ""; // Trả về chuỗi rỗng nếu ô trống
             }
         }
-        return null; // Trả về null nếu ô là null hoặc không được định dạng
+        return ""; // Trả về null nếu ô là null hoặc không được định dạng
     }
 }

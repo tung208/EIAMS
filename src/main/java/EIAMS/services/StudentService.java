@@ -255,18 +255,21 @@ public class StudentService implements StudentServiceInterface {
         Pageable pageable = PageRequest.of(0, 1);
         int sublistSize = 500;
         for (BlackListRepresentation element: blackListRepresentations) {
-            StudentSubject ss = studentSubjectRepository.findByRollNumberAndGroupNameAndSemesterId(
+            List<StudentSubject> studentSubjectList = studentSubjectRepository.findByRollNumberAndGroupNameAndSemesterId(
                     safeTrim(element.getRollNumber(),1),
                     safeTrim(element.getBlackList(),1),
-                    semester_id,
-                    pageable
+                    semester_id
             );
             System.out.println(safeTrim(element.getRollNumber(),1)+" "+
                     safeTrim(element.getBlackList(),1)+" "+
-                    semester_id);
-            if (ss != null){
-                ss.setBlackList(1);
-                studentSubjectRepository.save(ss);
+                    semester_id+" "+
+                    studentSubjectList.size()
+                    );
+            if (studentSubjectList.size() != 0){
+                for (StudentSubject item: studentSubjectList){
+                    item.setBlackList(1);
+                    studentSubjectRepository.save(item);
+                }
             }
         }
 
