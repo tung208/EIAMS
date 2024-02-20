@@ -3,7 +3,7 @@ package EIAMS.entities;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.Instant;
+import java.util.Date;
 
 @Getter
 @Setter
@@ -25,10 +25,10 @@ public class Semester {
     private String code;
 
     @Column(name = "from_date")
-    private Instant fromDate;
+    private Date fromDate;
 
     @Column(name = "to_date")
-    private Instant toDate;
+    private Date toDate;
 
     @Column(name = "creator_id", nullable = false)
     private Integer creatorId;

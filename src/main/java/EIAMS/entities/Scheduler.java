@@ -3,7 +3,7 @@ package EIAMS.entities;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDate;
+import java.util.Date;
 
 @Getter
 @Setter
@@ -40,9 +40,9 @@ public class Scheduler {
     private String studentId;
 
     @Column(name = "start_date")
-    private LocalDate startDate;
+    private Date startDate;
 
     @Column(name = "end_date")
-    private LocalDate endDate;
+    private Date endDate;
 
 }
