@@ -3,6 +3,8 @@ package EIAMS.entities;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.Date;
+
 @Getter
 @Setter
 @Entity
@@ -20,10 +22,10 @@ public class PlanExam {
     private String semesterId;
 
     @Column(name = "start_time", length = 64)
-    private String startTime;
+    private Date startTime;
 
     @Column(name = "end_time", length = 64)
-    private String endTime;
+    private Date endTime;
 
     @Column(name = "subject_code", length = 64)
     private String subjectCode;

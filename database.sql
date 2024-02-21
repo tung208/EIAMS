@@ -101,8 +101,8 @@ CREATE TABLE `Test` (
 CREATE TABLE `PlanExam` (
   `id` int(11) PRIMARY KEY AUTO_INCREMENT,
   `semester_id` varchar(64),
-  `start_time` varchar(64),
-  `end_time` varchar(64),
+  `start_time` date,
+  `end_time` date,
   `subject_code` varchar(64)
 );
 
