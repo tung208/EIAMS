@@ -71,7 +71,7 @@ CREATE TABLE `Scheduler` (
   `subject_code` longtext,
   `exam_code_id` longtext,
   `student_id` longtext,
-  `start_date` date
+  `start_date` date,
   `end_date` date
 );
 

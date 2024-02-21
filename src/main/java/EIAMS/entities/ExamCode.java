@@ -10,7 +10,7 @@ import lombok.*;
 @NoArgsConstructor
 @Builder
 @Table(name = "exam_code", schema = "eiams", indexes = {
-        @Index(name = "semester", columnList = "semester_id"),
+//        @Index(name = "semester", columnList = "semester_id"),
         @Index(name = "semester_index2", columnList = "semester_id")
 })
 public class ExamCode {
