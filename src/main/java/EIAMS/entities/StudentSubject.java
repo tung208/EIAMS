@@ -2,6 +2,7 @@ package EIAMS.entities;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.ColumnDefault;
 
 @Getter
 @Setter
@@ -30,7 +31,7 @@ public class StudentSubject {
     @Column(name = "group_name", length = 128)
     private String groupName;
 
-    @Column(name = "black_list")
+    @Column(name = "black_list", columnDefinition = "integer default 0")
     private Integer blackList;
 
 }

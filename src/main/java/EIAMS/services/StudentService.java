@@ -260,11 +260,11 @@ public class StudentService implements StudentServiceInterface {
                     safeTrim(element.getBlackList(),1),
                     semester_id
             );
-            System.out.println(safeTrim(element.getRollNumber(),1)+" "+
-                    safeTrim(element.getBlackList(),1)+" "+
-                    semester_id+" "+
-                    studentSubjectList.size()
-                    );
+//            System.out.println(safeTrim(element.getRollNumber(),1)+" "+
+//                    safeTrim(element.getBlackList(),1)+" "+
+//                    semester_id+" "+
+//                    studentSubjectList.size()
+//                    );
             if (studentSubjectList.size() != 0){
                 for (StudentSubject item: studentSubjectList){
                     item.setBlackList(1);

@@ -2,8 +2,10 @@ package EIAMS.services;
 
 import EIAMS.entities.StudentSubject;
 import EIAMS.entities.Subject;
+import EIAMS.entities.csvRepresentation.NoLabRepresentation;
 import EIAMS.entities.csvRepresentation.SubjectCsvRepresentation;
 import EIAMS.repositories.SubjectRepository;
+import EIAMS.services.excel.ExcelNoLab;
 import EIAMS.services.excel.ExcelSubject;
 import EIAMS.services.interfaces.SubjectServiceInterface;
 import EIAMS.services.thread.SaveStudentSubject;
@@ -67,6 +69,36 @@ public class SubjectService implements SubjectServiceInterface {
             List<Subject> sublist = subjectList.subList(i, endIndex);
             executor.execute(new SaveSubject(sublist,subjectRepository));
         }
+        return null;
+    }
+
+    @Override
+    @Transactional
+    public Integer uploadSubjectNoLab(MultipartFile file, int semester_id) throws IOException {
+        List<NoLabRepresentation> noLabRepresentations = new ExcelNoLab().getDataFromExcel(file.getInputStream());
+
+        List<Subject> subjectList = new ArrayList<>();
+
+        // Kích thước của danh sách con
+        int sublistSize = 500;
+        for (NoLabRepresentation element: noLabRepresentations) {
+            Subject subject = Subject.builder()
+                    .semesterId(semester_id)
+                    .subjectCode(safeTrim(element.getSubjectCode(),1))
+                    .build();
+            subjectList.add(subject);
+        }
+        System.out.println(subjectList.size());
+        subjectRepository.deleteBySemesterId(semester_id);
+        for (int i = 0; i < subjectList.size(); i += sublistSize) {
+            int endIndex = Math.min(i + sublistSize, subjectList.size());
+            List<Subject> sublist = subjectList.subList(i, endIndex);
+        }
+        return null;
+    }
+
+    @Override
+    public Integer uploadSubjectDontMix(MultipartFile file, int semester_id) throws IOException {
         return null;
     }
 
