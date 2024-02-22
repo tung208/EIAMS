@@ -9,9 +9,8 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Table(name = "exam_code", schema = "eiams", indexes = {
-        @Index(name = "semester", columnList = "semester_id"),
-        @Index(name = "semester_index2", columnList = "semester_id")
+@Table(name = "examcode", schema = "eiams", indexes = {
+        @Index(name = "semester", columnList = "semester_id")
 })
 public class ExamCode {
     @Id
@@ -19,16 +18,21 @@ public class ExamCode {
     @Column(name = "id", nullable = false)
     private Integer id;
 
+    @Column(name = "semester_id")
+    private Integer semesterId;
+
     @Column(name = "subject_id")
     private String subjectId;
 
     @Column(name = "type")
     private String type;
 
-    @Column(name = "semester_id")
-    private Integer semesterId;
+    @Column(name = "exam")
+    private String exam;
+
+    @Column(name = "exam_code")
+    private String examCode;
 
     @Column(name = "slot_id")
     private Integer slotId;
-
 }
