@@ -2,7 +2,7 @@ package EIAMS.controllers;
 
 import EIAMS.entities.responeObject.ResponseObject;
 import EIAMS.entities.Student;
-import EIAMS.services.interfaces.StudentServiceInterface;
+import EIAMS.services.StudentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -19,9 +19,8 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping(value = "/api/v1/student")
 public class StudentController {
-
     @Autowired
-    private final StudentServiceInterface studentService;
+    private StudentService studentService;
 
     @GetMapping(path = "/index")
     public ResponseEntity<ResponseObject> list(
@@ -52,8 +51,22 @@ public class StudentController {
     }
 
     @PostMapping("/import")
-    public ResponseEntity<ResponseObject> importStudents(@RequestParam("file") MultipartFile file) throws IOException {
-        studentService.uploadStudents(file);
+    public ResponseEntity<ResponseObject> importStudents(@RequestParam("file") MultipartFile file,@RequestParam("semester_id") int semesterId) throws IOException {
+        studentService.uploadStudents(file,semesterId);
+        return ResponseEntity.status(HttpStatus.OK).body(
+                new ResponseObject("OK", "Import Success", "Xin chao the gioi"));
+    }
+
+    @PostMapping("/import-profile")
+    public ResponseEntity<ResponseObject> importStudentProfile(@RequestParam("file") MultipartFile file,@RequestParam("semester_id") int semesterId) throws IOException {
+        studentService.uploadCMND(file,semesterId);
+        return ResponseEntity.status(HttpStatus.OK).body(
+                new ResponseObject("OK", "Import Success", "Xin chao the gioi"));
+    }
+
+    @PostMapping("/import-blacklist")
+    public ResponseEntity<ResponseObject> importBlackList(@RequestParam("file") MultipartFile file,@RequestParam("semester_id") int semesterId) throws IOException {
+        studentService.uploadBlackList(file,semesterId);
         return ResponseEntity.status(HttpStatus.OK).body(
                 new ResponseObject("OK", "Import Success", "Xin chao the gioi"));
     }

@@ -25,4 +25,7 @@ public class Room {
     @Column(name = "quantity_student")
     private Integer quantityStudent;
 
+    @Column(name = "semester_id")
+    private Integer semesterId;
+
 }

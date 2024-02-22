@@ -1,8 +1,7 @@
 package EIAMS.controllers;
 
-
 import EIAMS.entities.responeObject.ResponseObject;
-import EIAMS.services.RoomService;
+import EIAMS.services.SubjectService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -17,14 +16,13 @@ import java.io.IOException;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping(value = "/api/v1/room")
-public class RoomController {
+@RequestMapping(value = "/api/v1/subject")
+public class SubjectController {
     @Autowired
-    RoomService roomService;
-
+    SubjectService subjectService;
     @PostMapping("/import")
     public ResponseEntity<ResponseObject> importSubject(@RequestParam("file") MultipartFile file, @RequestParam("semester_id") int semesterId) throws IOException {
-        roomService.uploadRoom(file,semesterId);
+        subjectService.uploadSubject(file,semesterId);
         return ResponseEntity.status(HttpStatus.OK).body(
                 new ResponseObject("OK", "Import Success", "Xin chao the gioi"));
     }

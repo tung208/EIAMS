@@ -11,20 +11,23 @@ import java.util.Date;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Table(name = "slot", schema = "eiams")
-public class Slot {
+@Table(name = "planexam", schema = "eiams")
+public class PlanExam {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Integer id;
 
-    @Column(name = "name", length = 64)
-    private String name;
+    @Column(name = "semester_id", length = 64)
+    private String semesterId;
 
-    @Column(name = "start_time", length = 64)
+    @Column(name = "start_time")
     private Date startTime;
 
-    @Column(name = "end_time", length = 64)
+    @Column(name = "end_time")
     private Date endTime;
+
+    @Column(name = "subject_code", length = 64)
+    private String subjectCode;
 
 }

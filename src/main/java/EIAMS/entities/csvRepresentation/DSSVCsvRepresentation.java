@@ -16,8 +16,10 @@ import lombok.Setter;
 public class DSSVCsvRepresentation {
 
     @CsvBindByName(column = "SubjectCode")
+//    @CsvBindByPosition(position = 0)
     private String subjectCode;
     @CsvBindByName(column = "RollNumber")
+//    @CsvBindByPosition(position = 1)
     private String rollNumber;
     @CsvBindByName(column = "MemberCode")
     private String memberCode;

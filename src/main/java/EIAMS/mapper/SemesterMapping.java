@@ -9,7 +9,7 @@ public class SemesterMapping {
                 .builder()
                 .name(semesterDto.getName())
                 .code(semesterDto.getCode())
-                .fromeDate(semesterDto.getFrom_date())
+                .fromDate(semesterDto.getFrom_date())
                 .toDate(semesterDto.getTo_date())
                 .creatorId(semesterDto.getCreatorId())
                 .build();
