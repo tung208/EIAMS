@@ -29,13 +29,13 @@ public class SubjectController {
 
     @PostMapping("/import-nolab")
     public ResponseEntity<ResponseObject> importSubjectNoLab(@RequestParam("file") MultipartFile file, @RequestParam("semester_id") int semesterId) throws IOException {
-        subjectService.uploadSubject(file,semesterId);
+        subjectService.uploadSubjectNoLab(file,semesterId);
         return ResponseEntity.status(HttpStatus.OK).body(
                 new ResponseObject("OK", "Import Success", "Xin chao the gioi"));
     }
     @PostMapping("/import-dontmix")
     public ResponseEntity<ResponseObject> importSubjectDontMix(@RequestParam("file") MultipartFile file, @RequestParam("semester_id") int semesterId) throws IOException {
-        subjectService.uploadSubject(file,semesterId);
+        subjectService.uploadSubjectDontMix(file,semesterId);
         return ResponseEntity.status(HttpStatus.OK).body(
                 new ResponseObject("OK", "Import Success", "Xin chao the gioi"));
     }

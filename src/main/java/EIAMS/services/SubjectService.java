@@ -2,9 +2,11 @@ package EIAMS.services;
 
 import EIAMS.entities.StudentSubject;
 import EIAMS.entities.Subject;
+import EIAMS.entities.csvRepresentation.DontMixRepresentation;
 import EIAMS.entities.csvRepresentation.NoLabRepresentation;
 import EIAMS.entities.csvRepresentation.SubjectCsvRepresentation;
 import EIAMS.repositories.SubjectRepository;
+import EIAMS.services.excel.ExcelDontMix;
 import EIAMS.services.excel.ExcelNoLab;
 import EIAMS.services.excel.ExcelSubject;
 import EIAMS.services.interfaces.SubjectServiceInterface;
@@ -77,28 +79,33 @@ public class SubjectService implements SubjectServiceInterface {
     public Integer uploadSubjectNoLab(MultipartFile file, int semester_id) throws IOException {
         List<NoLabRepresentation> noLabRepresentations = new ExcelNoLab().getDataFromExcel(file.getInputStream());
 
-        List<Subject> subjectList = new ArrayList<>();
-
         // Kích thước của danh sách con
         int sublistSize = 500;
         for (NoLabRepresentation element: noLabRepresentations) {
-            Subject subject = Subject.builder()
-                    .semesterId(semester_id)
-                    .subjectCode(safeTrim(element.getSubjectCode(),1))
-                    .build();
-            subjectList.add(subject);
-        }
-        System.out.println(subjectList.size());
-        subjectRepository.deleteBySemesterId(semester_id);
-        for (int i = 0; i < subjectList.size(); i += sublistSize) {
-            int endIndex = Math.min(i + sublistSize, subjectList.size());
-            List<Subject> sublist = subjectList.subList(i, endIndex);
+            List<Subject> subjects =  subjectRepository.findBySubjectCodeAndSemeterId(safeTrim(element.getSubjectCode(),1), semester_id);
+            System.out.println(element.getSubjectCode()+" "+subjects.size());
+            for (Subject item: subjects){
+                item.setNoLab(1);
+            }
+            subjectRepository.saveAll(subjects);
         }
         return null;
     }
 
     @Override
     public Integer uploadSubjectDontMix(MultipartFile file, int semester_id) throws IOException {
+        List<DontMixRepresentation> dontMixRepresentations = new ExcelDontMix().getDataFromExcel(file.getInputStream());
+
+        // Kích thước của danh sách con
+        int sublistSize = 500;
+        for (DontMixRepresentation element: dontMixRepresentations) {
+            List<Subject> subjects =  subjectRepository.findBySubjectCodeAndSemeterId(safeTrim(element.getSubjectCode(),1), semester_id);
+            System.out.println(element.getSubjectCode()+" "+subjects.size());
+            for (Subject item: subjects){
+                item.setDontMix(1);
+            }
+            subjectRepository.saveAll(subjects);
+        }
         return null;
     }
 
