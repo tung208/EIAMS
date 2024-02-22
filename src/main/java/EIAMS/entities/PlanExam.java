@@ -3,6 +3,8 @@ package EIAMS.entities;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Setter
 @Entity
@@ -19,11 +21,11 @@ public class PlanExam {
     @Column(name = "semester_id", length = 64)
     private String semesterId;
 
-    @Column(name = "start_time", length = 64)
-    private String startTime;
+    @Column(name = "start_time")
+    private LocalDateTime startTime;
 
-    @Column(name = "end_time", length = 64)
-    private String endTime;
+    @Column(name = "end_time")
+    private LocalDateTime endTime;
 
     @Column(name = "subject_code", length = 64)
     private String subjectCode;
