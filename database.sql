@@ -75,11 +75,13 @@ CREATE TABLE `Scheduler` (
   `end_date` date
 );
 
-CREATE TABLE `Exam_Code` (
+CREATE TABLE `ExamCode` (
   `id` int(11) PRIMARY KEY AUTO_INCREMENT,
+  `semester_id` int,
   `subject_id` varchar(255),
   `type` varchar(255),
-  `semester_id` int,
+  `exam` varchar(64),
+  `exam_code` varchar(64),
   `slot_id` int,
   INDEX semester (semester_id)
 );
@@ -87,8 +89,8 @@ CREATE TABLE `Exam_Code` (
 CREATE TABLE `Slot` (
   `id` int(11) PRIMARY KEY AUTO_INCREMENT,
   `name` varchar(64),
-  `start_time` varchar(64),
-  `end_time` varchar(64)
+  `start_time` datetime,
+  `end_time` datetime
 );
 
 CREATE TABLE `Test` (
@@ -101,11 +103,11 @@ CREATE TABLE `Test` (
 CREATE TABLE `PlanExam` (
   `id` int(11) PRIMARY KEY AUTO_INCREMENT,
   `semester_id` varchar(64),
-  `start_time` varchar(64),
-  `end_time` varchar(64),
+  `start_time` datetime,
+  `end_time` datetime,
   `subject_code` varchar(64)
 );
 
 CREATE INDEX semester_index ON Subject(semester_id);
 CREATE INDEX semester_index1 ON StudentSubject(semester_id);
-CREATE INDEX semester_index2 ON Exam_Code(semester_id);
+-- CREATE INDEX semester_index2 ON ExamCode(semester_id);

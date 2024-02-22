@@ -3,6 +3,10 @@ package EIAMS.entities;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.sql.Date;
+import java.time.LocalDateTime;
+
+
 @Getter
 @Setter
 @Entity
@@ -19,10 +23,10 @@ public class Slot {
     @Column(name = "name", length = 64)
     private String name;
 
-    @Column(name = "start_time", length = 64)
-    private String startTime;
+    @Column(name = "start_time")
+    private LocalDateTime startTime;
 
-    @Column(name = "end_time", length = 64)
-    private String endTime;
+    @Column(name = "end_time")
+    private LocalDateTime endTime;
 
 }
