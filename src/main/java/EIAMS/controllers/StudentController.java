@@ -24,9 +24,13 @@ public class StudentController {
 
     @GetMapping(path = "/index")
     public ResponseEntity<ResponseObject> list(
+            @RequestParam(name = "search", defaultValue = "") String search,
+            @RequestParam(name = "member-code", defaultValue = "") String memberCode,
             @RequestParam(name = "page", required = false) Integer page,
             @RequestParam(name = "limit", required = false) Integer limit) {
-        Page<Student> list = studentService.list(page, limit);
+        Page<Student> list = studentService.list(
+                search, memberCode, page, limit
+        );
         if (list.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
                     new ResponseObject("NOT FOUND", "", null));

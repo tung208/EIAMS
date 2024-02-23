@@ -1,6 +1,8 @@
 package EIAMS.repositories;
 
 import EIAMS.entities.Student;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -17,8 +19,10 @@ public interface StudentRepository extends JpaRepository<Student, Integer> {
     @Query(value = "DELETE FROM Student s WHERE s.rollNumber IN :rollNumbers")
     void deleteByRollNumbers(List<String> rollNumbers);
 //    void deleteByRollNumberIn(List<String> rollNumbers);
-    List<Student> findAll();
 
     Optional<Student> findByRollNumber(String rollNumber);
+
+    Page<Student> findAllByRollNumberContainingIgnoreCaseOrFullNameContainingIgnoreCaseAndMemberCodeContainingIgnoreCase(
+            String rollNumber, String fullName, String memberCode, Pageable pageable);
 
 }

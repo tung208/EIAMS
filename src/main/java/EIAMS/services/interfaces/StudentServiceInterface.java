@@ -10,7 +10,7 @@ import java.util.Optional;
 import java.util.Set;
 
 public interface StudentServiceInterface {
-     Page<Student> list(Integer page, Integer limit);
+     Page<Student> list(String search, String memberCode, Integer page, Integer limit);
      List<Student> list();
      void create(Student student);
      void update(int id, Student student);

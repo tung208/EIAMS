@@ -54,9 +54,10 @@ public class StudentService implements StudentServiceInterface {
 //    private Job exportCsvJob;
 
     @Override
-    public Page<Student> list(Integer page, Integer limit) {
+    public Page<Student> list(String search, String memberCode, Integer page, Integer limit) {
         Pageable pageable = pagination.getPageable(page, limit);
-        return studentRepository.findAll(pageable);
+        return studentRepository.findAllByRollNumberContainingIgnoreCaseOrFullNameContainingIgnoreCaseAndMemberCodeContainingIgnoreCase(
+                search, search, memberCode, pageable);
     }
 
     @Override
