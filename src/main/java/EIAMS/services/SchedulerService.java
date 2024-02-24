@@ -82,21 +82,32 @@ public class SchedulerService implements SchedulerServiceInterface {
                     }
 
                     // Assign students to rooms
-                    int studentIndex = 0;
+
                     for (int i = 0; i < numberOfRoomNeed; i++) {
+                        int studentIndex = 0;
+                        String sCodes = "";
+                        String studentCodes = "";
                         Room room = roomCommon.get(i);
                         // Assign students to the current room
                         for (int j = 0; j < studentsInRooms[i]; j++) {
                             if (studentIndex < numberOfStudent) {
                                 StudentSubject student = allStudent.get(studentIndex);
-                                // Assign the student to the room
-                                Scheduler scheduler = schedulerRepository.findBySemesterIdAndSlotId(semesterId, 1);
-                                scheduler.setRoomId(room.getId());
+                                studentCodes += (student.getRollNumber() + ",");
+                                sCodes += (student.getSubjectCode() + ",");
                                 studentIndex++;
                             } else {
                                 break; // No more students to assign
                             }
                         }
+                        // Assign the student to the room
+                        Scheduler scheduler = new Scheduler();
+                        scheduler.setSemesterId(semesterId);
+                        scheduler.setSlotId(slots.get(0).getId());
+                        scheduler.setRoomId(room.getId());
+                        scheduler.setSubjectCode(sCodes);
+                        scheduler.setStudentCodes(studentCodes);
+                        //TODO: set slot Id
+                        schedulerRepository.save(scheduler);
                     }
                 }
             }

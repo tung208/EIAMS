@@ -36,8 +36,8 @@ public class Scheduler {
     private String examCodeId;
 
     @Lob
-    @Column(name = "student_id")
-    private String studentId;
+    @Column(name = "student_codes")
+    private String studentCodes;
 
     @Column(name = "start_date")
     private Date startDate;

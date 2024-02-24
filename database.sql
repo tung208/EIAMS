@@ -70,7 +70,7 @@ CREATE TABLE `Scheduler` (
   `room_id` int(11) NOT NULL,
   `subject_code` longtext,
   `exam_code_id` longtext,
-  `student_id` longtext,
+  `student_codes` longtext,
   `start_date` date,
   `end_date` date
 );
