@@ -29,8 +29,8 @@ CREATE TABLE `Semester` (
   `id` int(11) PRIMARY KEY AUTO_INCREMENT,
   `name` varchar(64) NOT NULL,
   `code` varchar(64) NOT NULL,
-  `from_date` datetime,
-  `to_date` datetime,
+  `from_date` date,
+  `to_date` date,
   `creator_id` int(11) NOT NULL
 );
 
@@ -71,8 +71,8 @@ CREATE TABLE `Scheduler` (
   `subject_code` longtext,
   `exam_code_id` longtext,
   `student_id` longtext,
-  `start_date` date,
-  `end_date` date
+  `start_date` datetime,
+  `end_date` datetime
 );
 
 CREATE TABLE `ExamCode` (
