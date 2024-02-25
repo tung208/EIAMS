@@ -21,8 +21,8 @@ public class ExamCode {
     @Column(name = "semester_id")
     private Integer semesterId;
 
-    @Column(name = "subject_id")
-    private String subjectId;
+    @Column(name = "subject_code")
+    private String subjectCode;
 
     @Column(name = "type")
     private String type;

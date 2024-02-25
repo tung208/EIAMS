@@ -78,7 +78,7 @@ CREATE TABLE `Scheduler` (
 CREATE TABLE `ExamCode` (
   `id` int(11) PRIMARY KEY AUTO_INCREMENT,
   `semester_id` int,
-  `subject_id` varchar(255),
+  `subject_code` varchar(255),
   `type` varchar(255),
   `exam` varchar(64),
   `exam_code` varchar(64),
