@@ -7,6 +7,8 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.stereotype.Service;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -19,12 +21,17 @@ public class SchedulerService implements SchedulerServiceInterface {
     private final SlotRepository slotRepository;
     private final SchedulerRepository schedulerRepository;
     private final PlanExamRepository planExamRepository;
+    private final ExamCodeRepository examCodeRepository;
 
     @Override
     public long countStudentBySubject(int semesterId, String subjectCode) {
         return studentSubjectRepository.countAllBySemesterIdAndSubjectCode(semesterId, subjectCode);
     }
-
+    public List<StudentSubject> shuffleStudents(List<StudentSubject> students) {
+        // Shuffle the list
+        Collections.shuffle(students);
+        return students;
+    }
     @Override
     public long countSlotBySubject(int semesterId, String subjectCode) {
         long numberOfStudents = studentSubjectRepository.countAllBySemesterIdAndSubjectCode(semesterId, subjectCode);
@@ -41,7 +48,7 @@ public class SchedulerService implements SchedulerServiceInterface {
         List<PlanExam> planExamList = planExamRepository.findAll();
         for (PlanExam planExam : planExamList) {
             String subjectCodes = planExam.getSubjectCode();
-            List<Slot> slotList = slotRepository.findSlotsByTimeRange(planExam.getStartTime(), planExam.getEndTime());
+            Slot slot = slotRepository.findSlotByTimeRange(planExam.getStartTime(), planExam.getEndTime());
             for (String code : subjectCodes.split(",")){
                 Subject subject = subjectRepository.findBySemesterIdAndSubjectCode(semesterId, code);
                 List<StudentSubject> listBlackList = studentSubjectRepository.findAllBySemesterIdAndSubjectCodeAndBlackList(semesterId, code, 1);
@@ -49,8 +56,9 @@ public class SchedulerService implements SchedulerServiceInterface {
                 List<StudentSubject> allStudent = studentSubjectRepository.findAllBySemesterIdAndSubjectCode(semesterId, code);
                 List<Room> labs = roomRepository.findAllByType("lab");
                 List<Room> roomCommon = roomRepository.findAllByType("common");
-
+                ExamCode examCode = examCodeRepository.findBySemesterIdAndSlotIdAndSubjectId(semesterId, slot.getId(), String.valueOf(subject.getId()));
                 if(subject.getNoLab() == 1 && subject.getDontMix() == 1) {
+                    allStudent = shuffleStudents(allStudent);
                     int numberOfStudent = allStudent.size();
                     int numberOfRoomNeed = numberOfStudent/roomCommon.get(0).getQuantityStudent();
                     if (numberOfStudent % roomCommon.get(0).getQuantityStudent() != 0) {
@@ -102,11 +110,13 @@ public class SchedulerService implements SchedulerServiceInterface {
                         // Assign the student to the room
                         Scheduler scheduler = new Scheduler();
                         scheduler.setSemesterId(semesterId);
-                        scheduler.setSlotId(slots.get(0).getId());
+                        scheduler.setSlotId(slot.getId());
                         scheduler.setRoomId(room.getId());
                         scheduler.setSubjectCode(sCodes);
                         scheduler.setStudentCodes(studentCodes);
-                        //TODO: set slot Id
+                        scheduler.setExamCodeId(String.valueOf(examCode.getId()));
+                        scheduler.setStartDate(planExam.getStartTime());
+                        scheduler.setEndDate(planExam.getEndTime());
                         schedulerRepository.save(scheduler);
                     }
                 }
