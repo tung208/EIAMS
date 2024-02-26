@@ -6,6 +6,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import java.util.Collection;
 import java.util.List;
 
 public interface StudentSubjectRepository extends JpaRepository<StudentSubject, Integer> {
@@ -17,4 +18,6 @@ public interface StudentSubjectRepository extends JpaRepository<StudentSubject, 
     long countAllBySemesterId(int semesterId);
     List<StudentSubject> findAllBySemesterIdAndSubjectCodeAndBlackList(Integer semesterId, String subjectCode,Integer blackList);
     List<StudentSubject> findAllBySemesterIdAndSubjectCode(Integer semesterId, String subjectCode);
+    List<StudentSubject> findAllBySemesterIdAndSubjectCodeIn(Integer semesterId, Collection<String> subjectCode);
+    List<StudentSubject> findAllBySemesterIdAndBlackListAndSubjectCodeIn(Integer semesterId, Integer blackList, Collection<String> subjectCode);
 }
