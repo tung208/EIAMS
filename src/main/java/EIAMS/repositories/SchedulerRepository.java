@@ -4,5 +4,5 @@ import EIAMS.entities.Scheduler;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface SchedulerRepository extends JpaRepository<Scheduler, Integer> {
-    Scheduler findBySemesterIdAndSlotId(Integer semesterId, Integer slotId);
+    Scheduler findBySemesterIdAndSlotIdAndRoomId(Integer semesterId, Integer slotId, Integer roomId);
 }

@@ -42,6 +42,10 @@ public class SchedulerService implements SchedulerServiceInterface {
         List<Slot> slots = slotRepository.findAll();
 
         List<PlanExam> planExamList = planExamRepository.findAll();
+        List<Room> labs = roomRepository.findAllByType("lab");
+        List<Room> roomCommon = roomRepository.findAllByType("common");
+        List<Room> availableLabRooms = new ArrayList<>(labs);
+        List<Room> availableCommonRooms = new ArrayList<>(roomCommon);
         for (PlanExam planExam : planExamList) {
             String subjectCodes = planExam.getSubjectCode();
             Collection<String> subjectCodesNoLabAndMix = new ArrayList<>();
@@ -54,8 +58,6 @@ public class SchedulerService implements SchedulerServiceInterface {
                 List<StudentSubject> listBlackList = studentSubjectRepository.findAllBySemesterIdAndSubjectCodeAndBlackList(semesterId, code, 1);
                 List<StudentSubject> listLegit = studentSubjectRepository.findAllBySemesterIdAndSubjectCodeAndBlackList(semesterId, code, 0);
                 List<StudentSubject> allStudentBySubjectCode = studentSubjectRepository.findAllBySemesterIdAndSubjectCode(semesterId, code);
-                List<Room> labs = roomRepository.findAllByType("lab");
-                List<Room> roomCommon = roomRepository.findAllByType("common");
                 ExamCode examCode = examCodeRepository.findBySemesterIdAndSlotIdAndSubjectId(semesterId, slot.getId(), String.valueOf(subject.getId()));
                 // Fill student
                 if (subject.getNoLab() == 1 && subject.getDontMix() == 1) {
@@ -96,7 +98,17 @@ public class SchedulerService implements SchedulerServiceInterface {
                         int studentIndex = 0;
                         String sCodes = "";
                         String studentCodes = "";
-                        Room room = roomCommon.get(i);
+                        Room room = availableCommonRooms.get(i);
+                        Scheduler scheduler = schedulerRepository.findBySemesterIdAndSlotIdAndRoomId(semesterId, slot.getId(), room.getId());
+                        if(scheduler == null) scheduler = new Scheduler();
+                        int assignedStudentsCount = scheduler.getStudentCodes().split(",").length; // Count assigned students
+                        if (assignedStudentsCount == room.getQuantityStudent()) {
+                            if (room.getType().equals("lab")) {
+                                availableLabRooms.remove(room);
+                            } else if (room.getType().equals("common")) {
+                                availableCommonRooms.remove(room);
+                            }
+                        }
                         // Assign students to the current room
                         for (int j = 0; j < studentsInRooms[i]; j++) {
                             if (studentIndex < numberOfStudent) {
@@ -109,7 +121,6 @@ public class SchedulerService implements SchedulerServiceInterface {
                             }
                         }
                         // Assign the student to the room
-                        Scheduler scheduler = new Scheduler();
                         scheduler.setSemesterId(semesterId);
                         scheduler.setSlotId(slot.getId());
                         scheduler.setRoomId(room.getId());
@@ -120,6 +131,7 @@ public class SchedulerService implements SchedulerServiceInterface {
                         scheduler.setEndDate(planExam.getEndTime());
                         schedulerRepository.save(scheduler);
                     }
+
                 }
                 if (subject.getNoLab() == 1 && subject.getDontMix() == 0) {
                     //TODO: Fill all student no lab and mix to room ===> after loop
