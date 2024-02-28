@@ -42,6 +42,8 @@ public class SchedulerService implements SchedulerServiceInterface {
         List<Slot> slots = slotRepository.findAll();
 
         List<PlanExam> planExamList = planExamRepository.findAll();
+        List<Room> allRooms = roomRepository.findAll();
+        List<Room> availableRooms = new ArrayList<>(allRooms);
         List<Room> labs = roomRepository.findAllByType("lab");
         List<Room> roomCommon = roomRepository.findAllByType("common");
         List<Room> availableLabRooms = new ArrayList<>(labs);
@@ -99,14 +101,19 @@ public class SchedulerService implements SchedulerServiceInterface {
                         String sCodes = "";
                         String studentCodes = "";
                         Room room = availableCommonRooms.get(i);
-                        Scheduler scheduler = schedulerRepository.findBySemesterIdAndSlotIdAndRoomId(semesterId, slot.getId(), room.getId());
-                        if(scheduler == null) scheduler = new Scheduler();
-                        int assignedStudentsCount = scheduler.getStudentCodes().split(",").length; // Count assigned students
-                        if (assignedStudentsCount == room.getQuantityStudent()) {
-                            if (room.getType().equals("lab")) {
-                                availableLabRooms.remove(room);
-                            } else if (room.getType().equals("common")) {
-                                availableCommonRooms.remove(room);
+                        Scheduler scheduler = null;
+                        boolean roomRemoved = true;
+                        while (roomRemoved) {
+                            roomRemoved = false; // Assume no room will be removed until we find one
+                            for (Room r : availableCommonRooms) {
+                                scheduler = schedulerRepository.findBySemesterIdAndSlotIdAndRoomId(semesterId, slot.getId(), room.getId());
+                                if (scheduler == null) scheduler = new Scheduler();
+                                int assignedStudentsCount = scheduler.getStudentCodes().split(",").length; // Count assigned students
+                                if (assignedStudentsCount == r.getQuantityStudent()) {
+                                    if (availableLabRooms.remove(r)) {
+                                        roomRemoved = true; // Mark that a room has been removed
+                                    }
+                                }
                             }
                         }
                         // Assign students to the current room
