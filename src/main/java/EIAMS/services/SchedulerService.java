@@ -95,13 +95,12 @@ public class SchedulerService implements SchedulerServiceInterface {
                     }
 
                     // Assign students to rooms
-
+                    Scheduler scheduler = null;
                     for (int i = 0; i < numberOfRoomNeed; i++) {
                         int studentIndex = 0;
                         String sCodes = "";
                         String studentCodes = "";
                         Room room = availableCommonRooms.get(i);
-                        Scheduler scheduler = null;
                         boolean roomRemoved = true;
                         while (roomRemoved) {
                             roomRemoved = false; // Assume no room will be removed until we find one
@@ -113,9 +112,10 @@ public class SchedulerService implements SchedulerServiceInterface {
                                     if (availableLabRooms.remove(r)) {
                                         roomRemoved = true; // Mark that a room has been removed
                                     }
-                                }
+                                } else roomRemoved = false;
                             }
                         }
+                        room = availableCommonRooms.get(i);
                         // Assign students to the current room
                         for (int j = 0; j < studentsInRooms[i]; j++) {
                             if (studentIndex < numberOfStudent) {
