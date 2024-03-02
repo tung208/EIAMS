@@ -31,10 +31,10 @@ public class SemesterController {
         Semester semester = semesterService.create(semesterDto);
         if (semester == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-                    new ResponseObject("Fail", "Can't create question bank !",null));
+                    new ResponseObject("Fail", "Can't Create Semester !",null));
         } else {
             return ResponseEntity.status(HttpStatus.OK).body(
-                    new ResponseObject("OK", "Create Question Bank Successfully!", semester));
+                    new ResponseObject("OK", "Create Semester Successfully!", semester));
         }
     }
 }
