@@ -17,7 +17,7 @@ import java.sql.Date;
 public class SemesterDto {
     String name;
     String code;
-    Date from_date;
-    Date to_date;
+    String from_date;
+    String to_date;
     Integer creatorId;
 }

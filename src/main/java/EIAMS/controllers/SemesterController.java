@@ -19,17 +19,12 @@ public class SemesterController {
 
     @GetMapping()
     public PageResponse<Semester> getSemester(@RequestParam(defaultValue = "1") Integer pageNo,
-                                              @RequestParam(defaultValue = "10") Integer pageSize,
+                                              @RequestParam(defaultValue = "2") Integer pageSize,
                                               @RequestParam(defaultValue = "id") String sortBy
                                       ){
         Page<Semester> page =  semesterService.list(pageNo,pageSize);
         return new PageResponse<>(page.getNumber() + 1, page.getTotalPages(), page.getSize(), page.getContent());
     }
-
-//    @GetMapping(path = "/test")
-//    public String test(){
-//        return "Xin chao 123";
-//    }
 
     @PostMapping()
     public ResponseEntity<ResponseObject> postSemester(@RequestBody SemesterDto semesterDto){
