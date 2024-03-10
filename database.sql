@@ -102,9 +102,10 @@ CREATE TABLE `Test` (
 
 CREATE TABLE `PlanExam` (
   `id` int(11) PRIMARY KEY AUTO_INCREMENT,
-  `semester_id` varchar(64),
-  `start_time` datetime,
-  `end_time` datetime,
+  `semester_id` int,
+  `expected_date` datetime,
+  `expected_time` varchar(64),
+  `type_exam` varchar(64),
   `subject_code` varchar(64)
 );
 

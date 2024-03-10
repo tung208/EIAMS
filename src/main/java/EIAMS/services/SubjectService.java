@@ -83,7 +83,6 @@ public class SubjectService implements SubjectServiceInterface {
         int sublistSize = 500;
         for (NoLabRepresentation element: noLabRepresentations) {
             List<Subject> subjects =  subjectRepository.findBySubjectCodeAndSemeterId(safeTrim(element.getSubjectCode(),1), semester_id);
-            System.out.println(element.getSubjectCode()+" "+subjects.size());
             for (Subject item: subjects){
                 item.setNoLab(1);
             }
@@ -100,7 +99,6 @@ public class SubjectService implements SubjectServiceInterface {
         int sublistSize = 500;
         for (DontMixRepresentation element: dontMixRepresentations) {
             List<Subject> subjects =  subjectRepository.findBySubjectCodeAndSemeterId(safeTrim(element.getSubjectCode(),1), semester_id);
-            System.out.println(element.getSubjectCode()+" "+subjects.size());
             for (Subject item: subjects){
                 item.setDontMix(1);
             }
