@@ -9,5 +9,5 @@ import java.util.List;
 
 public interface PlanExamRepository extends JpaRepository<PlanExam, Integer> {
     void deleteBySemesterId(int suid);
-    List<PlanExam> findAllBySemesterId(String semesterId);
+    List<PlanExam> findAllBySemesterId(Integer semesterId);
 }
