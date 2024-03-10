@@ -12,4 +12,6 @@ public interface ExamCodeRepository extends JpaRepository<ExamCode, Integer> {
     @Modifying
     @Query("DELETE FROM ExamCode ex WHERE ex.semesterId = :semesterId")
     int deleteBySemesterId(int semesterId);
+
+    ExamCode findBySemesterIdAndSlotIdAndSubjectCode(Integer semesterId, Integer slotId, String subjectCode);
 }

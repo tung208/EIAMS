@@ -11,4 +11,6 @@ public interface SubjectRepository extends JpaRepository<Subject, Integer> {
 
     @Query("SELECT s FROM Subject s WHERE s.subjectCode = :subjectCode AND s.semesterId = :semesterId")
     List<Subject> findBySubjectCodeAndSemeterId(String subjectCode, int semesterId);
+
+    Subject findBySemesterIdAndSubjectCode(Integer semesterId, String subjectCode);
 }
