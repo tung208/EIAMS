@@ -21,6 +21,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
+import java.text.ParseException;
 import java.util.*;
 
 @Service
@@ -45,6 +46,10 @@ public class SemesterService implements SemesterServiceInterface {
     @Override
     public Semester create(SemesterDto semesterDto) {
         Semester semester = SemesterMapping.toEntity(semesterDto);
+        System.out.println(semester);
+        if (semester == null) {
+            return null;
+        }
         return semesterRepository.save(semester);
     }
 
