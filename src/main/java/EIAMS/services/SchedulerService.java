@@ -55,10 +55,10 @@ public class SchedulerService implements SchedulerServiceInterface {
             List<StudentSubject> listBlackList = studentSubjectRepository.findAllBySemesterIdAndSubjectCodeAndBlackList(semesterId, code, 1);
             List<StudentSubject> listLegit = studentSubjectRepository.findAllBySemesterIdAndSubjectCodeAndBlackList(semesterId, code, 0);
             List<StudentSubject> allStudentBySubjectCode = studentSubjectRepository.findAllBySemesterIdAndSubjectCode(semesterId, code);
-            List<ExamCode> examCode = examCodeRepository.findBySemesterIdAndSubjectCode(semesterId, subject.getSubjectCode());
+            List<ExamCode> examCode = examCodeRepository.findBySemesterIdAndSubjectCode(semesterId, code);
             String examCodes = "";
             if (examCode != null && examIndex < examCode.size()) {
-                examCodes += examCode.get(examIndex).getExamCode() + ",";
+                examCodes += examCode.get(examIndex).getId() + ",";
                 examIndex++;
             }
 
@@ -93,43 +93,47 @@ public class SchedulerService implements SchedulerServiceInterface {
                     numberOfRoomCommonNeed++;
                 }
                 // Initialize a map to hold the number of students in each room
-                Map<Integer, Integer> studentsInLab = new HashMap<>();
-                // Calculate the base number of students per room (floor division)
-                int baseStudentsPerLab = numberOfStudentBlackList / numberOfLabRoomNeed;
+                if (numberOfLabRoomNeed > 0) {
+                    Map<Integer, Integer> studentsInLab = new HashMap<>();
+                    // Calculate the base number of students per room (floor division)
+                    int baseStudentsPerLab = numberOfStudentBlackList / numberOfLabRoomNeed;
 
-                // Calculate the number of rooms that will get the base number of students
-                int labsWithBaseStudents = numberOfStudentBlackList % numberOfLabRoomNeed;
-                // Distribute the base number of students to rooms
-                for (int i = 0; i < numberOfLabRoomNeed; i++) {
-                    Room room = availableLabRooms.get(i);
-                    studentsInLab.put(room.getId(), baseStudentsPerLab);
-                }
+                    // Calculate the number of rooms that will get the base number of students
+                    int labsWithBaseStudents = numberOfStudentBlackList % numberOfLabRoomNeed;
+                    // Distribute the base number of students to rooms
+                    for (int i = 0; i < numberOfLabRoomNeed; i++) {
+                        Room room = availableLabRooms.get(i);
+                        studentsInLab.put(room.getId(), baseStudentsPerLab);
+                    }
 
-                // Distribute the remaining students among the rooms with the fewest students
-                for (int i = 0; i < labsWithBaseStudents; i++) {
-                    int updatedStudentCount = studentsInLab.get(availableLabRooms.get(i).getId()) + 1;
-                    studentsInLab.put(availableLabRooms.get(i).getId(), updatedStudentCount);
+                    // Distribute the remaining students among the rooms with the fewest students
+                    for (int i = 0; i < labsWithBaseStudents; i++) {
+                        int updatedStudentCount = studentsInLab.get(availableLabRooms.get(i).getId()) + 1;
+                        studentsInLab.put(availableLabRooms.get(i).getId(), updatedStudentCount);
+                    }
+                    fillStudentToRoom(studentsInLab, availableLabRooms, listBlackList, semesterId, planExam, examCodes);
                 }
-                fillStudentToRoom(studentsInLab, availableLabRooms, listBlackList, semesterId, planExam, examCodes);
-                // Initialize a map to hold the number of students in each room
-                Map<Integer, Integer> studentsInRoomCommon = new HashMap<>();
-                // Calculate the base number of students per room (floor division)
-                int baseStudentsPerRoom = numberOfStudentLegit / numberOfRoomCommonNeed;
+                if (numberOfRoomCommonNeed > 0) {
+                    // Initialize a map to hold the number of students in each room
+                    Map<Integer, Integer> studentsInRoomCommon = new HashMap<>();
+                    // Calculate the base number of students per room (floor division)
+                    int baseStudentsPerRoom = numberOfStudentLegit / numberOfRoomCommonNeed;
 
-                // Calculate the number of rooms that will get the base number of students
-                int roomsWithBaseStudents = numberOfStudentLegit % numberOfRoomCommonNeed;
-                // Distribute the base number of students to rooms
-                for (int i = 0; i < numberOfRoomCommonNeed; i++) {
-                    Room room = availableCommonRooms.get(i);
-                    studentsInRoomCommon.put(room.getId(), baseStudentsPerRoom);
-                }
+                    // Calculate the number of rooms that will get the base number of students
+                    int roomsWithBaseStudents = numberOfStudentLegit % numberOfRoomCommonNeed;
+                    // Distribute the base number of students to rooms
+                    for (int i = 0; i < numberOfRoomCommonNeed; i++) {
+                        Room room = availableCommonRooms.get(i);
+                        studentsInRoomCommon.put(room.getId(), baseStudentsPerRoom);
+                    }
 
-                // Distribute the remaining students among the rooms with the fewest students
-                for (int i = 0; i < roomsWithBaseStudents; i++) {
-                    int updatedStudentCount = studentsInRoomCommon.get(availableCommonRooms.get(i).getId()) + 1;
-                    studentsInRoomCommon.put(availableCommonRooms.get(i).getId(), updatedStudentCount);
+                    // Distribute the remaining students among the rooms with the fewest students
+                    for (int i = 0; i < roomsWithBaseStudents; i++) {
+                        int updatedStudentCount = studentsInRoomCommon.get(availableCommonRooms.get(i).getId()) + 1;
+                        studentsInRoomCommon.put(availableCommonRooms.get(i).getId(), updatedStudentCount);
+                    }
+                    fillStudentToRoom(studentsInRoomCommon, availableCommonRooms, shuffleStudents(listLegit), semesterId, planExam, examCodes);
                 }
-                fillStudentToRoom(studentsInRoomCommon, availableCommonRooms, listLegit, semesterId, planExam, examCodes);
             }
             if ((subject.getNoLab() == null || subject.getNoLab() == 0) && (subject.getDontMix() == null || subject.getDontMix() == 0)) {
                 subjectCodesLabAndMix.add(code);
@@ -184,7 +188,7 @@ public class SchedulerService implements SchedulerServiceInterface {
                     int updatedStudentCount = studentsInLab.get(availableLabRooms.get(i).getId()) + 1;
                     studentsInLab.put(availableLabRooms.get(i).getId(), updatedStudentCount);
                 }
-                fillStudentToRoom(studentsInLab, availableLabRooms, ListBlackListWithSubjectLabAndMix, semesterId, planExam, examCodes);
+                fillStudentToRoom(studentsInLab, availableLabRooms, shuffleStudents(ListBlackListWithSubjectLabAndMix), semesterId, planExam, examCodes);
             } else {
                 ListLegitWithSubjectLabAndMix.addAll(ListBlackListWithSubjectLabAndMix);
             }
@@ -206,7 +210,7 @@ public class SchedulerService implements SchedulerServiceInterface {
                     int updatedStudentCount = mixStudentsInRoomCommon.get(availableCommonRooms.get(i).getId()) + 1;
                     mixStudentsInRoomCommon.put(availableCommonRooms.get(i).getId(), updatedStudentCount);
                 }
-                fillStudentToRoom(mixStudentsInRoomCommon, availableCommonRooms, ListLegitWithSubjectLabAndMix, semesterId, planExam, examCodes);
+                fillStudentToRoom(mixStudentsInRoomCommon, availableCommonRooms, shuffleStudents(ListLegitWithSubjectLabAndMix), semesterId, planExam, examCodes);
             }
         }
 
@@ -306,9 +310,10 @@ public class SchedulerService implements SchedulerServiceInterface {
 
     public void fillStudentToRoom(Map<Integer, Integer> studentsInRooms, List<Room> availableRooms,
                                   List<StudentSubject> allStudentBySubjectCode, int semesterId, PlanExam planExam, String examCodes) {
+        if (allStudentBySubjectCode.isEmpty() || availableRooms.isEmpty()) return;
+        int studentIndex = 0;
         Scheduler scheduler = null;
         for (int i = 0; i < studentsInRooms.size(); i++) {
-            int studentIndex = 0;
             String subjectCodes = allStudentBySubjectCode.get(studentIndex).getSubjectCode();
             String studentIds = "";
             Room room;
@@ -322,23 +327,25 @@ public class SchedulerService implements SchedulerServiceInterface {
                 if (scheduler.getStudentId() != null) {
                     String[] assignedStudents = scheduler.getStudentId().split(",");
                     int assignedStudentsCount = assignedStudents.length;
-                    if (assignedStudentsCount == studentsInRooms.get(r.getId())) {
+                    if (studentsInRooms.get(r.getId()) != null && assignedStudentsCount == studentsInRooms.get(r.getId())) {
                         availableRooms.remove(r); // Remove the room from availableRooms
                     }
                 }
             }
             room = availableRooms.get(i);
             // Assign students to the current room
-            for (int j = 0; j < studentsInRooms.get(room.getId()); j++) {
-                if (studentIndex < allStudentBySubjectCode.size()) {
-                    StudentSubject student = allStudentBySubjectCode.get(studentIndex);
-                    studentIds += (student.getId() + ",");
-                    if(!Objects.equals(student.getSubjectCode(), allStudentBySubjectCode.get(studentIndex + 1).getSubjectCode())){
-                        subjectCodes += ("," + student.getSubjectCode());
+            if (studentsInRooms.get(room.getId()) != null) {
+                for (int j = 0; j < studentsInRooms.get(room.getId()); j++) {
+                    if (studentIndex < allStudentBySubjectCode.size()) {
+                        StudentSubject student = allStudentBySubjectCode.get(studentIndex);
+                        studentIds += (student.getId() + ",");
+                        if ( (studentIndex + 1) < allStudentBySubjectCode.size()  &&!Objects.equals(student.getSubjectCode(), allStudentBySubjectCode.get(studentIndex + 1).getSubjectCode())) {
+                            subjectCodes += ("," + student.getSubjectCode());
+                        }
+                        studentIndex++;
+                    } else {
+                        break; // No more students to assign
                     }
-                    studentIndex++;
-                } else {
-                    break; // No more students to assign
                 }
             }
             // Assign the student to the room
