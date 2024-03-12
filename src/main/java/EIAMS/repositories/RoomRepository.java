@@ -9,6 +9,6 @@ public interface RoomRepository extends JpaRepository<Room, Integer> {
     void deleteBySemesterId(int suid);
     List<Room> findAllByType(String type);
 
-    List<Room> findAllByNameContainingIgnoreCase(String name);
-    List<Room> findAllByNameIsNotContainingIgnoreCase(String name);
+    List<Room> findAllByQuantityStudentGreaterThanAndNameContainingIgnoreCase(Integer quantityStudent, String name);
+    List<Room> findAllByQuantityStudentGreaterThanAndNameNotContainingIgnoreCase(Integer quantityStudent, String name);
 }

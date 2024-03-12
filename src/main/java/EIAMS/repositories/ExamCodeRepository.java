@@ -6,6 +6,8 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 public interface ExamCodeRepository extends JpaRepository<ExamCode, Integer> {
 
     @Transactional
@@ -13,5 +15,5 @@ public interface ExamCodeRepository extends JpaRepository<ExamCode, Integer> {
     @Query("DELETE FROM ExamCode ex WHERE ex.semesterId = :semesterId")
     int deleteBySemesterId(int semesterId);
 
-    ExamCode findBySemesterIdAndSubjectCode(Integer semesterId, String subjectCode);
+    List<ExamCode> findBySemesterIdAndSubjectCode(Integer semesterId, String subjectCode);
 }
