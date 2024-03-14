@@ -24,7 +24,7 @@ public class SchedulerController {
 
     @GetMapping(path = "/index")
     public ResponseEntity<ResponseObject> list(
-            @RequestParam(name = "semesterId", required = true) Integer semesterId,
+            @RequestParam(name = "semesterId") Integer semesterId,
             @RequestParam(name = "search", defaultValue = "") String search,
             @RequestParam(name = "page", required = false) Integer page,
             @RequestParam(name = "limit", required = false) Integer limit) {

@@ -29,7 +29,8 @@ public class SchedulerService implements SchedulerServiceInterface {
     @Override
     public Page<Scheduler> list(Integer semesterId, String search, Integer page, Integer limit) {
         Pageable pageable = pagination.getPageable(page, limit);
-        return schedulerRepository.findAllBySemesterIdAndSubjectCodeIsContainingIgnoreCase(semesterId, search, pageable);
+
+        return schedulerRepository.findAllBySemesterIdAndSubjectCodeContains(semesterId, search, pageable);
     }
 
     @Override

@@ -11,5 +11,5 @@ import java.util.List;
 public interface SchedulerRepository extends JpaRepository<Scheduler, Integer> {
     List<Scheduler> findAllBySemesterId(Integer semesterId);
     Scheduler findBySemesterIdAndRoomIdAndStartDateAndEndDate(Integer semesterId, Integer roomId, LocalDateTime startDate, LocalDateTime endDate);
-    Page<Scheduler> findAllBySemesterIdAndSubjectCodeIsContainingIgnoreCase(Integer semesterId, String subjectCode, Pageable pageable);
+    Page<Scheduler> findAllBySemesterIdAndSubjectCodeContains(Integer semesterId, String subjectCode, Pageable pageable);
 }
