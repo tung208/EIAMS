@@ -73,14 +73,15 @@ public class SchedulerService implements SchedulerServiceInterface {
             List<StudentSubject> listBlackList = studentSubjectRepository.findAllBySemesterIdAndSubjectCodeAndBlackList(semesterId, code, 1);
             List<StudentSubject> listLegit = studentSubjectRepository.findAllBySemesterIdAndSubjectCodeAndBlackList(semesterId, code, 0);
             List<StudentSubject> allStudentBySubjectCode = studentSubjectRepository.findAllBySemesterIdAndSubjectCode(semesterId, code);
+            if(allStudentBySubjectCode.isEmpty()) {
+                continue;
+            }
             // Fill student
             if (subject.getNoLab() != null && subject.getNoLab() == 1 && subject.getDontMix() != null && subject.getDontMix() == 1) {
                 //arrange student don't mix room and only room common
-                if (!allStudentBySubjectCode.isEmpty()) {
-                    Map<Integer, Integer> studentsInRooms = calculateRoomAllocation(allStudentBySubjectCode, availableCommonRooms);
-                    // Assign students to rooms
-                    fillStudentToRoom(studentsInRooms, allStudentBySubjectCode, semesterId, planExam);
-                }
+                Map<Integer, Integer> studentsInRooms = calculateRoomAllocation(allStudentBySubjectCode, availableCommonRooms);
+                // Assign students to rooms
+                fillStudentToRoom(studentsInRooms, allStudentBySubjectCode, semesterId, planExam);
             }
             if (subject.getNoLab() != null && subject.getNoLab() == 1 && (subject.getDontMix() == null || subject.getDontMix() == 0)) {
                 subjectCodesNoLabAndMix.add(code);
