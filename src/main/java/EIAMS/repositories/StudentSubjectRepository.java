@@ -18,5 +18,6 @@ public interface StudentSubjectRepository extends JpaRepository<StudentSubject, 
     List<StudentSubject> findAllBySemesterIdAndSubjectCodeAndBlackList(Integer semesterId, String subjectCode,Integer blackList);
     List<StudentSubject> findAllBySemesterIdAndSubjectCode(Integer semesterId, String subjectCode);
     List<StudentSubject> findAllBySemesterIdAndSubjectCodeIn(Integer semesterId, Collection<String> subjectCode);
+    List<StudentSubject> findAllBySemesterIdAndIdIn(Integer semesterId, Collection<Integer> id);
     List<StudentSubject> findAllBySemesterIdAndBlackListAndSubjectCodeIn(Integer semesterId, Integer blackList, Collection<String> subjectCode);
 }

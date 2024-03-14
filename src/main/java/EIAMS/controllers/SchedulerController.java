@@ -1,6 +1,7 @@
 package EIAMS.controllers;
 
 import EIAMS.entities.Scheduler;
+import EIAMS.entities.Student;
 import EIAMS.entities.responeObject.ResponseObject;
 import EIAMS.services.interfaces.SchedulerServiceInterface;
 import lombok.RequiredArgsConstructor;
@@ -20,13 +21,15 @@ public class SchedulerController {
 
     @Autowired
     private SchedulerServiceInterface schedulerServiceInterface;
+
     @GetMapping(path = "/index")
     public ResponseEntity<ResponseObject> list(
+            @RequestParam(name = "semesterId", required = true) Integer semesterId,
             @RequestParam(name = "search", defaultValue = "") String search,
             @RequestParam(name = "page", required = false) Integer page,
             @RequestParam(name = "limit", required = false) Integer limit) {
         Page<Scheduler> list = schedulerServiceInterface.list(
-                search, page, limit
+                semesterId, search, page, limit
         );
         if (list.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
@@ -39,15 +42,31 @@ public class SchedulerController {
 
     @GetMapping(path = "/arrange")
     public ResponseEntity<ResponseObject> arrangeStudent(@RequestParam(name = "semesterId") Integer semesterId) {
-
+        try {
             schedulerServiceInterface.arrangeStudent(semesterId);
             return ResponseEntity.status(HttpStatus.OK).body(
                     new ResponseObject("OK", "Arrange Success", null));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(
+                    new ResponseObject("Fail", e.getMessage(), null));
+        }
 
-//        catch (Exception e){
-//            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(
-//                    new ResponseObject("Fail", e.getMessage(), null));
-//        }
-
+    }
+    @GetMapping(path = "/student")
+    public ResponseEntity<ResponseObject> listStudent(
+            @RequestParam(name = "schedulerId") Integer schedulerId,
+            @RequestParam(name = "search", defaultValue = "") String search,
+            @RequestParam(name = "page", required = false) Integer page,
+            @RequestParam(name = "limit", required = false) Integer limit) {
+        Page<Student> list = schedulerServiceInterface.getListStudentInARoom(
+                schedulerId, search, page, limit
+        );
+        if (list.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                    new ResponseObject("NOT FOUND", "", null));
+        } else {
+            return ResponseEntity.status(HttpStatus.OK).body(
+                    new ResponseObject("OK", "", list));
+        }
     }
 }
