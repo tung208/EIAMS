@@ -11,6 +11,6 @@ import java.util.List;
 public interface PlanExamRepository extends JpaRepository<PlanExam, Integer> {
     void deleteBySemesterId(int suid);
     List<PlanExam> findAllBySemesterId(Integer semesterId);
-
+    List<PlanExam> findAllBySemesterIdAndSubjectCode(Integer semesterId, String subjectCode);
     List<PlanExam> findAllBySemesterIdAndSubjectCodeIn(Integer semesterId, Collection<String> subjectCode);
 }
