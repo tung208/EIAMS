@@ -102,22 +102,22 @@ public class SchedulerService implements SchedulerServiceInterface {
             List<StudentSubject> allLegit = dividedListLegit.get(indexOfPlanExam);
             List<StudentSubject> allStudent = dividedAllStudentBySubjectCode.get(indexOfPlanExam);
             // Fill student
-            if (subject.getNoLab() == 1 && subject.getDontMix() == 1) {
+            if (subject.getNoLab() != null && subject.getNoLab() == 1 && subject.getDontMix() != null && subject.getDontMix() == 1) {
                 //arrange student don't mix room and only room common
                 Map<Integer, Integer> studentsInRooms = calculateRoomAllocation(allStudent, availableCommonRooms);
                 // Assign students to rooms
                 fillStudentToRoom(studentsInRooms, allStudent, semesterId, planExam);
             }
-            if (subject.getNoLab() == 1 && (subject.getDontMix() == null || subject.getDontMix() == 0)) {
+            if (subject.getNoLab() != null && subject.getNoLab() == 1 && (subject.getDontMix() == null || subject.getDontMix() == 0)) {
                 subjectCodesNoLabAndMix.add(code);
             }
-            if ((subject.getNoLab() == null || subject.getNoLab() == 0) && subject.getDontMix() == 1) {
+            if ((subject.getNoLab() == null || subject.getNoLab() == 0) && subject.getDontMix() != null && subject.getDontMix() == 1) {
                 int numberOfStudentBlackList = allBlackList.size();
                 int numberOfStudentLegit = allLegit.size();
 
                 int numberOfLabRoomNeed = numberOfStudentBlackList / labs.get(0).getQuantityStudent();
                 // Gia su lab co 25 ng. chap nhan 20 ng thi xep 1 phong. Neu ko thi xep phong thuong
-                if ((numberOfStudentBlackList % labs.get(0).getQuantityStudent()) > (labs.get(0).getQuantityStudent() - 5)) {
+                if ((numberOfStudentBlackList % labs.get(0).getQuantityStudent()) > (labs.get(0).getQuantityStudent() - 8)) {
                     numberOfLabRoomNeed++;
                 } else {
                     numberOfStudentLegit += numberOfStudentBlackList % labs.get(0).getQuantityStudent();
@@ -216,7 +216,7 @@ public class SchedulerService implements SchedulerServiceInterface {
             int numberOfStudentLegit = allListLegitWithSubjectLabAndMix.size();
             int numberOfLabRoomNeed = numberOfStudentBlackList / labs.get(0).getQuantityStudent();
             // Gia su lab co 25 ng. chap nhan 20 ng thi xep 1 phong. Neu ko thi xep phong thuong
-            if ((numberOfStudentBlackList % labs.get(0).getQuantityStudent()) > (labs.get(0).getQuantityStudent() - 5)) {
+            if ((numberOfStudentBlackList % labs.get(0).getQuantityStudent()) > (labs.get(0).getQuantityStudent() - 8)) {
                 numberOfLabRoomNeed++;
             } else {
                 numberOfStudentLegit += numberOfStudentBlackList % labs.get(0).getQuantityStudent();
