@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -25,5 +26,6 @@ public interface StudentRepository extends JpaRepository<Student, Integer> {
     Page<Student> findAllByRollNumberContainingIgnoreCaseOrFullNameContainingIgnoreCaseAndMemberCodeContainingIgnoreCase(
             String rollNumber, String fullName, String memberCode, Pageable pageable);
 
-
+    Page<Student> findAllByRollNumberInAndFullNameContainingIgnoreCaseOrCmtndContainingIgnoreCaseAndMemberCodeContainingIgnoreCase(
+            Collection<String> rollNumbers, String fullName, String cmt, String memberCode, Pageable pageable);
 }

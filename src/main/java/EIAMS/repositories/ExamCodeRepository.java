@@ -9,6 +9,8 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 public interface ExamCodeRepository extends JpaRepository<ExamCode, Integer> {
 
     @Transactional
@@ -22,4 +24,7 @@ public interface ExamCodeRepository extends JpaRepository<ExamCode, Integer> {
             "WHERE (s.semesterId = :semesterId)" +
             "AND (:subjectCode = '' or s.code LIKE %:subjectCode% )" )
     Page<Semester> findByDynamic(Integer semesterId,String subjectCode, Pageable pageable);
+
+    List<ExamCode> findBySemesterIdAndSubjectCode(Integer semesterId, String subjectCode);
+
 }

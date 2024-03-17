@@ -36,7 +36,7 @@ public class ExamCodeController {
                                               @RequestParam(defaultValue = "") Integer semesterId,
                                               @RequestParam(defaultValue = "") String subjectCode
     ){
-        Page<Semester> page =  examCodeService.search(pageNo, pageSize, subjectCode);
+        Page<Semester> page =  examCodeService.search(pageNo, pageSize, semesterId, subjectCode);
         return new PageResponse<>(page.getNumber() + 1, page.getTotalPages(), page.getSize(), page.getContent());
     }
 }
