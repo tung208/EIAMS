@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -34,21 +35,28 @@ public class SchedulerService implements SchedulerServiceInterface {
     }
 
     @Override
-    public Page<Student> getListStudentInARoom(Integer schedulerId,String search, Integer page, Integer limit) {
+    public Page<Student> getListStudentInARoom(Integer schedulerId, String search, Integer page, Integer limit) {
         Pageable pageable = pagination.getPageable(page, limit);
         Scheduler scheduler = schedulerRepository.findById(schedulerId).get();
         String[] assignedStudents = scheduler.getStudentId().split(",");
         Collection<Integer> studentIds = new ArrayList<>();
-        for(String sId : assignedStudents) {
+        for (String sId : assignedStudents) {
             studentIds.add(Integer.parseInt(sId));
         }
         List<StudentSubject> studentSubjects = studentSubjectRepository.findAllBySemesterIdAndIdIn(scheduler.getSemesterId(), studentIds);
         Collection<String> rollNumbers = new ArrayList<>();
-        for(StudentSubject s : studentSubjects) {
+        for (StudentSubject s : studentSubjects) {
             rollNumbers.add(s.getRollNumber());
         }
         return studentRepository.findAllByRollNumberInAndFullNameContainingIgnoreCaseOrCmtndContainingIgnoreCaseAndMemberCodeContainingIgnoreCase(
                 rollNumbers, search, search, search, pageable);
+    }
+
+    @Transactional
+    public void deleteBySemesterId(Integer semesterId) {
+        if (!schedulerRepository.findAllBySemesterId(semesterId).isEmpty()) {
+            schedulerRepository.deleteBySemesterId(semesterId);
+        }
     }
 
     public List<StudentSubject> shuffleStudents(List<StudentSubject> students) {
@@ -56,6 +64,7 @@ public class SchedulerService implements SchedulerServiceInterface {
         Collections.shuffle(students);
         return students;
     }
+
     public <T> List<List<T>> divideList(List<T> list, int n) {
         List<List<T>> dividedLists = new ArrayList<>();
         int size = list.size();
@@ -70,26 +79,29 @@ public class SchedulerService implements SchedulerServiceInterface {
         }
         return dividedLists;
     }
+
     @Override
-    public void arrangeStudent(int semesterId) {
+    @Transactional
+    public void arrangeStudent(int semesterId) throws Exception {
+        deleteBySemesterId(semesterId);
         List<PlanExam> planExamList = planExamRepository.findAllBySemesterId(semesterId);
         List<Room> labs = roomRepository.findAllByQuantityStudentGreaterThanAndNameContainingIgnoreCase(1, "Lab");
         List<Room> roomCommon = roomRepository.findAllByQuantityStudentGreaterThanAndNameNotContainingIgnoreCase(1, "Lab");
         Collection<String> subjectCodesNoLabAndMix = new ArrayList<>();
         Collection<String> subjectCodesLabAndMix = new ArrayList<>();
         for (PlanExam planExam : planExamList) {
-            List<Room> availableLabRooms = new ArrayList<>(labs);
-            List<Room> availableCommonRooms = new ArrayList<>(roomCommon);
+            List<Room> availableLabRooms = getAvailableRoom(planExam, labs);
+            List<Room> availableCommonRooms = getAvailableRoom(planExam, roomCommon);
             String code = planExam.getSubjectCode();
             Subject subject = subjectRepository.findBySemesterIdAndSubjectCode(semesterId, code);
-            if(subject == null) {
+            if (subject == null) {
                 continue;
             }
             List<StudentSubject> listBlackList = studentSubjectRepository.findAllBySemesterIdAndSubjectCodeAndBlackList(semesterId, code, 1);
             List<StudentSubject> listLegit = studentSubjectRepository.findAllBySemesterIdAndSubjectCodeAndBlackList(semesterId, code, null);
             List<StudentSubject> allStudentBySubjectCode = studentSubjectRepository.findAllBySemesterIdAndSubjectCode(semesterId, code);
 
-            if(allStudentBySubjectCode.isEmpty()) {
+            if (allStudentBySubjectCode.isEmpty()) {
                 continue;
             }
             List<PlanExam> planExamsByCode = planExamRepository.findAllBySemesterIdAndSubjectCode(semesterId, code);
@@ -104,7 +116,7 @@ public class SchedulerService implements SchedulerServiceInterface {
             // Fill student
             if (subject.getNoLab() != null && subject.getNoLab() == 1 && subject.getDontMix() != null && subject.getDontMix() == 1) {
                 //arrange student don't mix room and only room common
-                Map<Integer, Integer> studentsInRooms = calculateRoomAllocation(allStudent, availableCommonRooms);
+                Map<Integer, Integer> studentsInRooms = calculateRoomAllocation(planExam, allStudent, availableCommonRooms);
                 // Assign students to rooms
                 fillStudentToRoom(studentsInRooms, allStudent, semesterId, planExam);
             }
@@ -126,6 +138,16 @@ public class SchedulerService implements SchedulerServiceInterface {
                 int numberOfRoomCommonNeed = numberOfStudentLegit / roomCommon.get(0).getQuantityStudent();
                 if (numberOfStudentLegit % roomCommon.get(0).getQuantityStudent() != 0) {
                     numberOfRoomCommonNeed++;
+                }
+                if (numberOfRoomCommonNeed > availableCommonRooms.size()) {
+                    throw new Exception("Not enough normal room for " + planExam.getSubjectCode() + " with " + numberOfStudentLegit + " student." +
+                            "We have only " + availableCommonRooms.size() + " normal rooms." +
+                            "We need at least " + numberOfRoomCommonNeed + " rooms.");
+                }
+                if (numberOfLabRoomNeed > availableLabRooms.size()) {
+                    throw new Exception("Not enough lab room for " + planExam.getSubjectCode() + " with " + numberOfStudentBlackList + " student." +
+                            "We have only " + availableLabRooms.size() + " lab rooms." +
+                            "We need at least " + numberOfLabRoomNeed + " lab rooms");
                 }
                 // Initialize a map to hold the number of students in each room
                 if (numberOfLabRoomNeed > 0) {
@@ -184,14 +206,14 @@ public class SchedulerService implements SchedulerServiceInterface {
         }
         List<StudentSubject> listStudentWithSubjectNoLabAndMix = studentSubjectRepository.findAllBySemesterIdAndSubjectCodeIn(semesterId, subjectCodesNoLabAndMix);
         for (PlanExam planExam : planExamRepository.findAllBySemesterIdAndSubjectCodeIn(semesterId, subjectCodesNoLabAndMix)) {
-            List<Room> availableCommonRooms = new ArrayList<>(roomCommon);
+            List<Room> availableCommonRooms = getAvailableRoom(planExam, roomCommon);
             List<PlanExam> planExamsByCode = planExamRepository.findAllBySemesterIdAndSubjectCode(semesterId, planExam.getSubjectCode());
             int planExamsByCodeSize = planExamsByCode.size();
             int indexOfPlanExam = planExamsByCode.indexOf(planExam);
             List<List<StudentSubject>> dividedlistStudentWithSubjectNoLabAndMix = divideList(listStudentWithSubjectNoLabAndMix, planExamsByCodeSize);
             List<StudentSubject> allStudentBySubjectCode = dividedlistStudentWithSubjectNoLabAndMix.get(indexOfPlanExam);
             if (!listStudentWithSubjectNoLabAndMix.isEmpty()) {
-                Map<Integer, Integer> studentsInRoomCommon = calculateRoomAllocation(allStudentBySubjectCode, availableCommonRooms);
+                Map<Integer, Integer> studentsInRoomCommon = calculateRoomAllocation(planExam, allStudentBySubjectCode, availableCommonRooms);
                 fillStudentToRoom(studentsInRoomCommon, allStudentBySubjectCode, semesterId, planExam);
             }
         }
@@ -201,8 +223,8 @@ public class SchedulerService implements SchedulerServiceInterface {
         List<StudentSubject> ListLegitWithSubjectLabAndMix
                 = studentSubjectRepository.findAllBySemesterIdAndBlackListAndSubjectCodeIn(semesterId, null, subjectCodesLabAndMix);
         for (PlanExam planExam : planExamRepository.findAllBySemesterIdAndSubjectCodeIn(semesterId, subjectCodesLabAndMix)) {
-            List<Room> availableLabRooms = new ArrayList<>(labs);
-            List<Room> availableCommonRooms = new ArrayList<>(roomCommon);
+            List<Room> availableLabRooms = getAvailableRoom(planExam, labs);
+            List<Room> availableCommonRooms = getAvailableRoom(planExam, roomCommon);
 
             List<PlanExam> planExamsByCode = planExamRepository.findAllBySemesterIdAndSubjectCode(semesterId, planExam.getSubjectCode());
             int planExamsByCodeSize = planExamsByCode.size();
@@ -225,6 +247,16 @@ public class SchedulerService implements SchedulerServiceInterface {
             int numberOfRoomCommonNeed = numberOfStudentLegit / roomCommon.get(0).getQuantityStudent();
             if (numberOfStudentLegit % roomCommon.get(0).getQuantityStudent() != 0) {
                 numberOfRoomCommonNeed++;
+            }
+            if (numberOfRoomCommonNeed > availableCommonRooms.size()) {
+                throw new Exception("Not enough normal room for " + planExam.getSubjectCode() + " with " + numberOfStudentLegit + " student." +
+                        "We have only " + availableCommonRooms.size() + " normal rooms." +
+                        "We need at least " + numberOfRoomCommonNeed + " rooms.");
+            }
+            if (numberOfLabRoomNeed > availableLabRooms.size()) {
+                throw new Exception("Not enough lab room for " + planExam.getSubjectCode() + " with " + numberOfStudentBlackList + " student." +
+                        "We have only " + availableLabRooms.size() + " lab rooms." +
+                        "We need at least " + numberOfLabRoomNeed + " lab rooms");
             }
             // Initialize a map to hold the number of students in each room
             if (numberOfLabRoomNeed > 0) {
@@ -276,24 +308,27 @@ public class SchedulerService implements SchedulerServiceInterface {
         }
     }
 
-    public List<Room> getAvailableRoom(PlanExam planExam, List<Scheduler> schedulers, List<Room> allRooms) {
-        for (Scheduler scheduler : schedulers) {
-            // Check if the start time of the PlanExam falls within the time range of any existing Scheduler
-            if (scheduler.getStartDate().isEqual(getStartDateFromPlanExam(planExam))
-                    && scheduler.getEndDate().isEqual(getEndDateFromPlanExam(planExam))) {
-                // If yes, the room is not available, so continue to the next scheduler
+    public List<Room> getAvailableRoom(PlanExam planExam, List<Room> allRooms) {
+        List<Scheduler> schedulers = schedulerRepository.findAllBySemesterIdAndStartDateBeforeOrEndDateAfter(
+                planExam.getSemesterId(), getEndDateFromPlanExam(planExam), getStartDateFromPlanExam(planExam));
+        if (!schedulers.isEmpty()) {
+            for (Scheduler scheduler : schedulers) {
                 allRooms.remove(roomRepository.findById(scheduler.getRoomId()).get());
             }
         }
-
         return allRooms;
     }
 
-    public Map<Integer, Integer> calculateRoomAllocation(List<StudentSubject> allStudentBySubjectCode, List<Room> rooms) {
+    public Map<Integer, Integer> calculateRoomAllocation(PlanExam planExam, List<StudentSubject> allStudentBySubjectCode, List<Room> rooms) throws Exception {
         int numberOfStudent = allStudentBySubjectCode.size();
         int numberOfRoomNeed = numberOfStudent / rooms.get(0).getQuantityStudent();
         if (numberOfStudent % rooms.get(0).getQuantityStudent() != 0) {
             numberOfRoomNeed++;
+        }
+        if (numberOfRoomNeed > rooms.size()) {
+            throw new Exception("Not enough room for " + planExam.getSubjectCode() + " with " + allStudentBySubjectCode.size() + " student. " +
+                    "We have only " + rooms.size() + " rooms." +
+                    "We need at least " + numberOfRoomNeed + " rooms.");
         }
         Map<Integer, Integer> studentsInRooms = new HashMap<>();
         if (numberOfRoomNeed > 0) {
@@ -355,18 +390,18 @@ public class SchedulerService implements SchedulerServiceInterface {
                 }
             }
             // Assign students to the current room
-                for (int j = 0; j < entry.getValue(); j++) {
-                    if (studentIndex < allStudentBySubjectCode.size()) {
-                        StudentSubject student = allStudentBySubjectCode.get(studentIndex);
-                        studentIds += student.getId();
-                        if(j < allStudentBySubjectCode.size() -1) {
-                            studentIds += ",";
-                        }
-                        studentIndex++;
-                    } else {
-                        break; // No more students to assign
+            for (int j = 0; j < entry.getValue(); j++) {
+                if (studentIndex < allStudentBySubjectCode.size()) {
+                    StudentSubject student = allStudentBySubjectCode.get(studentIndex);
+                    studentIds += student.getId();
+                    if (j < allStudentBySubjectCode.size() - 1) {
+                        studentIds += ",";
                     }
+                    studentIndex++;
+                } else {
+                    break; // No more students to assign
                 }
+            }
             if (scheduler == null) {
                 scheduler = new Scheduler();
             }

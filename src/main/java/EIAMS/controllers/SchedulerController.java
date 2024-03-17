@@ -41,7 +41,7 @@ public class SchedulerController {
     }
 
     @GetMapping(path = "/arrange")
-    public ResponseEntity<ResponseObject> arrangeStudent(@RequestParam(name = "semesterId") Integer semesterId) {
+    public ResponseEntity<ResponseObject> arrangeStudent(@RequestParam(name = "semesterId") Integer semesterId) throws Exception {
         try {
             schedulerServiceInterface.arrangeStudent(semesterId);
             return ResponseEntity.status(HttpStatus.OK).body(
@@ -50,7 +50,6 @@ public class SchedulerController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(
                     new ResponseObject("Fail", e.getMessage(), null));
         }
-
     }
     @GetMapping(path = "/student")
     public ResponseEntity<ResponseObject> listStudent(
