@@ -25,4 +25,5 @@ public interface StudentRepository extends JpaRepository<Student, Integer> {
     Page<Student> findAllByRollNumberContainingIgnoreCaseOrFullNameContainingIgnoreCaseAndMemberCodeContainingIgnoreCase(
             String rollNumber, String fullName, String memberCode, Pageable pageable);
 
+
 }

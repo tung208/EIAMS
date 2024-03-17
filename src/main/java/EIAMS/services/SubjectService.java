@@ -1,5 +1,6 @@
 package EIAMS.services;
 
+import EIAMS.entities.Semester;
 import EIAMS.entities.StudentSubject;
 import EIAMS.entities.Subject;
 import EIAMS.entities.csvRepresentation.DontMixRepresentation;
@@ -15,6 +16,10 @@ import EIAMS.services.thread.SaveSubject;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -30,6 +35,13 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 public class SubjectService implements SubjectServiceInterface {
     private final SubjectRepository subjectRepository;
+    @Override
+    public Page<Semester> search(Integer page, Integer limit,Integer semesterId , String name, String code) {
+        Pageable pageable = PageRequest.of(page - 1, limit, Sort.by("id").descending());
+        return subjectRepository.findByDynamic(semesterId, name, code, pageable);
+
+    }
+    
     private static final Logger logger = LoggerFactory.getLogger(StudentService.class);
     @Override
     @Transactional

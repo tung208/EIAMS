@@ -1,6 +1,7 @@
 package EIAMS.services;
 
 import EIAMS.entities.ExamCode;
+import EIAMS.entities.Semester;
 import EIAMS.entities.csvRepresentation.ExamCodeRepresentation;
 import EIAMS.repositories.ExamCodeRepository;
 import EIAMS.services.excel.ExcelExamCode;
@@ -9,6 +10,10 @@ import EIAMS.services.thread.SaveExamCode;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -66,5 +71,11 @@ public class ExamCodeService implements ExamCodeServiceInterface {
             executor.execute(new SaveExamCode(sublist,examCodeRepository));
         }
         return null;
+    }
+
+    @Override
+    public Page<Semester> search(Integer page, Integer limit, Integer semesterId , String subjectCode) {
+        Pageable pageable = PageRequest.of(page - 1, limit, Sort.by("id").descending());
+        return examCodeRepository.findByDynamic(semesterId, subjectCode, pageable);
     }
 }

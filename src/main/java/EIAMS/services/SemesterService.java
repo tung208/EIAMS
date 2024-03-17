@@ -39,6 +39,13 @@ public class SemesterService implements SemesterServiceInterface {
     }
 
     @Override
+    public Page<Semester> search(Integer page, Integer limit, String name, String code) {
+        Pageable pageable = PageRequest.of(page - 1, limit, Sort.by("id").descending());
+        return semesterRepository.findByDynamic(name, code, pageable);
+
+    }
+
+    @Override
     public List<Semester> list() {
         return semesterRepository.findAll();
     }

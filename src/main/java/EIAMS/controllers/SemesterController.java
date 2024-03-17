@@ -20,9 +20,11 @@ public class SemesterController {
     @GetMapping()
     public PageResponse<Semester> getSemester(@RequestParam(defaultValue = "1") Integer pageNo,
                                               @RequestParam(defaultValue = "2") Integer pageSize,
-                                              @RequestParam(defaultValue = "id") String sortBy
+                                              @RequestParam(defaultValue = "id") String sortBy,
+                                              @RequestParam(defaultValue = "") String name,
+                                              @RequestParam(defaultValue = "") String code
                                       ){
-        Page<Semester> page =  semesterService.list(pageNo,pageSize);
+        Page<Semester> page =  semesterService.search(pageNo, pageSize, name, code);
         return new PageResponse<>(page.getNumber() + 1, page.getTotalPages(), page.getSize(), page.getContent());
     }
 

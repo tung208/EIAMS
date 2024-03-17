@@ -36,7 +36,6 @@ public class ExcelPlanExam {
 
                 String type = isValidExcel.getValueFromCell(row.getCell(2));
                 String expectedDate = isValidExcel.getValueFromCell(row.getCell(0));
-                System.out.println(expectedDate + " " + isValidExcel.getValueFromCell(row.getCell(1)));
                 if (type.contains(typeExam) && !expectedDate.isEmpty()){
                     PlanExamRepresentation element = new PlanExamRepresentation();
                     element.setExpectedDate(expectedDate);

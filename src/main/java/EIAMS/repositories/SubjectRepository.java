@@ -1,6 +1,9 @@
 package EIAMS.repositories;
 
+import EIAMS.entities.Semester;
 import EIAMS.entities.Subject;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -13,4 +16,10 @@ public interface SubjectRepository extends JpaRepository<Subject, Integer> {
     List<Subject> findBySubjectCodeAndSemeterId(String subjectCode, int semesterId);
 
     Subject findBySemesterIdAndSubjectCode(Integer semesterId, String subjectCode);
+
+    @Query("SELECT s FROM Subject s " +
+            "WHERE (s.semesterId = :semesterId)" +
+            "AND (:name = '' or s.subjectName LIKE %:name%)" +
+            "AND (:code = '' or s.subjectCode LIKE %:code%) " )
+    Page<Semester> findByDynamic(Integer semesterId, String name, String code, Pageable pageable);
 }
