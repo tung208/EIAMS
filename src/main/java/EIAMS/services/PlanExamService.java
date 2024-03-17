@@ -1,6 +1,7 @@
 package EIAMS.services;
 
 import EIAMS.entities.PlanExam;
+import EIAMS.entities.Semester;
 import EIAMS.entities.csvRepresentation.PlanExamRepresentation;
 import EIAMS.repositories.PlanExamRepository;
 import EIAMS.services.excel.ExcelPlanExam;
@@ -9,6 +10,10 @@ import EIAMS.services.thread.SavePlanExam;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -79,5 +84,11 @@ public class PlanExamService implements PlanExamServiceInterface {
         } else {
             return str == null ? null : str.trim();
         }
+    }
+
+    @Override
+    public Page<Semester> search(Integer page, Integer limit, Integer semesterId , String subjectCode) {
+        Pageable pageable = PageRequest.of(page - 1, limit, Sort.by("id").descending());
+        return planExamRepository.findByDynamic(semesterId, subjectCode, pageable);
     }
 }
