@@ -116,7 +116,7 @@ public class SchedulerService implements SchedulerServiceInterface {
             // Fill student
             if (subject.getNoLab() != null && subject.getNoLab() == 1 && subject.getDontMix() != null && subject.getDontMix() == 1) {
                 //arrange student don't mix room and only room common
-                Map<Integer, Integer> studentsInRooms = calculateRoomAllocation(allStudent, availableCommonRooms);
+                Map<Integer, Integer> studentsInRooms = calculateRoomAllocation(planExam, allStudent, availableCommonRooms);
                 // Assign students to rooms
                 fillStudentToRoom(studentsInRooms, allStudent, semesterId, planExam);
             }
@@ -140,10 +140,14 @@ public class SchedulerService implements SchedulerServiceInterface {
                     numberOfRoomCommonNeed++;
                 }
                 if (numberOfRoomCommonNeed > availableCommonRooms.size()) {
-                    throw new Exception("Not enough normal room for " + numberOfStudentLegit + "student");
+                    throw new Exception("Not enough normal room for " + planExam.getSubjectCode() + " with " + numberOfStudentLegit + " student." +
+                            "We have only " + availableCommonRooms.size() + " normal rooms." +
+                            "We need at least " + numberOfRoomCommonNeed + " rooms.");
                 }
                 if (numberOfLabRoomNeed > availableLabRooms.size()) {
-                    throw new Exception("Not enough lab room for " + numberOfStudentBlackList + "student");
+                    throw new Exception("Not enough lab room for " + planExam.getSubjectCode() + " with " + numberOfStudentBlackList + " student." +
+                            "We have only " + availableLabRooms.size() + " lab rooms." +
+                            "We need at least " + numberOfLabRoomNeed + " lab rooms");
                 }
                 // Initialize a map to hold the number of students in each room
                 if (numberOfLabRoomNeed > 0) {
@@ -209,7 +213,7 @@ public class SchedulerService implements SchedulerServiceInterface {
             List<List<StudentSubject>> dividedlistStudentWithSubjectNoLabAndMix = divideList(listStudentWithSubjectNoLabAndMix, planExamsByCodeSize);
             List<StudentSubject> allStudentBySubjectCode = dividedlistStudentWithSubjectNoLabAndMix.get(indexOfPlanExam);
             if (!listStudentWithSubjectNoLabAndMix.isEmpty()) {
-                Map<Integer, Integer> studentsInRoomCommon = calculateRoomAllocation(allStudentBySubjectCode, availableCommonRooms);
+                Map<Integer, Integer> studentsInRoomCommon = calculateRoomAllocation(planExam, allStudentBySubjectCode, availableCommonRooms);
                 fillStudentToRoom(studentsInRoomCommon, allStudentBySubjectCode, semesterId, planExam);
             }
         }
@@ -245,10 +249,14 @@ public class SchedulerService implements SchedulerServiceInterface {
                 numberOfRoomCommonNeed++;
             }
             if (numberOfRoomCommonNeed > availableCommonRooms.size()) {
-                throw new Exception("Not enough normal room for " + numberOfStudentLegit + "student");
+                throw new Exception("Not enough normal room for " + planExam.getSubjectCode() + " with " + numberOfStudentLegit + " student." +
+                        "We have only " + availableCommonRooms.size() + " normal rooms." +
+                        "We need at least " + numberOfRoomCommonNeed + " rooms.");
             }
             if (numberOfLabRoomNeed > availableLabRooms.size()) {
-                throw new Exception("Not enough lab room for " + numberOfStudentBlackList + "student");
+                throw new Exception("Not enough lab room for " + planExam.getSubjectCode() + " with " + numberOfStudentBlackList + " student." +
+                        "We have only " + availableLabRooms.size() + " lab rooms." +
+                        "We need at least " + numberOfLabRoomNeed + " lab rooms");
             }
             // Initialize a map to hold the number of students in each room
             if (numberOfLabRoomNeed > 0) {
@@ -311,14 +319,16 @@ public class SchedulerService implements SchedulerServiceInterface {
         return allRooms;
     }
 
-    public Map<Integer, Integer> calculateRoomAllocation(List<StudentSubject> allStudentBySubjectCode, List<Room> rooms) throws Exception {
+    public Map<Integer, Integer> calculateRoomAllocation(PlanExam planExam, List<StudentSubject> allStudentBySubjectCode, List<Room> rooms) throws Exception {
         int numberOfStudent = allStudentBySubjectCode.size();
         int numberOfRoomNeed = numberOfStudent / rooms.get(0).getQuantityStudent();
         if (numberOfStudent % rooms.get(0).getQuantityStudent() != 0) {
             numberOfRoomNeed++;
         }
         if (numberOfRoomNeed > rooms.size()) {
-            throw new Exception("Not enough room for " + allStudentBySubjectCode.size() + " student");
+            throw new Exception("Not enough room for " + planExam.getSubjectCode() + " with " + allStudentBySubjectCode.size() + " student. " +
+                    "We have only " + rooms.size() + " rooms." +
+                    "We need at least " + numberOfRoomNeed + " rooms.");
         }
         Map<Integer, Integer> studentsInRooms = new HashMap<>();
         if (numberOfRoomNeed > 0) {
