@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.time.LocalDateTime;
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -26,14 +26,14 @@ public class SchedulerController {
 
     @GetMapping(path = "/index")
     public ResponseEntity<ResponseObject> list(
-            @RequestParam(name = "semesterId") Integer semesterId,
+            @RequestParam(name = "semester_id") Integer semesterId,
             @RequestParam(name = "search", defaultValue = "") String search,
             @RequestParam(name = "start_date", defaultValue = "") String start_date,
             @RequestParam(name = "start_date", defaultValue = "") String end_date,
             @RequestParam(name = "page", required = false) Integer page,
             @RequestParam(name = "limit", required = false) Integer limit) {
         Page<Scheduler> list = schedulerServiceInterface.list(
-                semesterId, search,start_date, end_date, page, limit
+                semesterId, search, start_date, end_date, page, limit
         );
         if (list.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
@@ -45,7 +45,7 @@ public class SchedulerController {
     }
 
     @GetMapping(path = "/arrange")
-    public ResponseEntity<ResponseObject> arrangeStudent(@RequestParam(name = "semesterId") Integer semesterId) throws Exception {
+    public ResponseEntity<ResponseObject> arrangeStudent(@RequestParam(name = "semester_id") Integer semesterId) {
         try {
             schedulerServiceInterface.arrangeStudent(semesterId);
             return ResponseEntity.status(HttpStatus.OK).body(
@@ -55,14 +55,31 @@ public class SchedulerController {
                     new ResponseObject("Fail", e.getMessage(), null));
         }
     }
+
     @GetMapping(path = "/student")
     public ResponseEntity<ResponseObject> listStudent(
-            @RequestParam(name = "schedulerId") Integer schedulerId,
+            @RequestParam(name = "scheduler_id") Integer schedulerId,
             @RequestParam(name = "search", defaultValue = "") String search,
             @RequestParam(name = "page", required = false) Integer page,
             @RequestParam(name = "limit", required = false) Integer limit) {
         Page<Student> list = schedulerServiceInterface.getListStudentInARoom(
                 schedulerId, search, page, limit
+        );
+        if (list.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                    new ResponseObject("NOT FOUND", "", null));
+        } else {
+            return ResponseEntity.status(HttpStatus.OK).body(
+                    new ResponseObject("OK", "", list));
+        }
+    }
+
+    @GetMapping(path = "/get-by-subject")
+    public ResponseEntity<ResponseObject> listScheduler(
+            @RequestParam(name = "semester_id") Integer semesterId,
+            @RequestParam(name = "subject_code") String subjectCode) {
+        List<Scheduler> list = schedulerServiceInterface.getListSchedulerBySubjectCode(
+                semesterId, subjectCode
         );
         if (list.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
