@@ -4,8 +4,12 @@ import EIAMS.entities.Scheduler;
 import EIAMS.entities.Student;
 import org.springframework.data.domain.Page;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
 public interface SchedulerServiceInterface {
     void arrangeStudent(int semesterId) throws Exception;
-    Page<Scheduler> list(Integer semesterId,String search, Integer page, Integer limit);
+    Page<Scheduler> list(Integer semesterId, String search,String startDate, String endDate, Integer page, Integer limit);
     Page<Student> getListStudentInARoom(Integer schedulerId,String search, Integer page, Integer limit);
+    List<Scheduler> getListStudentBySubjectCode(Integer semesterId, String subjectCode, Integer page, Integer limit);
 }

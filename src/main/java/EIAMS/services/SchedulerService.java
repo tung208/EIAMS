@@ -28,10 +28,26 @@ public class SchedulerService implements SchedulerServiceInterface {
     private final Pagination pagination;
 
     @Override
-    public Page<Scheduler> list(Integer semesterId, String search, Integer page, Integer limit) {
+    public Page<Scheduler> list(Integer semesterId, String search,String startDate, String endDate, Integer page, Integer limit) {
         Pageable pageable = pagination.getPageable(page, limit);
-
-        return schedulerRepository.findAllBySemesterIdAndSubjectCodeContains(semesterId, search, pageable);
+        if(startDate.isBlank() && endDate.isBlank()) {
+            return schedulerRepository.findAllBySemesterIdAndSubjectCodeContains(semesterId, search, pageable);
+        }
+        if(startDate.isBlank() && !endDate.isBlank()) {
+            LocalDateTime endDateSearch = LocalDateTime.parse(endDate);
+            return schedulerRepository.findAllBySemesterIdAndEndDateBeforeAndSubjectCodeContains(semesterId, endDateSearch, search, pageable);
+        }
+        if(!startDate.isBlank() && endDate.isBlank()) {
+            LocalDateTime startDateSearch = LocalDateTime.parse(startDate);
+            return schedulerRepository.findAllBySemesterIdAndStartDateAfterAndSubjectCodeContains(semesterId, startDateSearch, search, pageable);
+        }
+        if(!startDate.isBlank() && !endDate.isBlank()) {
+            LocalDateTime endDateSearch = LocalDateTime.parse(endDate);
+            LocalDateTime startDateSearch = LocalDateTime.parse(startDate);
+            return schedulerRepository.findAllBySemesterIdAndStartDateAfterAndEndDateBeforeAndSubjectCodeContains(
+                    semesterId, startDateSearch, endDateSearch, search, pageable);
+        }
+        return null;
     }
 
     @Override
@@ -50,6 +66,11 @@ public class SchedulerService implements SchedulerServiceInterface {
         }
         return studentRepository.findAllByRollNumberInAndFullNameContainingIgnoreCaseOrCmtndContainingIgnoreCaseAndMemberCodeContainingIgnoreCase(
                 rollNumbers, search, search, search, pageable);
+    }
+
+    @Override
+    public List<Scheduler> getListStudentBySubjectCode(Integer semesterId, String subjectCode, Integer page, Integer limit) {
+        return schedulerRepository.findAllBySemesterIdAndSubjectCode(semesterId, subjectCode);
     }
 
     @Transactional
