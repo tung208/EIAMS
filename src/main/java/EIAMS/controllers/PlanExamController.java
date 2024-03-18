@@ -35,7 +35,7 @@ public class PlanExamController {
     }
 
     @GetMapping()
-    public PageResponse<Semester> getSemester(@RequestParam(defaultValue = "1") Integer pageNo,
+    public PageResponse<Semester> getPlanExam(@RequestParam(defaultValue = "1") Integer pageNo,
                                               @RequestParam(defaultValue = "2") Integer pageSize,
                                               @RequestParam(defaultValue = "id") String sortBy,
                                               @RequestParam(defaultValue = "") Integer semesterId,

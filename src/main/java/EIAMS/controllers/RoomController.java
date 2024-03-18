@@ -1,16 +1,16 @@
 package EIAMS.controllers;
 
 
+import EIAMS.entities.Semester;
+import EIAMS.entities.responeObject.PageResponse;
 import EIAMS.entities.responeObject.ResponseObject;
 import EIAMS.services.RoomService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -27,5 +27,16 @@ public class RoomController {
         roomService.uploadRoom(file,semesterId);
         return ResponseEntity.status(HttpStatus.OK).body(
                 new ResponseObject("OK", "Import Success", "Xin chao the gioi"));
+    }
+
+    @GetMapping()
+    public PageResponse<Semester> getSemester(@RequestParam(defaultValue = "1") Integer pageNo,
+                                              @RequestParam(defaultValue = "2") Integer pageSize,
+                                              @RequestParam(defaultValue = "id") String sortBy,
+                                              @RequestParam(defaultValue = "") Integer semesterId,
+                                              @RequestParam(defaultValue = "") String name
+    ){
+        Page<Semester> page =  roomService.search(pageNo, pageSize, semesterId, name);
+        return new PageResponse<>(page.getNumber() + 1, page.getTotalPages(), page.getSize(), page.getContent());
     }
 }
