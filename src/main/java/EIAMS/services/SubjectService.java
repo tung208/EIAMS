@@ -36,7 +36,7 @@ import java.util.concurrent.TimeUnit;
 public class SubjectService implements SubjectServiceInterface {
     private final SubjectRepository subjectRepository;
     @Override
-    public Page<Semester> search(Integer page, Integer limit,Integer semesterId , String name, String code) {
+    public Page<Subject> search(Integer page, Integer limit,Integer semesterId , String name, String code) {
         Pageable pageable = PageRequest.of(page - 1, limit, Sort.by("id").descending());
         return subjectRepository.findByDynamic(semesterId, name, code, pageable);
 

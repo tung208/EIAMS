@@ -87,7 +87,7 @@ public class PlanExamService implements PlanExamServiceInterface {
     }
 
     @Override
-    public Page<Semester> search(Integer page, Integer limit, Integer semesterId , String subjectCode) {
+    public Page<PlanExam> search(Integer page, Integer limit, Integer semesterId , String subjectCode) {
         Pageable pageable = PageRequest.of(page - 1, limit, Sort.by("id").descending());
         return planExamRepository.findByDynamic(semesterId, subjectCode, pageable);
     }

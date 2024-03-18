@@ -1,6 +1,7 @@
 package EIAMS.controllers;
 
 
+import EIAMS.entities.Room;
 import EIAMS.entities.Semester;
 import EIAMS.entities.responeObject.PageResponse;
 import EIAMS.entities.responeObject.ResponseObject;
@@ -30,13 +31,13 @@ public class RoomController {
     }
 
     @GetMapping()
-    public PageResponse<Semester> getSemester(@RequestParam(defaultValue = "1") Integer pageNo,
-                                              @RequestParam(defaultValue = "2") Integer pageSize,
-                                              @RequestParam(defaultValue = "id") String sortBy,
-                                              @RequestParam(defaultValue = "") Integer semesterId,
-                                              @RequestParam(defaultValue = "") String name
+    public PageResponse<Room> getRooms(@RequestParam(defaultValue = "1") Integer pageNo,
+                                          @RequestParam(defaultValue = "2") Integer pageSize,
+                                          @RequestParam(defaultValue = "id") String sortBy,
+                                          @RequestParam(defaultValue = "") Integer semesterId,
+                                          @RequestParam(defaultValue = "") String name
     ){
-        Page<Semester> page =  roomService.search(pageNo, pageSize, semesterId, name);
+        Page<Room> page =  roomService.search(pageNo, pageSize, semesterId, name);
         return new PageResponse<>(page.getNumber() + 1, page.getTotalPages(), page.getSize(), page.getContent());
     }
 }

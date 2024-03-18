@@ -74,7 +74,7 @@ public class ExamCodeService implements ExamCodeServiceInterface {
     }
 
     @Override
-    public Page<Semester> search(Integer page, Integer limit, Integer semesterId , String subjectCode) {
+    public Page<ExamCode> search(Integer page, Integer limit, Integer semesterId , String subjectCode) {
         Pageable pageable = PageRequest.of(page - 1, limit, Sort.by("id").descending());
         return examCodeRepository.findByDynamic(semesterId, subjectCode, pageable);
     }

@@ -19,6 +19,6 @@ public interface RoomRepository extends JpaRepository<Room, Integer> {
     @Query("SELECT s FROM Room s " +
             "WHERE (s.semesterId = :semesterId)" +
             "AND (:name = '' or s.name LIKE %:name% )" )
-    Page<Semester> findByDynamic(Integer semesterId, String name, Pageable pageable);
+    Page<Room> findByDynamic(Integer semesterId, String name, Pageable pageable);
 
 }

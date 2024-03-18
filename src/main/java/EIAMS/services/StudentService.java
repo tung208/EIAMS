@@ -1,5 +1,6 @@
 package EIAMS.services;
 
+import EIAMS.entities.Semester;
 import EIAMS.entities.Student;
 import EIAMS.entities.StudentSubject;
 import EIAMS.entities.Subject;
@@ -28,6 +29,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import org.springframework.web.multipart.MultipartFile;
@@ -58,6 +60,12 @@ public class StudentService implements StudentServiceInterface {
         Pageable pageable = pagination.getPageable(page, limit);
         return studentRepository.findAllByRollNumberContainingIgnoreCaseOrFullNameContainingIgnoreCaseAndMemberCodeContainingIgnoreCase(
                 search, search, memberCode, pageable);
+    }
+
+    @Override
+    public Page<Student> search(Integer page, Integer limit, String rollNumber, String memberCode, String fullName, String cmtnd) {
+        Pageable pageable = PageRequest.of(page - 1, limit, Sort.by("id").descending());
+        return studentRepository.findByDynamic(rollNumber, memberCode, fullName, cmtnd, pageable);
     }
 
     @Override

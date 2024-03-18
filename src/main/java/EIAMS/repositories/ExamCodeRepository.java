@@ -23,7 +23,7 @@ public interface ExamCodeRepository extends JpaRepository<ExamCode, Integer> {
     @Query("SELECT s FROM ExamCode s " +
             "WHERE (s.semesterId = :semesterId)" +
             "AND (:subjectCode = '' or s.subjectCode LIKE %:subjectCode% )" )
-    Page<Semester> findByDynamic(Integer semesterId,String subjectCode, Pageable pageable);
+    Page<ExamCode> findByDynamic(Integer semesterId,String subjectCode, Pageable pageable);
 
     List<ExamCode> findBySemesterIdAndSubjectCode(Integer semesterId, String subjectCode);
 

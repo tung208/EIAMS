@@ -1,5 +1,6 @@
 package EIAMS.controllers;
 
+import EIAMS.entities.PlanExam;
 import EIAMS.entities.Semester;
 import EIAMS.entities.responeObject.PageResponse;
 import EIAMS.entities.responeObject.ResponseObject;
@@ -35,13 +36,13 @@ public class PlanExamController {
     }
 
     @GetMapping()
-    public PageResponse<Semester> getPlanExam(@RequestParam(defaultValue = "1") Integer pageNo,
+    public PageResponse<PlanExam> getPlanExam(@RequestParam(defaultValue = "1") Integer pageNo,
                                               @RequestParam(defaultValue = "2") Integer pageSize,
                                               @RequestParam(defaultValue = "id") String sortBy,
                                               @RequestParam(defaultValue = "") Integer semesterId,
                                               @RequestParam(defaultValue = "") String subjectCode
     ){
-        Page<Semester> page =  planExamService.search(pageNo, pageSize, semesterId, subjectCode);
+        Page<PlanExam> page =  planExamService.search(pageNo, pageSize, semesterId, subjectCode);
         return new PageResponse<>(page.getNumber() + 1, page.getTotalPages(), page.getSize(), page.getContent());
     }
 }

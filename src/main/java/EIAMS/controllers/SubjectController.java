@@ -1,6 +1,7 @@
 package EIAMS.controllers;
 
 import EIAMS.entities.Semester;
+import EIAMS.entities.Subject;
 import EIAMS.entities.responeObject.PageResponse;
 import EIAMS.entities.responeObject.ResponseObject;
 import EIAMS.services.SubjectService;
@@ -41,14 +42,14 @@ public class SubjectController {
     }
 
     @GetMapping()
-    public PageResponse<Semester> getSemester(@RequestParam(defaultValue = "1") Integer pageNo,
-                                              @RequestParam(defaultValue = "2") Integer pageSize,
-                                              @RequestParam(defaultValue = "id") String sortBy,
-                                              @RequestParam(defaultValue = "") Integer semesterId,
-                                              @RequestParam(defaultValue = "") String code,
-                                              @RequestParam(defaultValue = "") String name
+    public PageResponse<Subject> getSemester(@RequestParam(defaultValue = "1") Integer pageNo,
+                                             @RequestParam(defaultValue = "2") Integer pageSize,
+                                             @RequestParam(defaultValue = "id") String sortBy,
+                                             @RequestParam(defaultValue = "") Integer semesterId,
+                                             @RequestParam(defaultValue = "") String code,
+                                             @RequestParam(defaultValue = "") String name
     ){
-        Page<Semester> page =  subjectService.search(pageNo, pageSize, semesterId, code, name);
+        Page<Subject> page =  subjectService.search(pageNo, pageSize, semesterId, code, name);
         return new PageResponse<>(page.getNumber() + 1, page.getTotalPages(), page.getSize(), page.getContent());
     }
 }

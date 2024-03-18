@@ -1,7 +1,6 @@
 package EIAMS.services;
 
 import EIAMS.entities.Room;
-import EIAMS.entities.Semester;
 import EIAMS.entities.csvRepresentation.RoomRepresentation;
 import EIAMS.repositories.RoomRepository;
 import EIAMS.services.excel.ExcelRoom;
@@ -79,7 +78,7 @@ public class RoomService implements RoomServiceInterface {
     }
 
     @Override
-    public Page<Semester> search(Integer page, Integer limit, Integer semesterId , String name) {
+    public Page<Room> search(Integer page, Integer limit, Integer semesterId , String name) {
         Pageable pageable = PageRequest.of(page - 1, limit, Sort.by("id").descending());
         return roomRepository.findByDynamic(semesterId, name, pageable);
     }

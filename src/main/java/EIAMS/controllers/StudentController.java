@@ -1,5 +1,6 @@
 package EIAMS.controllers;
 
+import EIAMS.entities.responeObject.PageResponse;
 import EIAMS.entities.responeObject.ResponseObject;
 import EIAMS.entities.Student;
 import EIAMS.services.StudentService;
@@ -22,22 +23,18 @@ public class StudentController {
     @Autowired
     private StudentService studentService;
 
-    @GetMapping(path = "/index")
-    public ResponseEntity<ResponseObject> list(
-            @RequestParam(name = "search", defaultValue = "") String search,
-            @RequestParam(name = "member-code", defaultValue = "") String memberCode,
-            @RequestParam(name = "page", required = false) Integer page,
-            @RequestParam(name = "limit", required = false) Integer limit) {
-        Page<Student> list = studentService.list(
-                search, memberCode, page, limit
-        );
-        if (list.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-                    new ResponseObject("NOT FOUND", "", null));
-        } else {
-            return ResponseEntity.status(HttpStatus.OK).body(
-                    new ResponseObject("OK", "", list));
-        }
+    @GetMapping()
+    public PageResponse<Student> list(
+            @RequestParam(defaultValue = "1") Integer pageNo,
+            @RequestParam(defaultValue = "2") Integer pageSize,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "") String rollNumber,
+            @RequestParam(defaultValue = "") String memberCode,
+            @RequestParam(defaultValue = "") String fullName,
+            @RequestParam(defaultValue = "") String cmtnd
+           ) {
+        Page<Student> page = studentService.search( pageNo, pageSize, rollNumber, memberCode, fullName, cmtnd );
+        return new PageResponse<>(page.getNumber() + 1, page.getTotalPages(), page.getSize(), page.getContent());
     }
 
     @GetMapping("/export")

@@ -1,5 +1,6 @@
 package EIAMS.repositories;
 
+import EIAMS.entities.Semester;
 import EIAMS.entities.Student;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -28,4 +29,12 @@ public interface StudentRepository extends JpaRepository<Student, Integer> {
 
     Page<Student> findAllByRollNumberInAndFullNameContainingIgnoreCaseOrCmtndContainingIgnoreCaseAndMemberCodeContainingIgnoreCase(
             Collection<String> rollNumbers, String fullName, String cmt, String memberCode, Pageable pageable);
+
+    @Query("SELECT s FROM Student s " +
+            "WHERE (:rollNumber = '' or s.rollNumber LIKE %:rollNumber% )" +
+            "AND (:memberCode = '' or s.memberCode LIKE %:memberCode% ) " +
+            "AND (:fullName = '' or s.fullName LIKE %:fullName% ) " +
+            "AND (:cmtnd = '' or s.cmtnd LIKE %:cmtnd% ) "
+    )
+    Page<Student> findByDynamic(String rollNumber, String memberCode, String fullName, String cmtnd, Pageable pageable);
 }

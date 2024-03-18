@@ -1,5 +1,6 @@
 package EIAMS.services.interfaces;
 
+import EIAMS.entities.Semester;
 import EIAMS.entities.Student;
 import org.springframework.data.domain.Page;
 import org.springframework.web.multipart.MultipartFile;
@@ -24,4 +25,6 @@ public interface StudentServiceInterface {
      Integer uploadCMND(MultipartFile file, int semester_id) throws IOException;
 
      Integer uploadBlackList(MultipartFile file, int semester_id) throws IOException;
+
+     Page<Student> search(Integer page, Integer limit, String rollNumber, String memberCode, String fullName, String cmtnd);
 }

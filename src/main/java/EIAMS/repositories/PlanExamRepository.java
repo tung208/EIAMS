@@ -20,5 +20,5 @@ public interface PlanExamRepository extends JpaRepository<PlanExam, Integer> {
     @Query("SELECT s FROM PlanExam s " +
             "WHERE (s.semesterId = :semesterId)" +
             "AND (:subjectCode = '' or s.subjectCode LIKE %:subjectCode% )" )
-    Page<Semester> findByDynamic(Integer semesterId, String subjectCode, Pageable pageable);
+    Page<PlanExam> findByDynamic(Integer semesterId, String subjectCode, Pageable pageable);
 }
