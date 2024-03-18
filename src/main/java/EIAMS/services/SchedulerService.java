@@ -330,11 +330,16 @@ public class SchedulerService implements SchedulerServiceInterface {
     }
 
     public List<Room> getAvailableRoom(PlanExam planExam, List<Room> allRooms) {
-        List<Scheduler> schedulers = schedulerRepository.findAllBySemesterIdAndStartDateBeforeOrEndDateAfter(
-                planExam.getSemesterId(), getEndDateFromPlanExam(planExam), getStartDateFromPlanExam(planExam));
+        List<Scheduler> schedulers = schedulerRepository.findAllBySemesterIdAndEndDateAfter(
+                planExam.getSemesterId(), getStartDateFromPlanExam(planExam));
         if (!schedulers.isEmpty()) {
             for (Scheduler scheduler : schedulers) {
-                allRooms.remove(roomRepository.findById(scheduler.getRoomId()).get());
+                if (scheduler.getStudentId() != null) {
+                    String[] assignedStudents = scheduler.getStudentId().split(",");
+                    if (assignedStudents.length > 0) {
+                        allRooms.remove(roomRepository.findById(scheduler.getRoomId()).get());
+                    }
+                }
             }
         }
         return allRooms;

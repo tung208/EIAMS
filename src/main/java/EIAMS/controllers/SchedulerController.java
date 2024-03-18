@@ -51,7 +51,7 @@ public class SchedulerController {
             return ResponseEntity.status(HttpStatus.OK).body(
                     new ResponseObject("OK", "Arrange Success", null));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
                     new ResponseObject("Fail", e.getMessage(), null));
         }
     }

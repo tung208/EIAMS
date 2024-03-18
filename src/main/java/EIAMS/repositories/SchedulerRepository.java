@@ -12,7 +12,7 @@ public interface SchedulerRepository extends JpaRepository<Scheduler, Integer> {
     List<Scheduler> findAllBySemesterId(Integer semesterId);
     List<Scheduler> findAllBySemesterIdAndSubjectCode(Integer semesterId, String subjectCode);
     Scheduler findBySemesterIdAndRoomIdAndStartDateAndEndDate(Integer semesterId, Integer roomId, LocalDateTime startDate, LocalDateTime endDate);
-    List<Scheduler> findAllBySemesterIdAndStartDateBeforeOrEndDateAfter(Integer semesterId, LocalDateTime startDate, LocalDateTime endDate);
+    List<Scheduler> findAllBySemesterIdAndEndDateAfter(Integer semesterId, LocalDateTime endDate);
     void deleteBySemesterId(Integer semesterId);
     Page<Scheduler> findAllBySemesterIdAndStartDateAfterAndEndDateBeforeAndSubjectCodeContains(
             Integer semesterId, LocalDateTime startDate, LocalDateTime endDate, String subjectCode, Pageable pageable);
