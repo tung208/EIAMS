@@ -1,6 +1,7 @@
 package EIAMS.services;
 
 import EIAMS.entities.Room;
+import EIAMS.entities.Semester;
 import EIAMS.entities.csvRepresentation.RoomRepresentation;
 import EIAMS.repositories.RoomRepository;
 import EIAMS.services.excel.ExcelRoom;
@@ -9,6 +10,10 @@ import EIAMS.services.thread.SaveRoom;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -71,5 +76,11 @@ public class RoomService implements RoomServiceInterface {
         } else {
             return str == null ? null : str.trim();
         }
+    }
+
+    @Override
+    public Page<Semester> search(Integer page, Integer limit, Integer semesterId , String name) {
+        Pageable pageable = PageRequest.of(page - 1, limit, Sort.by("id").descending());
+        return roomRepository.findByDynamic(semesterId, name, pageable);
     }
 }
