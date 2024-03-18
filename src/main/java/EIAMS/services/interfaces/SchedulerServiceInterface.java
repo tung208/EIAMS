@@ -9,7 +9,7 @@ import java.util.List;
 
 public interface SchedulerServiceInterface {
     void arrangeStudent(int semesterId) throws Exception;
-    Page<Scheduler> list(Integer semesterId, String search,String startDate, String endDate, Integer page, Integer limit);
+    List<Object> list(Integer semesterId, String search,String startDate, String endDate);
     Page<Student> getListStudentInARoom(Integer schedulerId,String search, Integer page, Integer limit);
     List<Scheduler> getListSchedulerBySubjectCode(Integer semesterId, String subjectCode);
 }

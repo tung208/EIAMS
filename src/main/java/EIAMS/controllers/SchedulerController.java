@@ -32,8 +32,8 @@ public class SchedulerController {
             @RequestParam(name = "end_date", defaultValue = "") String end_date,
             @RequestParam(name = "page", required = false) Integer page,
             @RequestParam(name = "limit", required = false) Integer limit) {
-        Page<Scheduler> list = schedulerServiceInterface.list(
-                semesterId, search, start_date, end_date, page, limit
+        List<Object> list = schedulerServiceInterface.list(
+                semesterId, search, start_date, end_date
         );
         if (list.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(

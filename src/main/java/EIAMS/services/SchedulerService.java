@@ -29,25 +29,24 @@ public class SchedulerService implements SchedulerServiceInterface {
     private final Pagination pagination;
 
     @Override
-    public Page<Scheduler> list(Integer semesterId, String search, String startDate, String endDate, Integer page, Integer limit) {
-        Pageable pageable = pagination.getPageable(page, limit);
+    public List<Object> list(Integer semesterId, String search, String startDate, String endDate) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         if (startDate.isBlank() && endDate.isBlank()) {
-            return schedulerRepository.findAllBySemesterIdAndSubjectCodeContains(semesterId, search, pageable);
+            return schedulerRepository.findAllBySemesterIdAndSubjectCodeContains(semesterId, search);
         }
         if (startDate.isBlank() && !endDate.isBlank()) {
             LocalDateTime endDateSearch = LocalDateTime.parse(endDate, formatter);
-            return schedulerRepository.findAllBySemesterIdAndEndDateBeforeAndSubjectCodeContains(semesterId, endDateSearch, search, pageable);
+            return schedulerRepository.findAllBySemesterIdAndEndDateBeforeAndSubjectCodeContains(semesterId, endDateSearch, search);
         }
         if (!startDate.isBlank() && endDate.isBlank()) {
             LocalDateTime startDateSearch = LocalDateTime.parse(startDate, formatter);
-            return schedulerRepository.findAllBySemesterIdAndStartDateAfterAndSubjectCodeContains(semesterId, startDateSearch, search, pageable);
+            return schedulerRepository.findAllBySemesterIdAndStartDateAfterAndSubjectCodeContains(semesterId, startDateSearch, search);
         }
         if (!startDate.isBlank() && !endDate.isBlank()) {
             LocalDateTime endDateSearch = LocalDateTime.parse(endDate, formatter);
             LocalDateTime startDateSearch = LocalDateTime.parse(startDate, formatter);
             return schedulerRepository.findAllBySemesterIdAndStartDateAfterAndEndDateBeforeAndSubjectCodeContains(
-                    semesterId, startDateSearch, endDateSearch, search, pageable);
+                    semesterId, startDateSearch, endDateSearch, search);
         }
         return null;
     }
