@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Service
@@ -30,20 +31,21 @@ public class SchedulerService implements SchedulerServiceInterface {
     @Override
     public Page<Scheduler> list(Integer semesterId, String search, String startDate, String endDate, Integer page, Integer limit) {
         Pageable pageable = pagination.getPageable(page, limit);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         if (startDate.isBlank() && endDate.isBlank()) {
             return schedulerRepository.findAllBySemesterIdAndSubjectCodeContains(semesterId, search, pageable);
         }
         if (startDate.isBlank() && !endDate.isBlank()) {
-            LocalDateTime endDateSearch = LocalDateTime.parse(endDate);
+            LocalDateTime endDateSearch = LocalDateTime.parse(endDate, formatter);
             return schedulerRepository.findAllBySemesterIdAndEndDateBeforeAndSubjectCodeContains(semesterId, endDateSearch, search, pageable);
         }
         if (!startDate.isBlank() && endDate.isBlank()) {
-            LocalDateTime startDateSearch = LocalDateTime.parse(startDate);
+            LocalDateTime startDateSearch = LocalDateTime.parse(startDate, formatter);
             return schedulerRepository.findAllBySemesterIdAndStartDateAfterAndSubjectCodeContains(semesterId, startDateSearch, search, pageable);
         }
         if (!startDate.isBlank() && !endDate.isBlank()) {
-            LocalDateTime endDateSearch = LocalDateTime.parse(endDate);
-            LocalDateTime startDateSearch = LocalDateTime.parse(startDate);
+            LocalDateTime endDateSearch = LocalDateTime.parse(endDate, formatter);
+            LocalDateTime startDateSearch = LocalDateTime.parse(startDate, formatter);
             return schedulerRepository.findAllBySemesterIdAndStartDateAfterAndEndDateBeforeAndSubjectCodeContains(
                     semesterId, startDateSearch, endDateSearch, search, pageable);
         }
@@ -330,11 +332,16 @@ public class SchedulerService implements SchedulerServiceInterface {
     }
 
     public List<Room> getAvailableRoom(PlanExam planExam, List<Room> allRooms) {
-        List<Scheduler> schedulers = schedulerRepository.findAllBySemesterIdAndStartDateBeforeOrEndDateAfter(
-                planExam.getSemesterId(), getEndDateFromPlanExam(planExam), getStartDateFromPlanExam(planExam));
+        List<Scheduler> schedulers = schedulerRepository.findAllBySemesterIdAndEndDateAfter(
+                planExam.getSemesterId(), getStartDateFromPlanExam(planExam));
         if (!schedulers.isEmpty()) {
             for (Scheduler scheduler : schedulers) {
-                allRooms.remove(roomRepository.findById(scheduler.getRoomId()).get());
+                if (scheduler.getStudentId() != null) {
+                    String[] assignedStudents = scheduler.getStudentId().split(",");
+                    if (assignedStudents.length > 0) {
+                        allRooms.remove(roomRepository.findById(scheduler.getRoomId()).get());
+                    }
+                }
             }
         }
         return allRooms;

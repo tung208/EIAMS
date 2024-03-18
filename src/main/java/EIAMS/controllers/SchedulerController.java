@@ -29,7 +29,7 @@ public class SchedulerController {
             @RequestParam(name = "semester_id") Integer semesterId,
             @RequestParam(name = "search", defaultValue = "") String search,
             @RequestParam(name = "start_date", defaultValue = "") String start_date,
-            @RequestParam(name = "start_date", defaultValue = "") String end_date,
+            @RequestParam(name = "end_date", defaultValue = "") String end_date,
             @RequestParam(name = "page", required = false) Integer page,
             @RequestParam(name = "limit", required = false) Integer limit) {
         Page<Scheduler> list = schedulerServiceInterface.list(
@@ -51,7 +51,7 @@ public class SchedulerController {
             return ResponseEntity.status(HttpStatus.OK).body(
                     new ResponseObject("OK", "Arrange Success", null));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
                     new ResponseObject("Fail", e.getMessage(), null));
         }
     }

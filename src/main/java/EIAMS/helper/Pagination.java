@@ -17,7 +17,6 @@ public class Pagination {
         }else {
             pageable = PageRequest.of(0, Integer.MAX_VALUE);
         }
-
         return pageable;
     }
 }
