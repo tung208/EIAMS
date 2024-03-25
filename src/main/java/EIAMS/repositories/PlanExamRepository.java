@@ -9,12 +9,15 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 
 public interface PlanExamRepository extends JpaRepository<PlanExam, Integer> {
     void deleteBySemesterId(int suid);
     List<PlanExam> findAllBySemesterId(Integer semesterId);
     List<PlanExam> findAllBySemesterIdAndSubjectCode(Integer semesterId, String subjectCode);
+    List<PlanExam> findAllBySemesterIdAndExpectedDateAndExpectedTimeAndSubjectCodeIn(Integer semesterId, Date expectedDate, String expectedTime, Collection<String> subjectCode);
+    List<PlanExam> findAllBySemesterIdAndExpectedDateAndExpectedTime(Integer semesterId, Date expectedDate, String expectedTime);
     List<PlanExam> findAllBySemesterIdAndSubjectCodeIn(Integer semesterId, Collection<String> subjectCode);
 
     @Query("SELECT s FROM PlanExam s " +

@@ -10,10 +10,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -109,8 +112,9 @@ public class SchedulerService implements SchedulerServiceInterface {
         List<PlanExam> planExamList = planExamRepository.findAllBySemesterId(semesterId);
         List<Room> labs = roomRepository.findAllByQuantityStudentGreaterThanAndNameContainingIgnoreCase(1, "Lab");
         List<Room> roomCommon = roomRepository.findAllByQuantityStudentGreaterThanAndNameNotContainingIgnoreCase(1, "Lab");
-        Collection<String> subjectCodesNoLabAndMix = new ArrayList<>();
-        Collection<String> subjectCodesLabAndMix = new ArrayList<>();
+
+        Map<String, Collection<StudentSubject>> listStudentNoLabAndCanMix = new HashMap<>();
+        Map<String, Collection<StudentSubject>> listStudentLabAndCanMix = new HashMap<>();
         for (PlanExam planExam : planExamList) {
             List<Room> availableLabRooms = getAvailableRoom(planExam, labs);
             List<Room> availableCommonRooms = getAvailableRoom(planExam, roomCommon);
@@ -135,17 +139,50 @@ public class SchedulerService implements SchedulerServiceInterface {
             List<StudentSubject> allBlackList = dividedBlackList.get(indexOfPlanExam);
             List<StudentSubject> allLegit = dividedListLegit.get(indexOfPlanExam);
             List<StudentSubject> allStudent = dividedAllStudentBySubjectCode.get(indexOfPlanExam);
+            String key = planExam.getExpectedDate().toString() + "@" + planExam.getExpectedTime();
             // Fill student
             if (subject.getNoLab() != null && subject.getNoLab() == 1 && subject.getDontMix() != null && subject.getDontMix() == 1) {
+                List<Scheduler> schedulers = schedulerRepository.findAllBySemesterIdAndSubjectCodeNotAndStartDateAndEndDate(
+                        semesterId, planExam.getSubjectCode(), getStartDateFromPlanExam(planExam), getEndDateFromPlanExam(planExam)
+                );
+                if (schedulers != null) {
+                    for (Scheduler s : schedulers) {
+                        if(s.getStudentId() != null) {
+                            availableCommonRooms.remove(roomRepository.findById(s.getRoomId()).get());
+                        }
+                    }
+                }
                 //arrange student don't mix room and only room common
-                Map<Integer, Integer> studentsInRooms = calculateRoomAllocation(planExam, allStudent, availableCommonRooms);
+                Map<Integer, Integer> studentsInRooms = calculateRoomAllocation(allStudent, availableCommonRooms);
                 // Assign students to rooms
                 fillStudentToRoom(studentsInRooms, allStudent, semesterId, planExam);
             }
             if (subject.getNoLab() != null && subject.getNoLab() == 1 && (subject.getDontMix() == null || subject.getDontMix() == 0)) {
-                subjectCodesNoLabAndMix.add(code);
+                if (listStudentNoLabAndCanMix.containsKey(key)) {
+                    Collection<StudentSubject> students = listStudentNoLabAndCanMix.get(key);
+                    students.addAll(allStudent);
+                    listStudentNoLabAndCanMix.put(key, students);
+                } else {
+                    Collection<StudentSubject> newList = new ArrayList<>(allStudent);
+                    listStudentNoLabAndCanMix.put(key, newList);
+                }
             }
             if ((subject.getNoLab() == null || subject.getNoLab() == 0) && subject.getDontMix() != null && subject.getDontMix() == 1) {
+                List<Scheduler> schedulers = schedulerRepository.findAllBySemesterIdAndSubjectCodeNotAndStartDateAndEndDate(
+                        semesterId, planExam.getSubjectCode(), getStartDateFromPlanExam(planExam), getEndDateFromPlanExam(planExam)
+                );
+                if (schedulers != null) {
+                    for (Scheduler s : schedulers) {
+                        Room r = roomRepository.findById(s.getRoomId()).get();
+                        if (r.getName().contains("Lab")) {
+                            if(s.getStudentId() != null) {
+                                availableLabRooms.remove(r);
+                            }
+                        } else {
+                            availableCommonRooms.remove(r);
+                        }
+                    }
+                }
                 int numberOfStudentBlackList = allBlackList.size();
                 int numberOfStudentLegit = allLegit.size();
 
@@ -223,41 +260,70 @@ public class SchedulerService implements SchedulerServiceInterface {
                 }
             }
             if ((subject.getNoLab() == null || subject.getNoLab() == 0) && (subject.getDontMix() == null || subject.getDontMix() == 0)) {
-                subjectCodesLabAndMix.add(code);
-            }
-        }
-        List<StudentSubject> listStudentWithSubjectNoLabAndMix = studentSubjectRepository.findAllBySemesterIdAndSubjectCodeIn(semesterId, subjectCodesNoLabAndMix);
-        for (PlanExam planExam : planExamRepository.findAllBySemesterIdAndSubjectCodeIn(semesterId, subjectCodesNoLabAndMix)) {
-            List<Room> availableCommonRooms = getAvailableRoom(planExam, roomCommon);
-            List<PlanExam> planExamsByCode = planExamRepository.findAllBySemesterIdAndSubjectCode(semesterId, planExam.getSubjectCode());
-            int planExamsByCodeSize = planExamsByCode.size();
-            int indexOfPlanExam = planExamsByCode.indexOf(planExam);
-            List<List<StudentSubject>> dividedlistStudentWithSubjectNoLabAndMix = divideList(listStudentWithSubjectNoLabAndMix, planExamsByCodeSize);
-            List<StudentSubject> allStudentBySubjectCode = dividedlistStudentWithSubjectNoLabAndMix.get(indexOfPlanExam);
-            if (!listStudentWithSubjectNoLabAndMix.isEmpty()) {
-                Map<Integer, Integer> studentsInRoomCommon = calculateRoomAllocation(planExam, allStudentBySubjectCode, availableCommonRooms);
-                fillStudentToRoom(studentsInRoomCommon, allStudentBySubjectCode, semesterId, planExam);
+                if (listStudentLabAndCanMix.containsKey(key)) {
+                    Collection<StudentSubject> students = listStudentLabAndCanMix.get(key);
+                    students.addAll(allStudent);
+                    listStudentLabAndCanMix.put(key, students);
+                } else {
+                    Collection<StudentSubject> newList = new ArrayList<>(allStudent);
+                    listStudentLabAndCanMix.put(key, newList);
+                }
             }
         }
 
-        List<StudentSubject> ListBlackListWithSubjectLabAndMix
-                = studentSubjectRepository.findAllBySemesterIdAndBlackListAndSubjectCodeIn(semesterId, 1, subjectCodesLabAndMix);
-        List<StudentSubject> ListLegitWithSubjectLabAndMix
-                = studentSubjectRepository.findAllBySemesterIdAndBlackListAndSubjectCodeIn(semesterId, null, subjectCodesLabAndMix);
-        for (PlanExam planExam : planExamRepository.findAllBySemesterIdAndSubjectCodeIn(semesterId, subjectCodesLabAndMix)) {
+        for (Map.Entry<String, Collection<StudentSubject>> entry : listStudentNoLabAndCanMix.entrySet()) {
+            String key = entry.getKey();
+            String[] parts = key.split("@");
+            String datePart = parts[0];
+            Date date;
+            try {
+                date = new SimpleDateFormat("yyyy-MM-dd").parse(datePart);
+            } catch (ParseException e) {
+                throw new Exception(e.getMessage());
+            }
+            // Extracting time
+            String timePart = parts[1];
+            Collection<StudentSubject> students = entry.getValue();
+            PlanExam planExam = planExamRepository.findAllBySemesterIdAndExpectedDateAndExpectedTime(semesterId, date, timePart).get(0);
+            List<Room> availableCommonRooms = getAvailableRoom(planExam, roomCommon);
+            Map<Integer, Integer> studentsInRoomCommon = calculateRoomAllocation((List<StudentSubject>) students, availableCommonRooms);
+            fillStudentToRoom(studentsInRoomCommon, (List<StudentSubject>) students, semesterId, planExam);
+        }
+        for (Map.Entry<String, Collection<StudentSubject>> entry : listStudentLabAndCanMix.entrySet()) {
+            String key = entry.getKey();
+            String[] parts = key.split("@");
+            String datePart = parts[0];
+            Date date;
+            try {
+                date = new SimpleDateFormat("yyyy-MM-dd").parse(datePart);
+            } catch (ParseException e) {
+                throw new Exception(e.getMessage());
+            }
+            // Extracting time
+            String timePart = parts[1];
+            Collection<StudentSubject> students = entry.getValue();
+            PlanExam planExam = planExamRepository.findAllBySemesterIdAndExpectedDateAndExpectedTime(semesterId, date, timePart).get(0);
+            List<StudentSubject> allStudentLegitPerSlot = students.stream()
+                    .filter(student -> (student.getBlackList() == null || student.getBlackList() == 0))
+                    .collect(Collectors.toList());
+            List<StudentSubject> allStudentBlackListPerSlot = students.stream()
+                    .filter(student ->(student.getBlackList() != null && student.getBlackList() == 1) )
+                    .collect(Collectors.toList());
+            List<String> uniqueSubjectCodesBlackList = allStudentBlackListPerSlot.stream()
+                    .map(StudentSubject::getSubjectCode)
+                    .distinct()
+                    .toList();
+            List<String> uniqueSubjectCodesLegit = allStudentBlackListPerSlot.stream()
+                    .map(StudentSubject::getSubjectCode)
+                    .distinct()
+                    .toList();
+
+            List<Room> availableCommonRooms = getAvailableRoom(planExam, roomCommon);
             List<Room> availableLabRooms = getAvailableRoom(planExam, labs);
-            List<Room> availableCommonRooms = getAvailableRoom(planExam, roomCommon);
 
-            List<PlanExam> planExamsByCode = planExamRepository.findAllBySemesterIdAndSubjectCode(semesterId, planExam.getSubjectCode());
-            int planExamsByCodeSize = planExamsByCode.size();
-            int indexOfPlanExam = planExamsByCode.indexOf(planExam);
-            List<List<StudentSubject>> dividedListBlackListWithSubjectLabAndMix = divideList(ListBlackListWithSubjectLabAndMix, planExamsByCodeSize);
-            List<List<StudentSubject>> dividedListLegitWithSubjectLabAndMix = divideList(ListLegitWithSubjectLabAndMix, planExamsByCodeSize);
-            List<StudentSubject> allBlackListWithSubjectLabAndMix = dividedListBlackListWithSubjectLabAndMix.get(indexOfPlanExam);
-            List<StudentSubject> allListLegitWithSubjectLabAndMix = dividedListLegitWithSubjectLabAndMix.get(indexOfPlanExam);
 
-            int numberOfStudentBlackList = allBlackListWithSubjectLabAndMix.size();
-            int numberOfStudentLegit = allListLegitWithSubjectLabAndMix.size();
+            int numberOfStudentBlackList = allStudentBlackListPerSlot.size();
+            int numberOfStudentLegit = allStudentLegitPerSlot.size();
             int numberOfLabRoomNeed = numberOfStudentBlackList / labs.get(0).getQuantityStudent();
             // Gia su lab co 25 ng. chap nhan 20 ng thi xep 1 phong. Neu ko thi xep phong thuong
             if ((numberOfStudentBlackList % labs.get(0).getQuantityStudent()) > (labs.get(0).getQuantityStudent() - 8)) {
@@ -271,12 +337,12 @@ public class SchedulerService implements SchedulerServiceInterface {
                 numberOfRoomCommonNeed++;
             }
             if (numberOfRoomCommonNeed > availableCommonRooms.size()) {
-                throw new Exception("Not enough normal room for " + planExam.getSubjectCode() + " with " + numberOfStudentLegit + " student." +
+                throw new Exception("Not enough normal room for " + uniqueSubjectCodesLegit.toString() + " with " + numberOfStudentLegit + " student." +
                         "We have only " + availableCommonRooms.size() + " normal rooms." +
                         "We need at least " + numberOfRoomCommonNeed + " rooms.");
             }
             if (numberOfLabRoomNeed > availableLabRooms.size()) {
-                throw new Exception("Not enough lab room for " + planExam.getSubjectCode() + " with " + numberOfStudentBlackList + " student." +
+                throw new Exception("Not enough lab room for " + uniqueSubjectCodesBlackList.toString() + "with" + numberOfStudentBlackList + " student." +
                         "We have only " + availableLabRooms.size() + " lab rooms." +
                         "We need at least " + numberOfLabRoomNeed + " lab rooms");
             }
@@ -302,7 +368,7 @@ public class SchedulerService implements SchedulerServiceInterface {
                         studentsInLab.put(availableLabRooms.get(i).getId(), updatedStudentCount);
                     }
                 }
-                fillStudentToRoom(studentsInLab, allBlackListWithSubjectLabAndMix, semesterId, planExam);
+                fillStudentToRoom(studentsInLab, allStudentBlackListPerSlot, semesterId, planExam);
             }
             if (numberOfRoomCommonNeed > 0) {
                 Map<Integer, Integer> mixStudentsInRoomCommon = new HashMap<>();
@@ -325,35 +391,37 @@ public class SchedulerService implements SchedulerServiceInterface {
                         mixStudentsInRoomCommon.put(availableCommonRooms.get(i).getId(), updatedStudentCount);
                     }
                 }
-                fillStudentToRoom(mixStudentsInRoomCommon, allListLegitWithSubjectLabAndMix, semesterId, planExam);
+                fillStudentToRoom(mixStudentsInRoomCommon, allStudentLegitPerSlot, semesterId, planExam);
             }
         }
     }
 
     public List<Room> getAvailableRoom(PlanExam planExam, List<Room> allRooms) {
-        List<Scheduler> schedulers = schedulerRepository.findAllBySemesterIdAndEndDateAfter(
-                planExam.getSemesterId(), getStartDateFromPlanExam(planExam));
+        List<Scheduler> schedulers = schedulerRepository.findAllBySemesterIdAndStartDateBeforeAndEndDateAfter(
+                planExam.getSemesterId(), getStartDateFromPlanExam(planExam), getStartDateFromPlanExam(planExam));
         if (!schedulers.isEmpty()) {
             for (Scheduler scheduler : schedulers) {
                 if (scheduler.getStudentId() != null) {
-                    String[] assignedStudents = scheduler.getStudentId().split(",");
-                    if (assignedStudents.length > 0) {
-                        allRooms.remove(roomRepository.findById(scheduler.getRoomId()).get());
-                    }
+                    allRooms.remove(roomRepository.findById(scheduler.getRoomId()).get());
                 }
             }
         }
         return allRooms;
     }
 
-    public Map<Integer, Integer> calculateRoomAllocation(PlanExam planExam, List<StudentSubject> allStudentBySubjectCode, List<Room> rooms) throws Exception {
+    public Map<Integer, Integer> calculateRoomAllocation(List<StudentSubject> allStudentBySubjectCode, List<Room> rooms) throws Exception {
         int numberOfStudent = allStudentBySubjectCode.size();
+        List<String> uniqueSubjectCodes = allStudentBySubjectCode.stream()
+                .map(StudentSubject::getSubjectCode)
+                .distinct()
+                .toList();
+
         int numberOfRoomNeed = numberOfStudent / rooms.get(0).getQuantityStudent();
         if (numberOfStudent % rooms.get(0).getQuantityStudent() != 0) {
             numberOfRoomNeed++;
         }
         if (numberOfRoomNeed > rooms.size()) {
-            throw new Exception("Not enough room for " + planExam.getSubjectCode() + " with " + allStudentBySubjectCode.size() + " student. " +
+            throw new Exception("Not enough room for " + uniqueSubjectCodes + " with " + allStudentBySubjectCode.size() + " student. " +
                     "We have only " + rooms.size() + " rooms." +
                     "We need at least " + numberOfRoomNeed + " rooms.");
         }
@@ -393,18 +461,11 @@ public class SchedulerService implements SchedulerServiceInterface {
                                   List<StudentSubject> allStudentBySubjectCode, int semesterId, PlanExam planExam) {
         if (allStudentBySubjectCode.isEmpty() || studentsInRooms.isEmpty()) return;
         allStudentBySubjectCode = shuffleStudents(allStudentBySubjectCode);
-        String code = planExam.getSubjectCode();
-        List<ExamCode> examCodes = examCodeRepository.findBySemesterIdAndSubjectCode(semesterId, code);
-        StringBuilder examIds = new StringBuilder();
-        for (int i = 0; i < examCodes.size(); i++) {
-            examIds.append(examCodes.get(i).getId().toString());
-            if (i < examCodes.size() - 1) {
-                examIds.append(",");
-            }
-        }
+
         int studentIndex = 0;
         for (Map.Entry<Integer, Integer> entry : studentsInRooms.entrySet()) {
             String studentIds = "";
+            String subjectCodes = "";
             Room room = roomRepository.findById(entry.getKey()).get();
             Scheduler scheduler = schedulerRepository.findBySemesterIdAndRoomIdAndStartDateAndEndDate(
                     semesterId, room.getId(), getStartDateFromPlanExam(planExam), getEndDateFromPlanExam(planExam));
@@ -420,6 +481,9 @@ public class SchedulerService implements SchedulerServiceInterface {
             for (int j = 0; j < entry.getValue(); j++) {
                 if (studentIndex < allStudentBySubjectCode.size()) {
                     StudentSubject student = allStudentBySubjectCode.get(studentIndex);
+                    if (!subjectCodes.contains(student.getSubjectCode())) {
+                        subjectCodes += (student.getSubjectCode() + ",");
+                    }
                     studentIds += student.getId();
                     if (j < allStudentBySubjectCode.size() - 1) {
                         studentIds += ",";
@@ -435,15 +499,15 @@ public class SchedulerService implements SchedulerServiceInterface {
             // Assign the student to the room
             scheduler.setSemesterId(semesterId);
             scheduler.setRoomId(room.getId());
-            scheduler.setSubjectCode(planExam.getSubjectCode());
+            scheduler.setSubjectCode(subjectCodes);
             scheduler.setStudentId(studentIds);
-            scheduler.setExamCodeId(examIds.toString());
             scheduler.setStartDate(getStartDateFromPlanExam(planExam));
             scheduler.setEndDate(getEndDateFromPlanExam(planExam));
             schedulerRepository.save(scheduler);
 
         }
     }
+
 
     public LocalDateTime getStartDateFromPlanExam(PlanExam planExam) {
         Date expectedDate = planExam.getExpectedDate();
