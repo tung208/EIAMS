@@ -1,13 +1,11 @@
 package EIAMS.services;
 
-import EIAMS.entities.Semester;
+import EIAMS.dtos.StudentDto;
 import EIAMS.entities.Student;
 import EIAMS.entities.StudentSubject;
-import EIAMS.entities.Subject;
 import EIAMS.entities.csvRepresentation.BlackListRepresentation;
 import EIAMS.entities.csvRepresentation.CMNDCsvRepresentation;
 import EIAMS.entities.csvRepresentation.DSSVCsvRepresentation;
-import EIAMS.entities.csvRepresentation.SubjectCsvRepresentation;
 import EIAMS.helper.Pagination;
 import EIAMS.repositories.SemesterRepository;
 import EIAMS.repositories.StudentRepository;
@@ -15,13 +13,11 @@ import EIAMS.repositories.StudentSubjectRepository;
 import EIAMS.services.excel.ExcelBlackList;
 import EIAMS.services.excel.ExcelCMND;
 import EIAMS.services.excel.ExcelDSSV;
-import EIAMS.services.excel.ExcelSubject;
 import EIAMS.services.interfaces.StudentServiceInterface;
 import EIAMS.services.thread.SaveCMND;
 import EIAMS.services.thread.SaveStudent;
 import EIAMS.services.thread.SaveStudentSubject;
 
-import EIAMS.services.thread.SaveSubject;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -37,7 +33,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.*;
 import java.util.*;
 import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -52,8 +47,6 @@ public class StudentService implements StudentServiceInterface {
     private final Pagination pagination;
     private static final Logger logger = LoggerFactory.getLogger(StudentService.class);
 
-//    @Autowired
-//    private Job exportCsvJob;
 
     @Override
     public Page<Student> list(String search, String memberCode, Integer page, Integer limit) {
@@ -69,6 +62,13 @@ public class StudentService implements StudentServiceInterface {
     }
 
     @Override
+    public Page<StudentSubject> searchStudentSubject(Integer page, Integer limit, Integer semesterId, String rollNumber, String subjectCode, String groupName, String backList) {
+        Pageable pageable = PageRequest.of(page - 1, limit, Sort.by("id").descending());
+//        return studentSubjectRepository.findByDynamic(semesterId, rollNumber, subjectCode, groupName, backList, pageable);
+        return null;
+    }
+
+    @Override
     public List<Student> list() {
         return studentRepository.findAll();
     }
@@ -79,14 +79,16 @@ public class StudentService implements StudentServiceInterface {
     }
 
     @Override
-    public void update(int id, Student student) {
-        Optional<Student> s = studentRepository.findById(id);
+    public void update(StudentDto student) {
+        Optional<Student> s = studentRepository.findById(student.getId());
         if (s.isPresent()) {
-            Student studentUpdate = s.get();
-            studentUpdate.setRollNumber(student.getRollNumber());
-            studentUpdate.setFullName(student.getFullName());
-            studentUpdate.setCmtnd(student.getCmtnd());
-            studentUpdate.setMemberCode(student.getMemberCode());
+            Student studentUpdate = Student.builder()
+                    .id(student.getId())
+                    .rollNumber(student.getRollNumber())
+                    .memberCode(student.getMemberCode())
+                    .fullName(student.getFullName())
+                    .cmtnd(student.getCmtnd())
+                    .build();
             studentRepository.save(studentUpdate);
         }
     }
@@ -100,43 +102,6 @@ public class StudentService implements StudentServiceInterface {
     public void delete(int id) {
         studentRepository.deleteById(id);
     }
-
-//    @Override
-//    public void exportListStudent(List<Student> students, String filePath) {
-//        // Create a JobParameters with the file path as a parameter
-//        Map<String, JobParameter> parameters = new HashMap<>();
-//        parameters.put("filePath", new JobParameter(filePath));
-//
-//        JobParameters jobParameters = new JobParameters(parameters);
-//
-//        // Create a StepExecutionListener to set the list of students as a JobExecutionParameter
-//        StepExecutionListener stepExecutionListener = new StepExecutionListener() {
-//            @Override
-//            public void beforeStep(StepExecution stepExecution) {
-//                ExecutionContext executionContext = stepExecution.getExecutionContext();
-//                executionContext.put("students", students);
-//            }
-//
-//            @Override
-//            public ExitStatus afterStep(StepExecution stepExecution) {
-//                return null;
-//            }
-//        };
-//
-//        // Launch the export job
-//        try {
-//            JobExecution jobExecution = jobLauncher.run(exportCsvJob, jobParameters);
-//
-//            // Optional: Monitor job execution if needed
-//            BatchStatus batchStatus = jobExecution.getStatus();
-//            if (batchStatus != BatchStatus.COMPLETED) {
-//                // Handle job failure or other statuses
-//            }
-//        } catch (Exception e) {
-//            // Handle job launching exception
-//            e.printStackTrace();
-//        }
-//    }
 
     @Override
     public void saveCustomersToDatabase(MultipartFile file){

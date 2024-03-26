@@ -27,7 +27,7 @@ public class RoomController {
     public ResponseEntity<ResponseObject> importSubject(@RequestParam("file") MultipartFile file, @RequestParam("semester_id") int semesterId) throws IOException {
         roomService.uploadRoom(file,semesterId);
         return ResponseEntity.status(HttpStatus.OK).body(
-                new ResponseObject("OK", "Import Success", "Xin chao the gioi"));
+                new ResponseObject("OK", "Import Success", "Import Success"));
     }
 
     @GetMapping()
