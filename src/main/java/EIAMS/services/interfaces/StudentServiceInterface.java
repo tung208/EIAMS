@@ -30,5 +30,5 @@ public interface StudentServiceInterface {
 
      Page<Student> search(Integer page, Integer limit, String rollNumber, String memberCode, String fullName, String cmtnd);
 
-     Page<StudentSubject> searchStudentSubject(Integer page, Integer limit, Integer semesterId, String rollNumber, String subjectCode, String groupName, String backList);
+     Page<StudentSubject> searchStudentSubject(Integer page, Integer limit, Integer semesterId, String rollNumber, String subjectCode, String groupName, Integer backList);
 }

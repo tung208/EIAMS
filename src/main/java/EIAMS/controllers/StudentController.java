@@ -94,7 +94,7 @@ public class StudentController {
             @RequestParam(defaultValue = "") String rollNumber,
             @RequestParam(defaultValue = "") String subjectCode,
             @RequestParam(defaultValue = "") String groupName,
-            @RequestParam(defaultValue = "") String blackList
+            @RequestParam(defaultValue = "10") Integer blackList
     ) {
         Page<StudentSubject> page = studentService.searchStudentSubject(pageNo, pageSize,semesterId, rollNumber, subjectCode, groupName, blackList);
         return new PageResponse<>(page.getNumber() + 1, page.getTotalPages(), page.getSize(), page.getContent());

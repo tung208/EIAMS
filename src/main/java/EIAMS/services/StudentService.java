@@ -62,10 +62,10 @@ public class StudentService implements StudentServiceInterface {
     }
 
     @Override
-    public Page<StudentSubject> searchStudentSubject(Integer page, Integer limit, Integer semesterId, String rollNumber, String subjectCode, String groupName, String backList) {
+    public Page<StudentSubject> searchStudentSubject(Integer page, Integer limit, Integer semesterId, String rollNumber, String subjectCode, String groupName, Integer backList) {
         Pageable pageable = PageRequest.of(page - 1, limit, Sort.by("id").descending());
-//        return studentSubjectRepository.findByDynamic(semesterId, rollNumber, subjectCode, groupName, backList, pageable);
-        return null;
+        return studentSubjectRepository.findByDynamic(semesterId, rollNumber, subjectCode, groupName, backList, pageable);
+//        return null;
     }
 
     @Override
