@@ -32,15 +32,20 @@ public class SchedulerController {
             @RequestParam(name = "end_date", defaultValue = "") String end_date,
             @RequestParam(name = "page", required = false) Integer page,
             @RequestParam(name = "limit", required = false) Integer limit) {
-        List<Object> list = schedulerServiceInterface.list(
-                semesterId, search, start_date, end_date
-        );
-        if (list.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-                    new ResponseObject("NOT FOUND", "", null));
-        } else {
-            return ResponseEntity.status(HttpStatus.OK).body(
-                    new ResponseObject("OK", "", list));
+        try {
+            List<List<String>> list = schedulerServiceInterface.list(
+                    semesterId, search, start_date, end_date
+            );
+            if (list.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                        new ResponseObject("NOT FOUND", "", null));
+            } else {
+                return ResponseEntity.status(HttpStatus.OK).body(
+                        new ResponseObject("OK", "", list));
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    new ResponseObject("Fail", e.getMessage(), null));
         }
     }
 
@@ -62,15 +67,20 @@ public class SchedulerController {
             @RequestParam(name = "search", defaultValue = "") String search,
             @RequestParam(name = "page", required = false) Integer page,
             @RequestParam(name = "limit", required = false) Integer limit) {
-        Page<Student> list = schedulerServiceInterface.getListStudentInARoom(
-                schedulerId, search, page, limit
-        );
-        if (list.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-                    new ResponseObject("NOT FOUND", "", null));
-        } else {
-            return ResponseEntity.status(HttpStatus.OK).body(
-                    new ResponseObject("OK", "", list));
+        try {
+            Page<Student> list = schedulerServiceInterface.getListStudentInARoom(
+                    schedulerId, search, page, limit
+            );
+            if (list.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                        new ResponseObject("NOT FOUND", "", null));
+            } else {
+                return ResponseEntity.status(HttpStatus.OK).body(
+                        new ResponseObject("OK", "", list));
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    new ResponseObject("Fail", e.getMessage(), null));
         }
     }
 
@@ -78,15 +88,20 @@ public class SchedulerController {
     public ResponseEntity<ResponseObject> listScheduler(
             @RequestParam(name = "semester_id") Integer semesterId,
             @RequestParam(name = "subject_code") String subjectCode) {
-        List<Scheduler> list = schedulerServiceInterface.getListSchedulerBySubjectCode(
-                semesterId, subjectCode
-        );
-        if (list.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-                    new ResponseObject("NOT FOUND", "", null));
-        } else {
-            return ResponseEntity.status(HttpStatus.OK).body(
-                    new ResponseObject("OK", "", list));
+        try {
+            List<Scheduler> list = schedulerServiceInterface.getListSchedulerBySubjectCode(
+                    semesterId, subjectCode
+            );
+            if (list.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                        new ResponseObject("NOT FOUND", "", null));
+            } else {
+                return ResponseEntity.status(HttpStatus.OK).body(
+                        new ResponseObject("OK", "", list));
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    new ResponseObject("Fail", e.getMessage(), null));
         }
     }
 }

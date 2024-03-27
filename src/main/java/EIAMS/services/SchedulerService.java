@@ -33,28 +33,51 @@ public class SchedulerService implements SchedulerServiceInterface {
     private final Pagination pagination;
 
     @Override
-    public List<Object> list(Integer semesterId, String search, String startDate, String endDate) {
+    public List<List<String>> list(Integer semesterId, String search, String startDate, String endDate) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        Map<String, Set<String>> subjectCodesByTimeRange = new LinkedHashMap<>();
+
+        List<Object> results;
         if (startDate.isBlank() && endDate.isBlank()) {
-            return schedulerRepository.findAllBySemesterIdAndSubjectCodeContains(semesterId, search);
-        }
-        if (startDate.isBlank() && !endDate.isBlank()) {
+            results = schedulerRepository.findAllBySemesterIdAndSubjectCodeContains(semesterId, search);
+        } else if (startDate.isBlank() && !endDate.isBlank()) {
             LocalDateTime endDateSearch = LocalDateTime.parse(endDate, formatter);
-            return schedulerRepository.findAllBySemesterIdAndEndDateBeforeAndSubjectCodeContains(semesterId, endDateSearch, search);
-        }
-        if (!startDate.isBlank() && endDate.isBlank()) {
+            results = schedulerRepository.findAllBySemesterIdAndEndDateBeforeAndSubjectCodeContains(semesterId, endDateSearch, search);
+        } else if (!startDate.isBlank() && endDate.isBlank()) {
             LocalDateTime startDateSearch = LocalDateTime.parse(startDate, formatter);
-            return schedulerRepository.findAllBySemesterIdAndStartDateAfterAndSubjectCodeContains(semesterId, startDateSearch, search);
-        }
-        if (!startDate.isBlank() && !endDate.isBlank()) {
+            results = schedulerRepository.findAllBySemesterIdAndStartDateAfterAndSubjectCodeContains(semesterId, startDateSearch, search);
+        } else {
             LocalDateTime endDateSearch = LocalDateTime.parse(endDate, formatter);
             LocalDateTime startDateSearch = LocalDateTime.parse(startDate, formatter);
-            return schedulerRepository.findAllBySemesterIdAndStartDateAfterAndEndDateBeforeAndSubjectCodeContains(
+            results = schedulerRepository.findAllBySemesterIdAndStartDateAfterAndEndDateBeforeAndSubjectCodeContains(
                     semesterId, startDateSearch, endDateSearch, search);
         }
-        return null;
-    }
 
+        // Group subject codes by time range and eliminate duplicates
+        for (Object result : results) {
+            if (result instanceof Object[]) {
+                Object[] row = (Object[]) result;
+                String startTime = row[1].toString();
+                String endTime = row[2].toString();
+                String timeRangeKey = startTime + "_" + endTime;
+                String[] subjectCodes = row[0].toString().split(",");
+                Set<String> uniqueSubjectCodes = subjectCodesByTimeRange.computeIfAbsent(timeRangeKey, k -> new HashSet<>());
+                uniqueSubjectCodes.addAll(Arrays.asList(subjectCodes));
+            }
+        }
+
+        // Convert map entries to List<List<String>> for response
+        List<List<String>> response = new ArrayList<>();
+        for (Map.Entry<String, Set<String>> entry : subjectCodesByTimeRange.entrySet()) {
+            List<String> entryList = new ArrayList<>();
+            entryList.add(String.join(",", entry.getValue()));
+            entryList.add(entry.getKey().split("_")[0]); // Start time
+            entryList.add(entry.getKey().split("_")[1]); // End time
+            response.add(entryList);
+        }
+
+        return response;
+    }
     @Override
     public Page<Student> getListStudentInARoom(Integer schedulerId, String search, Integer page, Integer limit) {
         Pageable pageable = pagination.getPageable(page, limit);
@@ -75,7 +98,7 @@ public class SchedulerService implements SchedulerServiceInterface {
 
     @Override
     public List<Scheduler> getListSchedulerBySubjectCode(Integer semesterId, String subjectCode) {
-        return schedulerRepository.findAllBySemesterIdAndSubjectCode(semesterId, subjectCode);
+        return schedulerRepository.findAllBySemesterIdAndSubjectCodeContainingOrderByStartDate(semesterId, subjectCode);
     }
 
     @Transactional
@@ -513,6 +536,12 @@ public class SchedulerService implements SchedulerServiceInterface {
                 } else {
                     break; // No more students to assign
                 }
+            }
+            if (subjectCodes.endsWith(",")) {
+                subjectCodes = subjectCodes.substring(0, subjectCodes.length() - 1);
+            }
+            if (studentIds.endsWith(",")) {
+                studentIds = studentIds.substring(0, studentIds.length() - 1);
             }
             if (scheduler == null) {
                 scheduler = new Scheduler();
