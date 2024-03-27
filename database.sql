@@ -68,6 +68,7 @@ CREATE TABLE `Scheduler` (
   `semester_id` int(11) NOT NULL,
   `slot_id` int(11),
   `room_id` int(11) NOT NULL,
+  `lecture_id` int(11) NOT NULL,
   `subject_code` longtext,
   `exam_code_id` longtext,
   `student_id` longtext,
@@ -108,6 +109,14 @@ CREATE TABLE `PlanExam` (
   `type_exam` varchar(64),
   `subject_code` varchar(64)
 );
+
+CREATE TABLE `Lecturer` (
+  `id` int(11) PRIMARY KEY AUTO_INCREMENT,
+  `semester_id` int,
+  `code_name` varchar(64),
+  `email` varchar(64)
+);
+
 
 CREATE INDEX semester_index ON Subject(semester_id);
 CREATE INDEX semester_index1 ON StudentSubject(semester_id);
