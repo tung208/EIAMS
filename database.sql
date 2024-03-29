@@ -114,7 +114,8 @@ CREATE TABLE `Lecturer` (
   `id` int(11) PRIMARY KEY AUTO_INCREMENT,
   `semester_id` int,
   `code_name` varchar(64),
-  `email` varchar(64)
+  `email` varchar(64),
+  `total_slot` int
 );
 
 

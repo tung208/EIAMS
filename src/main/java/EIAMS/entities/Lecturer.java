@@ -24,4 +24,8 @@ public class Lecturer {
 
     @Column(name = "email", length = 64)
     private String email;
+
+    @Column(name = "total_slot")
+    private Integer totalSlot;
+
 }
