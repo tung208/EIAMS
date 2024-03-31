@@ -104,4 +104,16 @@ public class SchedulerController {
                     new ResponseObject("Fail", e.getMessage(), null));
         }
     }
+
+    @GetMapping(path = "/set-exam-code")
+    public ResponseEntity<ResponseObject> setExamCode(@RequestParam(name = "semester_id") Integer semesterId) {
+        try {
+            schedulerServiceInterface.setExamCode(semesterId);
+            return ResponseEntity.status(HttpStatus.OK).body(
+                    new ResponseObject("OK", "Set ExamCode Success", null));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    new ResponseObject("Fail", e.getMessage(), null));
+        }
+    }
 }

@@ -439,6 +439,31 @@ public class SchedulerService implements SchedulerServiceInterface {
         }
     }
 
+    @Override
+    public void setExamCode(int semesterId) {
+        List<Scheduler> schedulers = schedulerRepository.findAll();
+        if (schedulers.isEmpty()) return;
+
+        for (Scheduler s : schedulers) {
+            String subjectCodes = s.getSubjectCode();
+            String[] subjectCodesArray = subjectCodes.split(",");
+            StringBuilder examIdsBuilder = new StringBuilder();
+
+            Arrays.stream(subjectCodesArray)
+                    .map(subjectCode -> examCodeRepository.findBySemesterIdAndSubjectCode(semesterId, subjectCode))
+                    .flatMap(List::stream)
+                    .forEach(e -> examIdsBuilder.append(e.getId()).append(","));
+
+            String examIds = examIdsBuilder.toString();
+            if (examIds.endsWith(",")) {
+                examIds = examIds.substring(0, examIds.length() - 1);
+            }
+
+            s.setExamCodeId(examIds);
+            schedulerRepository.save(s);
+        }
+    }
+
     public List<Room> getAvailableRoom(PlanExam planExam, List<Room> allRooms) {
         List<Scheduler> schedulers = schedulerRepository.findAllBySemesterIdAndStartDateBeforeAndEndDateAfter(
                 planExam.getSemesterId(), getStartDateFromPlanExam(planExam), getStartDateFromPlanExam(planExam));
