@@ -1,5 +1,6 @@
 package EIAMS.services;
 
+import EIAMS.dtos.SubjectDto;
 import EIAMS.entities.Semester;
 import EIAMS.entities.StudentSubject;
 import EIAMS.entities.Subject;
@@ -16,6 +17,7 @@ import EIAMS.services.thread.SaveSubject;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.annotation.Order;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -27,6 +29,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -73,6 +76,8 @@ public class SubjectService implements SubjectServiceInterface {
                     .shortName(safeTrim(element.getShortName(),1))
                     .subjectName(safeTrim(element.getSubjectName(),0))
                     .replacedBy(safeTrim(element.getReplacedBy(),1))
+                    .dontMix(0)
+                    .noLab(0)
                     .build();
             subjectList.add(subject);
         }
@@ -125,5 +130,29 @@ public class SubjectService implements SubjectServiceInterface {
         } else {
             return str == null ? null : str.trim();
         }
+    }
+
+    @Override
+    public void update(SubjectDto subject){
+        Optional<Subject> s = subjectRepository.findById(subject.getId());
+        if (s.isPresent()) {
+            Subject subjectUpdate = Subject.builder()
+                    .id(subject.getId())
+                    .semesterId(subject.getSemesterId())
+                    .subjectCode(subject.getSubjectCode())
+                    .oldSubjectCode(subject.getOldSubjectCode())
+                    .shortName(subject.getShortName())
+                    .subjectName(subject.getSubjectName())
+                    .noLab(subject.getNoLab())
+                    .dontMix(subject.getDontMix())
+                    .replacedBy(subject.getReplacedBy())
+                    .build();
+            subjectRepository.save(subjectUpdate);
+        }
+    }
+
+    @Override
+    public void delete(int id){
+        subjectRepository.deleteById(id);
     }
 }

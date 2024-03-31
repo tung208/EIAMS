@@ -1,5 +1,6 @@
 package EIAMS.controllers;
 
+import EIAMS.dtos.SubjectDto;
 import EIAMS.entities.Semester;
 import EIAMS.entities.Subject;
 import EIAMS.entities.responeObject.PageResponse;
@@ -51,5 +52,19 @@ public class SubjectController {
     ){
         Page<Subject> page =  subjectService.search(pageNo, pageSize, semesterId, code, name);
         return new PageResponse<>(page.getNumber() + 1, page.getTotalPages(), page.getSize(), page.getContent());
+    }
+
+    @PutMapping
+    public ResponseEntity<ResponseObject> update(@RequestBody SubjectDto subjectDto){
+        subjectService.update(subjectDto);
+        return ResponseEntity.status(HttpStatus.OK).body(
+                new ResponseObject("OK", "Update Success", ""));
+    }
+
+    @DeleteMapping
+    public ResponseEntity<ResponseObject> delete(@RequestBody int id){
+        subjectService.delete(id);
+        return ResponseEntity.status(HttpStatus.OK).body(
+                new ResponseObject("OK", "Delele Success", ""));
     }
 }

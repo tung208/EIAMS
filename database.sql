@@ -49,8 +49,8 @@ CREATE TABLE `Subject` (
   `old_subject_code` varchar(255),
   `short_name` varchar(255),
   `subject_name` varchar(255),
-  `no_lab` int,
-  `dont_mix` int,
+  `no_lab` int DEFAULT '0',
+  `dont_mix` int DEFAULT '0',
   `replaced_by` varchar(255)
 );
 

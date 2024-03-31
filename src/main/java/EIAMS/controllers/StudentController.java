@@ -40,20 +40,6 @@ public class StudentController {
         return new PageResponse<>(page.getNumber() + 1, page.getTotalPages(), page.getSize(), page.getContent());
     }
 
-    @GetMapping("/export")
-    public ResponseEntity<ResponseObject> exportStudents() {
-        try {
-            List<Student> studentList = studentService.list();
-            String filePath = "src/main/resources/export/students.csv";
-//            studentService.exportListStudent(studentList, filePath);
-            return ResponseEntity.status(HttpStatus.OK).body(
-                    new ResponseObject("OK", "Export Success", null));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ResponseObject("FAIL", "Export Fail", e.getMessage()));
-        }
-
-    }
-
     @PostMapping("/import")
     public ResponseEntity<ResponseObject> importStudents(@RequestParam("file") MultipartFile file,@RequestParam("semester_id") int semesterId) throws IOException {
         studentService.uploadStudents(file,semesterId);
@@ -76,12 +62,12 @@ public class StudentController {
     }
 
     @PutMapping("/update")
-    public void update(@RequestBody StudentDto studentDto) {
+    public void updateStudent(@RequestBody StudentDto studentDto) {
         studentService.update(studentDto);
     }
 
     @DeleteMapping("/delete")
-    public void delete(@RequestParam int id) {
+    public void deleteStudent(@RequestParam int id) {
         studentService.delete(id);
     }
 
@@ -98,5 +84,12 @@ public class StudentController {
     ) {
         Page<StudentSubject> page = studentService.searchStudentSubject(pageNo, pageSize,semesterId, rollNumber, subjectCode, groupName, blackList);
         return new PageResponse<>(page.getNumber() + 1, page.getTotalPages(), page.getSize(), page.getContent());
+    }
+
+    @PutMapping("/subject")
+    public ResponseEntity<ResponseObject> updateStudentSubject() {
+
+        return ResponseEntity.status(HttpStatus.OK).body(
+                new ResponseObject("OK", "Update Success", ""));
     }
 }

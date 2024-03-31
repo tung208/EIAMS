@@ -34,10 +34,10 @@ public class Subject {
     @Column(name = "subject_name")
     private String subjectName;
 
-    @Column(name = "no_lab")
+    @Column(name = "no_lab", columnDefinition = "integer default '0'")
     private Integer noLab;
 
-    @Column(name = "dont_mix")
+    @Column(name = "dont_mix", columnDefinition = "integer default '0'")
     private Integer dontMix;
 
     @Column(name = "replaced_by")

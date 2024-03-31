@@ -1,6 +1,7 @@
 package EIAMS.services.interfaces;
 
 import EIAMS.dtos.StudentDto;
+import EIAMS.dtos.StudentSubjectDto;
 import EIAMS.entities.Semester;
 import EIAMS.entities.Student;
 import EIAMS.entities.StudentSubject;
@@ -31,4 +32,6 @@ public interface StudentServiceInterface {
      Page<Student> search(Integer page, Integer limit, String rollNumber, String memberCode, String fullName, String cmtnd);
 
      Page<StudentSubject> searchStudentSubject(Integer page, Integer limit, Integer semesterId, String rollNumber, String subjectCode, String groupName, Integer backList);
+
+     void updateStudentSubject(StudentSubjectDto studentSubjectDto);
 }

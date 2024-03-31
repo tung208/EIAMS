@@ -22,7 +22,7 @@ public class Room {
     @Column(name = "type", length = 32)
     private String type;
 
-    @Column(name = "quantity_student", columnDefinition = "integer default 20")
+    @Column(name = "quantity_student", columnDefinition = "integer default '20'")
     private Integer quantityStudent;
 
     @Column(name = "semester_id")

@@ -38,11 +38,10 @@ public class ExcelRoom {
 
 //                room.setRoomId(Integer.parseInt(isValidExcel.getValueFromCell(row.getCell(0))));
                 room.setRoomNo(isValidExcel.getValueFromCell(row.getCell(1)));
-//                System.out.println(isValidExcel.getValueFromCell(row.getCell(2)));
 
                 String strNumber = isValidExcel.getValueFromCell(row.getCell(2));
                 if (strNumber == "") {
-                    strNumber = "0";
+                    strNumber = "20";
                 }
                 double doubleNumber = Double.parseDouble(strNumber);
                 int intNumber = (int) doubleNumber;

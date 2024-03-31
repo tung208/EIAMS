@@ -1,6 +1,7 @@
 package EIAMS.services;
 
 import EIAMS.dtos.StudentDto;
+import EIAMS.dtos.StudentSubjectDto;
 import EIAMS.entities.Student;
 import EIAMS.entities.StudentSubject;
 import EIAMS.entities.csvRepresentation.BlackListRepresentation;
@@ -255,6 +256,16 @@ public class StudentService implements StudentServiceInterface {
             return str == null ? null : str.toUpperCase().trim();
         } else {
             return str == null ? null : str.trim();
+        }
+    }
+
+    @Override
+    public void updateStudentSubject(StudentSubjectDto studentSubjectDto) {
+        Optional<StudentSubject> ss = studentSubjectRepository.findById(studentSubjectDto.getId());
+        if (ss.isPresent()) {
+            StudentSubject studentSubject = StudentSubject.builder()
+
+                        .build();
         }
     }
 }

@@ -1,9 +1,6 @@
 package EIAMS.dtos;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.Value;
+import lombok.*;
 
 import java.io.Serializable;
 
@@ -14,8 +11,11 @@ import java.io.Serializable;
 @AllArgsConstructor
 @Builder
 public class SubjectDto {
+    @NonNull
     Integer id;
+    @NonNull
     Integer semesterId;
+    @NonNull
     String subjectCode;
     String oldSubjectCode;
     String shortName;
