@@ -1,5 +1,6 @@
 package EIAMS.services;
 
+import EIAMS.dtos.ExamCodeDto;
 import EIAMS.entities.ExamCode;
 import EIAMS.entities.Semester;
 import EIAMS.entities.csvRepresentation.ExamCodeRepresentation;
@@ -77,5 +78,36 @@ public class ExamCodeService implements ExamCodeServiceInterface {
     public Page<ExamCode> search(Integer page, Integer limit, Integer semesterId , String subjectCode) {
         Pageable pageable = PageRequest.of(page - 1, limit, Sort.by("id").descending());
         return examCodeRepository.findByDynamic(semesterId, subjectCode, pageable);
+    }
+
+    @Override
+    public ExamCode create(ExamCodeDto examCodeDto) {
+        ExamCode examCode = ExamCode.builder()
+                .semesterId(examCodeDto.getSemesterId())
+                .subjectCode(examCodeDto.getSubjectCode())
+                .examCode(examCodeDto.getSubjectCode())
+                .exam(examCodeDto.getExam())
+                .type(examCodeDto.getType())
+                .build();
+        examCodeRepository.save(examCode);
+        return examCode;
+    }
+
+    @Override
+    public void update(ExamCodeDto examCodeDto) {
+        ExamCode examCode = ExamCode.builder()
+                .id(examCodeDto.getId())
+                .semesterId(examCodeDto.getSemesterId())
+                .subjectCode(examCodeDto.getSubjectCode())
+                .examCode(examCodeDto.getSubjectCode())
+                .exam(examCodeDto.getExam())
+                .type(examCodeDto.getType())
+                .build();
+        examCodeRepository.save(examCode);
+    }
+
+    @Override
+    public void delete(Integer id) {
+        examCodeRepository.deleteById(id);
     }
 }
