@@ -12,6 +12,7 @@ import java.util.List;
 
 public interface SchedulerRepository extends JpaRepository<Scheduler, Integer> {
     List<Scheduler> findAllBySemesterId(Integer semesterId);
+    List<Scheduler> findAllBySemesterIdOrderByStartDate(Integer semesterId);
     List<Scheduler> findAllBySemesterIdAndSubjectCodeContainingOrderByStartDate(Integer semesterId, String subjectCode);
     Scheduler findBySemesterIdAndRoomIdAndStartDateAndEndDate(Integer semesterId, Integer roomId, LocalDateTime startDate, LocalDateTime endDate);
     @Query("""
@@ -50,4 +51,8 @@ public interface SchedulerRepository extends JpaRepository<Scheduler, Integer> {
             """)
     List<Object> findAllBySemesterIdAndEndDateBeforeAndSubjectCodeContains(
             Integer semesterId, LocalDateTime endDate, String subjectCode);
+
+    long countAllBySemesterId(Integer semesterId);
+
+    int countAllBySemesterIdAndLecturerId(Integer semesterId, Integer lecturerId);
 }

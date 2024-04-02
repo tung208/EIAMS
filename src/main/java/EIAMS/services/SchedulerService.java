@@ -19,6 +19,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static EIAMS.constants.DBTableUtils.SUBJECT_CODE_SPECIAL;
+
 @Service
 @RequiredArgsConstructor
 public class SchedulerService implements SchedulerServiceInterface {
@@ -30,6 +32,7 @@ public class SchedulerService implements SchedulerServiceInterface {
     private final SchedulerRepository schedulerRepository;
     private final PlanExamRepository planExamRepository;
     private final ExamCodeRepository examCodeRepository;
+    private final LecturerRepository lecturerRepository;
     private final Pagination pagination;
 
     @Override
@@ -613,5 +616,58 @@ public class SchedulerService implements SchedulerServiceInterface {
         int endMinute = Integer.parseInt(endParts[1]);
 
         return localDateTime.withHour(endHour).withMinute(endMinute);
+    }
+
+    @Override
+    public void arrangeLecturer(int semesterId) throws Exception {
+        List<Lecturer> allLecturers = lecturerRepository.findAllBySemesterId(semesterId);
+        int totalSlots = (int) schedulerRepository.countAllBySemesterId(semesterId);
+        List<Scheduler> schedulers = schedulerRepository.findAllBySemesterIdOrderByStartDate(semesterId);
+        List<Scheduler> schedulersTemp = new ArrayList<>(schedulers);
+
+        for (Scheduler scheduler : schedulersTemp) {
+            String[] subjectCodes = scheduler.getSubjectCode().split(",");
+            String subjectMatch = null;
+
+            // Find a subject code match in the scheduler
+            for (String code : subjectCodes) {
+                if (Arrays.asList(SUBJECT_CODE_SPECIAL).contains(code)) {
+                    subjectMatch = code;
+                    break;
+                }
+            }
+            Lecturer assignedLecturer = null;
+            for (Lecturer l: allLecturers ) {
+                if(isAvailableSlotExamOfLecturer(semesterId, l.getId()) && subjectMatch != null && Arrays.asList(l.getExamSubject().split(",")).contains(subjectMatch)) {
+                    assignedLecturer = l;
+                    break;
+                }
+            }
+            if (assignedLecturer != null) {
+                scheduler.setLecturerId(assignedLecturer.getId());
+                schedulerRepository.save(scheduler);
+                schedulersTemp.remove(scheduler);
+            }
+        }
+        for (Scheduler scheduler : schedulersTemp) {
+            Lecturer assignedLecturer = null;
+            for (Lecturer l: allLecturers ) {
+                if(isAvailableSlotExamOfLecturer(semesterId, l.getId())) {
+                    assignedLecturer = l;
+                    break;
+                }
+            }
+            if (assignedLecturer != null) {
+                scheduler.setLecturerId(assignedLecturer.getId());
+                schedulerRepository.save(scheduler);
+            }
+        }
+    }
+
+    public boolean isAvailableSlotExamOfLecturer(int semesterId, int lecturerId) {
+        Lecturer lecturer = lecturerRepository.findLecturerByIdAndSemesterId(lecturerId, semesterId);
+        int slotMin = lecturer.getTotalSlot();
+        int slotExamNow = schedulerRepository.countAllBySemesterIdAndLecturerId(semesterId, lecturerId);
+        return slotExamNow < slotMin;
     }
 }
