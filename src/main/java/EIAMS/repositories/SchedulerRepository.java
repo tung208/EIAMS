@@ -55,4 +55,7 @@ public interface SchedulerRepository extends JpaRepository<Scheduler, Integer> {
     long countAllBySemesterId(Integer semesterId);
 
     int countAllBySemesterIdAndLecturerId(Integer semesterId, Integer lecturerId);
+
+    List<Scheduler> findAllBySemesterIdAndSubjectCodeIn(Integer semesterId, Collection<String> subjectCode);
+    List<Scheduler> findAllBySemesterIdAndSubjectCodeNotIn(Integer semesterId, Collection<String> subjectCode);
 }

@@ -623,15 +623,17 @@ public class SchedulerService implements SchedulerServiceInterface {
         List<Lecturer> allLecturers = lecturerRepository.findAllBySemesterId(semesterId);
         int totalSlots = (int) schedulerRepository.countAllBySemesterId(semesterId);
         List<Scheduler> schedulers = schedulerRepository.findAllBySemesterIdOrderByStartDate(semesterId);
-        List<Scheduler> schedulersTemp = new ArrayList<>(schedulers);
+        List<Scheduler> schedulerWithSpecialSubject = schedulerRepository.findAllBySemesterIdAndSubjectCodeIn(semesterId, SUBJECT_CODE_SPECIAL);
 
-        for (Scheduler scheduler : schedulersTemp) {
+        List<Scheduler> schedulerWithNormalSubject = schedulerRepository.findAllBySemesterIdAndSubjectCodeNotIn(semesterId, SUBJECT_CODE_SPECIAL);
+
+        for (Scheduler scheduler : schedulers) {
             String[] subjectCodes = scheduler.getSubjectCode().split(",");
             String subjectMatch = null;
 
             // Find a subject code match in the scheduler
             for (String code : subjectCodes) {
-                if (Arrays.asList(SUBJECT_CODE_SPECIAL).contains(code)) {
+                if (SUBJECT_CODE_SPECIAL.contains(code)) {
                     subjectMatch = code;
                     break;
                 }
