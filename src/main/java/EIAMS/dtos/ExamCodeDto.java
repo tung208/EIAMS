@@ -10,6 +10,8 @@ import java.io.Serializable;
 @Data
 @AllArgsConstructor
 @Builder
+@Setter
+@Getter
 public class ExamCodeDto {
     Integer id;
     @NonNull

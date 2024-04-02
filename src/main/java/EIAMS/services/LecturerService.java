@@ -1,5 +1,6 @@
 package EIAMS.services;
 
+import EIAMS.dtos.LecturerDto;
 import EIAMS.entities.ExamCode;
 import EIAMS.entities.Lecturer;
 import EIAMS.entities.csvRepresentation.ExamCodeRepresentation;
@@ -65,5 +66,43 @@ public class LecturerService implements LecturerServiceInterface {
     public Page<Lecturer> search(Integer page, Integer limit, Integer semesterId, String email, String examSubject, int totalSlot) {
         Pageable pageable = PageRequest.of(page - 1, limit, Sort.by("id").descending());
         return lecturerRepository.findByDynamic(semesterId, email, examSubject, totalSlot, pageable);
+    }
+
+    @Override
+    public Lecturer create(LecturerDto lecturerDto) {
+        List<Lecturer> lecturerList = lecturerRepository.findBySemesterIdAndEmail(lecturerDto.getSemesterId(), lecturerDto.getEmail());
+        if (lecturerList.size() > 0){
+            return null;
+        }
+        int index = lecturerDto.getEmail().indexOf("@");
+        String codeName = lecturerDto.getEmail().substring(0, index);
+        Lecturer lecturer = Lecturer.builder()
+                .semesterId(lecturerDto.getSemesterId())
+                .email(lecturerDto.getEmail())
+                .examSubject(lecturerDto.getExamSubject())
+                .totalSlot(lecturerDto.getTotalSlot())
+                .codeName(codeName)
+                .build();
+        lecturerRepository.save(lecturer);
+        return lecturer;
+    }
+
+    @Override
+    public void update(int id, LecturerDto lecturerDto) {
+        int index = lecturerDto.getEmail().indexOf("@");
+        String codeName = lecturerDto.getEmail().substring(0, index);
+        Lecturer lecturer = Lecturer.builder()
+                .id(id)
+                .semesterId(lecturerDto.getSemesterId())
+                .email(lecturerDto.getEmail())
+                .examSubject(lecturerDto.getExamSubject())
+                .codeName(codeName)
+                .totalSlot(lecturerDto.getTotalSlot())
+                .build();
+    }
+
+    @Override
+    public void delete(int id) {
+        lecturerRepository.deleteById(id);
     }
 }

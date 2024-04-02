@@ -9,6 +9,8 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 public interface LecturerRepository extends JpaRepository<Lecturer,Integer> {
     @Transactional
     @Modifying
@@ -22,5 +24,7 @@ public interface LecturerRepository extends JpaRepository<Lecturer,Integer> {
             "AND (:totalSlot = 0 or s.totalSlot = :totalSlot )"
     )
     Page<Lecturer> findByDynamic(Integer semesterId, String email,String examSubject, Integer totalSlot, Pageable pageable);
+
+    List<Lecturer> findBySemesterIdAndEmail(Integer semesterId, String email);
 }
 

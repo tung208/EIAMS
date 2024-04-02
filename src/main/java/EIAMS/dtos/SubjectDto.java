@@ -11,8 +11,8 @@ import java.io.Serializable;
 @AllArgsConstructor
 @Builder
 public class SubjectDto {
-    @NonNull
     Integer id;
+
     @NonNull
     Integer semesterId;
     @NonNull
