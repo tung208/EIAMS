@@ -10,4 +10,6 @@ import lombok.*;
 public class LecturerRepresentation {
     String codeName;
     String email;
+    int totalSlot;
+    String examSubject;
 }

@@ -26,20 +26,20 @@ public class SubjectController {
     public ResponseEntity<ResponseObject> importSubject(@RequestParam("file") MultipartFile file, @RequestParam("semester_id") int semesterId) throws IOException {
         subjectService.uploadSubject(file,semesterId);
         return ResponseEntity.status(HttpStatus.OK).body(
-                new ResponseObject("OK", "Import Success", "Xin chao the gioi"));
+                new ResponseObject("OK", "Import Success", ""));
     }
 
     @PostMapping("/import-nolab")
     public ResponseEntity<ResponseObject> importSubjectNoLab(@RequestParam("file") MultipartFile file, @RequestParam("semester_id") int semesterId) throws IOException {
         subjectService.uploadSubjectNoLab(file,semesterId);
         return ResponseEntity.status(HttpStatus.OK).body(
-                new ResponseObject("OK", "Import Success", "Xin chao the gioi"));
+                new ResponseObject("OK", "Import Success", ""));
     }
     @PostMapping("/import-dontmix")
     public ResponseEntity<ResponseObject> importSubjectDontMix(@RequestParam("file") MultipartFile file, @RequestParam("semester_id") int semesterId) throws IOException {
         subjectService.uploadSubjectDontMix(file,semesterId);
         return ResponseEntity.status(HttpStatus.OK).body(
-                new ResponseObject("OK", "Import Success", "Xin chao the gioi"));
+                new ResponseObject("OK", "Import Success", ""));
     }
 
     @GetMapping()

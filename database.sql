@@ -115,6 +115,7 @@ CREATE TABLE `Lecturer` (
   `semester_id` int,
   `code_name` varchar(64),
   `email` varchar(64),
+  `exam_subject` varchar(124),
   `total_slot` int
 );
 

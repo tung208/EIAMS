@@ -22,6 +22,9 @@ public class Lecturer {
     @Column(name = "code_name")
     private String codeName;
 
+    @Column(name = "exam_subject")
+    private String examSubject;
+
     @Column(name = "email", length = 64)
     private String email;
 

@@ -26,6 +26,7 @@ public class StudentController {
     @Autowired
     private StudentService studentService;
 
+
     @GetMapping()
     public PageResponse<Student> list(
             @RequestParam(defaultValue = "1") Integer pageNo,
