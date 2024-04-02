@@ -27,5 +27,7 @@ public interface LecturerRepository extends JpaRepository<Lecturer,Integer> {
     Page<Lecturer> findByDynamic(Integer semesterId, String email,String examSubject, Integer totalSlot, Pageable pageable);
 
     Lecturer findLecturerByIdAndSemesterId(Integer id, Integer semesterId);
+
+    List<Lecturer> findBySemesterIdAndEmail(Integer semesterId, String email);
 }
 

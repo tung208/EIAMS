@@ -14,6 +14,8 @@ public interface SubjectServiceInterface {
     Integer uploadSubjectDontMix(MultipartFile file, int semester_id) throws IOException;
     Page<Subject> search(Integer page, Integer limit, Integer semesterId , String name, String code);
 
-    void update(SubjectDto subjectDto);
+    void update(int id, SubjectDto subjectDto);
     void delete(int id);
+
+    Subject create(SubjectDto subjectDto);
 }

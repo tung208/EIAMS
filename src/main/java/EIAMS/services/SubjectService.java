@@ -133,11 +133,11 @@ public class SubjectService implements SubjectServiceInterface {
     }
 
     @Override
-    public void update(SubjectDto subject){
+    public void update(int id, SubjectDto subject){
         Optional<Subject> s = subjectRepository.findById(subject.getId());
         if (s.isPresent()) {
             Subject subjectUpdate = Subject.builder()
-                    .id(subject.getId())
+                    .id(id)
                     .semesterId(subject.getSemesterId())
                     .subjectCode(subject.getSubjectCode())
                     .oldSubjectCode(subject.getOldSubjectCode())
@@ -155,4 +155,21 @@ public class SubjectService implements SubjectServiceInterface {
     public void delete(int id){
         subjectRepository.deleteById(id);
     }
+
+    @Override
+    public Subject create(SubjectDto subjectDto) {
+        Subject subject = Subject.builder()
+                .semesterId(subjectDto.getSemesterId())
+                .subjectCode(subjectDto.getSubjectCode())
+                .oldSubjectCode(subjectDto.getOldSubjectCode())
+                .shortName(subjectDto.getShortName())
+                .subjectName(subjectDto.getSubjectName())
+                .noLab(subjectDto.getNoLab())
+                .dontMix(subjectDto.getDontMix())
+                .replacedBy(subjectDto.getReplacedBy())
+                .build();
+        return subject;
+    }
+
+
 }

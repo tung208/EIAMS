@@ -1,5 +1,6 @@
 package EIAMS.controllers;
 
+import EIAMS.dtos.ExamCodeDto;
 import EIAMS.entities.ExamCode;
 import EIAMS.entities.Semester;
 import EIAMS.entities.responeObject.PageResponse;
@@ -39,5 +40,27 @@ public class ExamCodeController {
     ){
         Page<ExamCode> page =  examCodeService.search(pageNo, pageSize, semesterId, subjectCode);
         return new PageResponse<>(page.getNumber() + 1, page.getTotalPages(), page.getSize(), page.getContent());
+    }
+
+
+    @PostMapping()
+    public ResponseEntity<ResponseObject> createExamCode(@RequestBody ExamCodeDto examCodeDto
+    ){
+        ExamCode examCode = examCodeService.create(examCodeDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body( new ResponseObject("OK", "Create Success", examCode));
+    }
+
+    @PutMapping()
+    public ResponseEntity<ResponseObject> updateExamCode(@RequestBody ExamCodeDto examCodeDto
+    ){
+        examCodeService.update(examCodeDto);
+        return ResponseEntity.status(HttpStatus.OK).body( new ResponseObject("OK", "Create Success", ""));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ResponseObject> deleteExamCode(@PathVariable Integer id
+    ){
+        examCodeService.delete(id);
+        return ResponseEntity.status(HttpStatus.OK).body( new ResponseObject("OK", "Delete Success", ""));
     }
 }

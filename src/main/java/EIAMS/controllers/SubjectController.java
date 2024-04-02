@@ -54,17 +54,24 @@ public class SubjectController {
         return new PageResponse<>(page.getNumber() + 1, page.getTotalPages(), page.getSize(), page.getContent());
     }
 
-    @PutMapping
-    public ResponseEntity<ResponseObject> update(@RequestBody SubjectDto subjectDto){
-        subjectService.update(subjectDto);
+    @PutMapping("/{id}")
+    public ResponseEntity<ResponseObject> update(@PathVariable int id, @RequestBody SubjectDto subjectDto){
+        subjectService.update(id, subjectDto);
         return ResponseEntity.status(HttpStatus.OK).body(
                 new ResponseObject("OK", "Update Success", ""));
     }
 
-    @DeleteMapping
-    public ResponseEntity<ResponseObject> delete(@RequestBody int id){
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ResponseObject> delete(@PathVariable int id){
         subjectService.delete(id);
         return ResponseEntity.status(HttpStatus.OK).body(
                 new ResponseObject("OK", "Delele Success", ""));
+    }
+
+    @PostMapping()
+    public ResponseEntity<ResponseObject> create(SubjectDto subjectDto){
+        Subject subject = subjectService.create(subjectDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(
+                new ResponseObject("OK", "Create Success", ""));
     }
 }
