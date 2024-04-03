@@ -619,15 +619,17 @@ public class SchedulerService implements SchedulerServiceInterface {
     }
 
     @Override
-    public void arrangeLecturer(int semesterId) throws Exception {
+    @Transactional
+    public void arrangeLecturer(int semesterId){
+        schedulerRepository.resetLecturerId(semesterId);
         List<Lecturer> allLecturers = lecturerRepository.findAllBySemesterId(semesterId);
-        int totalSlots = (int) schedulerRepository.countAllBySemesterId(semesterId);
-        List<Scheduler> schedulers = schedulerRepository.findAllBySemesterIdOrderByStartDate(semesterId);
+//        int totalSlots = (int) schedulerRepository.countAllBySemesterId(semesterId);
+//        List<Scheduler> schedulers = schedulerRepository.findAllBySemesterIdOrderByStartDate(semesterId);
         List<Scheduler> schedulerWithSpecialSubject = schedulerRepository.findAllBySemesterIdAndSubjectCodeIn(semesterId, SUBJECT_CODE_SPECIAL);
 
         List<Scheduler> schedulerWithNormalSubject = schedulerRepository.findAllBySemesterIdAndSubjectCodeNotIn(semesterId, SUBJECT_CODE_SPECIAL);
 
-        for (Scheduler scheduler : schedulers) {
+        for (Scheduler scheduler : schedulerWithSpecialSubject) {
             String[] subjectCodes = scheduler.getSubjectCode().split(",");
             String subjectMatch = null;
 
@@ -638,30 +640,22 @@ public class SchedulerService implements SchedulerServiceInterface {
                     break;
                 }
             }
-            Lecturer assignedLecturer = null;
             for (Lecturer l: allLecturers ) {
-                if(isAvailableSlotExamOfLecturer(semesterId, l.getId()) && subjectMatch != null && Arrays.asList(l.getExamSubject().split(",")).contains(subjectMatch)) {
-                    assignedLecturer = l;
+                if(isAvailableSlotExamOfLecturer(semesterId, l.getId()) && subjectMatch != null && Arrays.asList(l.getExamSubject().split(",")).contains(subjectMatch)
+                    && isNotHaveSlotExamOfLecturer(semesterId,l.getId(), scheduler)) {
+                    scheduler.setLecturerId(l.getId());
+                    schedulerRepository.save(scheduler);
                     break;
                 }
-            }
-            if (assignedLecturer != null) {
-                scheduler.setLecturerId(assignedLecturer.getId());
-                schedulerRepository.save(scheduler);
-                schedulersTemp.remove(scheduler);
             }
         }
-        for (Scheduler scheduler : schedulersTemp) {
-            Lecturer assignedLecturer = null;
+        for (Scheduler scheduler : schedulerWithNormalSubject) {
             for (Lecturer l: allLecturers ) {
-                if(isAvailableSlotExamOfLecturer(semesterId, l.getId())) {
-                    assignedLecturer = l;
+                if(isAvailableSlotExamOfLecturer(semesterId, l.getId()) && isNotHaveSlotExamOfLecturer(semesterId,l.getId(), scheduler)) {
+                    scheduler.setLecturerId(l.getId());
+                    schedulerRepository.save(scheduler);
                     break;
                 }
-            }
-            if (assignedLecturer != null) {
-                scheduler.setLecturerId(assignedLecturer.getId());
-                schedulerRepository.save(scheduler);
             }
         }
     }
@@ -671,5 +665,9 @@ public class SchedulerService implements SchedulerServiceInterface {
         int slotMin = lecturer.getTotalSlot();
         int slotExamNow = schedulerRepository.countAllBySemesterIdAndLecturerId(semesterId, lecturerId);
         return slotExamNow < slotMin;
+    }
+    public boolean isNotHaveSlotExamOfLecturer(int semesterId, int lecturerId, Scheduler scheduler) {
+        List<Scheduler> schedulers = schedulerRepository.findBySemesterIdAndLecturerIdAvailable(semesterId, lecturerId, scheduler.getStartDate(), scheduler.getEndDate());
+        return schedulers.isEmpty();
     }
 }

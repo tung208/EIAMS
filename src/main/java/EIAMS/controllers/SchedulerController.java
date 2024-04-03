@@ -118,7 +118,7 @@ public class SchedulerController {
     }
 
     @GetMapping(path = "arrange-lecturer")
-    public ResponseEntity<ResponseObject> arrangeLecturer(@RequestParam(name = "semester_id") Integer semesterId) throws Exception {
+    public ResponseEntity<ResponseObject> arrangeLecturer(@RequestParam(name = "semester_id") Integer semesterId) {
 //        try {
             schedulerServiceInterface.arrangeLecturer(semesterId);
             return ResponseEntity.status(HttpStatus.OK).body(

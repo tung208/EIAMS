@@ -45,7 +45,7 @@ public class Scheduler {
     @Column(name = "end_date")
     private LocalDateTime endDate;
 
-    @Column(name = "lecturer_id", nullable = false)
+    @Column(name = "lecturer_id")
     private Integer lecturerId;
 
 }
