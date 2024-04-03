@@ -1,5 +1,6 @@
 package EIAMS.controllers;
 
+import EIAMS.dtos.PlanExamDto;
 import EIAMS.entities.PlanExam;
 import EIAMS.entities.Semester;
 import EIAMS.entities.responeObject.PageResponse;
@@ -44,5 +45,32 @@ public class PlanExamController {
     ){
         Page<PlanExam> page =  planExamService.search(pageNo, pageSize, semesterId, subjectCode);
         return new PageResponse<>(page.getNumber() + 1, page.getTotalPages(), page.getSize(), page.getContent());
+    }
+
+    @PostMapping
+    public ResponseEntity<ResponseObject> createPlanExam(@RequestBody PlanExamDto planExamDto){
+        planExamService.create(planExamDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(
+                new ResponseObject("OK",
+                        "Create Success",
+                        ""));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<ResponseObject> upldatePlanExam(@PathVariable int id, @RequestBody PlanExamDto planExamDto){
+        planExamService.update(id, planExamDto);
+        return ResponseEntity.status(HttpStatus.OK).body(
+                new ResponseObject("OK",
+                        "Update Success",
+                        ""));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ResponseObject> deletePlanExam(@PathVariable int id){
+        planExamService.delete((id));
+        return ResponseEntity.status(HttpStatus.OK).body(
+                new ResponseObject("OK",
+                        "Delete Success",
+                        ""));
     }
 }
