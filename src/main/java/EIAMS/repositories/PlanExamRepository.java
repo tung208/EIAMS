@@ -24,4 +24,12 @@ public interface PlanExamRepository extends JpaRepository<PlanExam, Integer> {
             "WHERE (s.semesterId = :semesterId)" +
             "AND (:subjectCode = '' or s.subjectCode LIKE %:subjectCode% )" )
     Page<PlanExam> findByDynamic(Integer semesterId, String subjectCode, Pageable pageable);
+
+    @Query("SELECT s FROM PlanExam s "
+            + "WHERE (s.semesterId = :semesterId)"
+            + "AND DATEDIFF(s.expectedDate, :expectedDate) = 0"
+            + "AND UPPER(s.expectedTime) = UPPER(:expectedTime)"
+            + "AND UPPER(s.typeExam) = UPPER(:typeExam)"
+            + "AND UPPER(s.subjectCode) = UPPER(:subjectCode)")
+    List<PlanExam> findBySameObject(Integer semesterId, java.sql.Date expectedDate, String expectedTime,String typeExam, String subjectCode);
 }

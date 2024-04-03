@@ -1,5 +1,6 @@
 package EIAMS.services;
 
+import EIAMS.dtos.PlanExamDto;
 import EIAMS.entities.PlanExam;
 import EIAMS.entities.Semester;
 import EIAMS.entities.csvRepresentation.PlanExamRepresentation;
@@ -90,5 +91,49 @@ public class PlanExamService implements PlanExamServiceInterface {
     public Page<PlanExam> search(Integer page, Integer limit, Integer semesterId , String subjectCode) {
         Pageable pageable = PageRequest.of(page - 1, limit, Sort.by("id").descending());
         return planExamRepository.findByDynamic(semesterId, subjectCode, pageable);
+    }
+
+    @Override
+    public PlanExam create(PlanExamDto planExamDto) {
+        List<PlanExam> planExamList = planExamRepository.findBySameObject(planExamDto.getSemesterId(),
+                planExamDto.getExpectedDate(), planExamDto.getExpectedTime(), planExamDto.getTypeExam(),
+                planExamDto.getSubjectCode());
+        if (planExamList.size() > 0){
+            return null;
+        }
+        PlanExam planExam = PlanExam.builder()
+                .semesterId(planExamDto.getSemesterId())
+                .expectedDate(planExamDto.getExpectedDate())
+                .expectedTime(planExamDto.getExpectedTime())
+                .typeExam(planExamDto.getTypeExam())
+                .subjectCode(planExamDto.getSubjectCode())
+                .build();
+        planExamRepository.save(planExam);
+        return planExam;
+    }
+
+    @Override
+    public void update(int id, PlanExamDto planExamDto) {
+        List<PlanExam> planExamList = planExamRepository.findBySameObject(planExamDto.getSemesterId(),
+                planExamDto.getExpectedDate(), planExamDto.getExpectedTime(), planExamDto.getTypeExam(),
+                planExamDto.getSubjectCode());
+        if (planExamList.size() > 0){
+            // Ban ra exception
+            return ;
+        }
+        PlanExam planExam = PlanExam.builder()
+                .id(id)
+                .semesterId(planExamDto.getSemesterId())
+                .expectedDate(planExamDto.getExpectedDate())
+                .expectedTime(planExamDto.getExpectedTime())
+                .typeExam(planExamDto.getTypeExam())
+                .subjectCode(planExamDto.getSubjectCode())
+                .build();
+        planExamRepository.save(planExam);
+    }
+
+    @Override
+    public void delete(int id) {
+        planExamRepository.deleteById(id);
     }
 }
