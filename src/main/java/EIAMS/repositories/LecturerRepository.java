@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 public interface LecturerRepository extends JpaRepository<Lecturer,Integer> {
+    List<Lecturer> findAllBySemesterId(Integer semesterId);
     @Transactional
     @Modifying
     @Query("DELETE FROM Lecturer le WHERE le.semesterId = :semesterId")
@@ -24,6 +25,8 @@ public interface LecturerRepository extends JpaRepository<Lecturer,Integer> {
             "AND (:totalSlot = 0 or s.totalSlot = :totalSlot )"
     )
     Page<Lecturer> findByDynamic(Integer semesterId, String email,String examSubject, Integer totalSlot, Pageable pageable);
+
+    Lecturer findLecturerByIdAndSemesterId(Integer id, Integer semesterId);
 
     List<Lecturer> findBySemesterIdAndEmail(Integer semesterId, String email);
 }
