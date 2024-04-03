@@ -68,8 +68,8 @@ public class StudentController {
         studentService.update(studentDto);
     }
 
-    @DeleteMapping("/delete")
-    public void deleteStudent(@RequestParam int id) {
+    @DeleteMapping("/delete/{id}")
+    public void deleteStudent(@PathVariable int id) {
         studentService.delete(id);
     }
 
