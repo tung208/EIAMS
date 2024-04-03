@@ -4,6 +4,7 @@ import EIAMS.entities.Scheduler;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
 import java.time.LocalDateTime;
@@ -12,6 +13,7 @@ import java.util.List;
 
 public interface SchedulerRepository extends JpaRepository<Scheduler, Integer> {
     List<Scheduler> findAllBySemesterId(Integer semesterId);
+    List<Scheduler> findAllBySemesterIdOrderByStartDate(Integer semesterId);
     List<Scheduler> findAllBySemesterIdAndSubjectCodeContainingOrderByStartDate(Integer semesterId, String subjectCode);
     Scheduler findBySemesterIdAndRoomIdAndStartDateAndEndDate(Integer semesterId, Integer roomId, LocalDateTime startDate, LocalDateTime endDate);
     @Query("""
@@ -50,4 +52,21 @@ public interface SchedulerRepository extends JpaRepository<Scheduler, Integer> {
             """)
     List<Object> findAllBySemesterIdAndEndDateBeforeAndSubjectCodeContains(
             Integer semesterId, LocalDateTime endDate, String subjectCode);
+
+    long countAllBySemesterId(Integer semesterId);
+
+    int countAllBySemesterIdAndLecturerId(Integer semesterId, Integer lecturerId);
+
+    List<Scheduler> findAllBySemesterIdAndSubjectCodeIn(Integer semesterId, Collection<String> subjectCode);
+    List<Scheduler> findAllBySemesterIdAndSubjectCodeNotIn(Integer semesterId, Collection<String> subjectCode);
+
+    @Query("""
+            select s from Scheduler s
+            where s.semesterId = ?1 and s.lecturerId = ?2 and ((s.startDate >= ?3 and s.endDate <= ?4) or (s.startDate > ?3 and s.endDate < ?4) or (s.startDate < ?3 and s.endDate > ?3) or (s.startDate < ?4 and s.endDate > ?4))""")
+    List<Scheduler> findBySemesterIdAndLecturerIdAvailable(Integer semesterId, Integer lecturerId, LocalDateTime startDate, LocalDateTime endDate);
+
+    @Modifying
+    @Query("""
+        update Scheduler s set s.lecturerId = 0 where s.semesterId = ?1""")
+    void resetLecturerId(int semesterId);
 }

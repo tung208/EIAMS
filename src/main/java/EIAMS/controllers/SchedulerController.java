@@ -116,4 +116,16 @@ public class SchedulerController {
                     new ResponseObject("Fail", e.getMessage(), null));
         }
     }
+
+    @GetMapping(path = "arrange-lecturer")
+    public ResponseEntity<ResponseObject> arrangeLecturer(@RequestParam(name = "semester_id") Integer semesterId) {
+//        try {
+            schedulerServiceInterface.arrangeLecturer(semesterId);
+            return ResponseEntity.status(HttpStatus.OK).body(
+                    new ResponseObject("OK", "Arrange Lecturer Success", null));
+//        } catch (Exception e) {
+//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+//                    new ResponseObject("Fail", e.getMessage(), null));
+//        }
+    }
 }
