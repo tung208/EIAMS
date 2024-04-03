@@ -17,7 +17,7 @@ import static org.springframework.http.HttpMethod.*;
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
-@EnableMethodSecurity
+//@EnableMethodSecurity
 public class SecurityConfiguration {
 
 //    private final JwtAuthenticationFilter jwtAuthFilter;

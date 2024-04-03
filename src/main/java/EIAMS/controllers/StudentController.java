@@ -62,6 +62,7 @@ public class StudentController {
                 new ResponseObject("OK", "Import Success", ""));
     }
 
+//    @CrossOrigin(origins = "http://localhost:7000/")
     @PutMapping("/update")
     public void updateStudent(@RequestBody StudentDto studentDto) {
         studentService.update(studentDto);
