@@ -126,7 +126,7 @@ public class SchedulerController {
                     new ResponseObject("Fail", e.getMessage(), null));
         }
     }
-    @PostMapping(path = "arrange-lecturer")
+    @PostMapping(path = "update-lecturer")
     public ResponseEntity<ResponseObject> updateLecture(@RequestParam(name = "scheduler_id") Integer schedulerId,
                                                         @RequestBody() Integer lecturerId) {
         try {
