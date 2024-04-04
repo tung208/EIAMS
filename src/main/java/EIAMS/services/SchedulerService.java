@@ -684,6 +684,13 @@ public class SchedulerService implements SchedulerServiceInterface {
         }
     }
 
+    @Override
+    public Scheduler updateLecturer(int schedulerId, int lecturerId) {
+        Scheduler scheduler = schedulerRepository.findById(schedulerId).get();
+        scheduler.setLecturerId(lecturerId);
+        return schedulerRepository.save(scheduler);
+    }
+
     public boolean isAvailableSlotExamOfLecturer(int semesterId, int lecturerId) {
         Lecturer lecturer = lecturerRepository.findLecturerByIdAndSemesterId(lecturerId, semesterId);
         int slotMin = lecturer.getTotalSlot();
