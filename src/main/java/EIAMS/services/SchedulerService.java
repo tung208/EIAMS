@@ -1,6 +1,7 @@
 package EIAMS.services;
 
 import EIAMS.constants.DBTableUtils;
+import EIAMS.dtos.SchedulerDetailDto;
 import EIAMS.entities.*;
 import EIAMS.helper.Pagination;
 import EIAMS.repositories.*;
@@ -26,6 +27,7 @@ import static EIAMS.constants.DBTableUtils.SUBJECT_CODE_SPECIAL;
 public class SchedulerService implements SchedulerServiceInterface {
     private final StudentSubjectRepository studentSubjectRepository;
     private final StudentRepository studentRepository;
+    private final SemesterRepository semesterRepository;
     private final RoomRepository roomRepository;
     private final SubjectRepository subjectRepository;
     private final SlotRepository slotRepository;
@@ -100,8 +102,30 @@ public class SchedulerService implements SchedulerServiceInterface {
     }
 
     @Override
-    public List<Scheduler> getListSchedulerBySubjectCode(Integer semesterId, String subjectCode) {
-        return schedulerRepository.findAllBySemesterIdAndSubjectCodeContainingOrderByStartDate(semesterId, subjectCode);
+    public List<SchedulerDetailDto> getListSchedulerBySubjectCode(Integer semesterId, String subjectCode) {
+        List<Scheduler> schedulers = schedulerRepository.findAllBySemesterIdAndSubjectCodeContainingOrderByStartDate(semesterId, subjectCode);
+
+        return schedulers.stream()
+                .map(scheduler -> {
+                    String lecturerEmail = null;
+                    if(scheduler.getLecturerId() != null && lecturerRepository.findById(scheduler.getLecturerId()).isPresent()){
+                        lecturerEmail = lecturerRepository.findById(scheduler.getLecturerId()).get().getEmail();
+                    };
+                    return SchedulerDetailDto.builder()
+                            .id(scheduler.getId())
+                            .semesterId(scheduler.getSemesterId())
+                            .semesterName(semesterRepository.findById(scheduler.getSemesterId()).get().getName())
+                            .lecturerId(scheduler.getLecturerId())
+                            .lecturerEmail(lecturerEmail)
+                            .startDate(scheduler.getStartDate())
+                            .endDate(scheduler.getEndDate())
+                            .examCodeId(scheduler.getExamCodeId())
+                            .roomId(scheduler.getRoomId())
+                            .roomName(roomRepository.findById(scheduler.getRoomId()).get().getName())
+                            .studentId(scheduler.getStudentId())
+                            .build();
+                })
+                .collect(Collectors.toList());
     }
 
     @Transactional

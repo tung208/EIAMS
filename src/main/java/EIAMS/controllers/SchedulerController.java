@@ -1,5 +1,6 @@
 package EIAMS.controllers;
 
+import EIAMS.dtos.SchedulerDetailDto;
 import EIAMS.entities.Scheduler;
 import EIAMS.entities.Student;
 import EIAMS.entities.responeObject.ResponseObject;
@@ -87,9 +88,9 @@ public class SchedulerController {
     @GetMapping(path = "/get-by-subject")
     public ResponseEntity<ResponseObject> listScheduler(
             @RequestParam(name = "semester_id") Integer semesterId,
-            @RequestParam(name = "subject_code") String subjectCode) {
+            @RequestParam(name = "subject_code", defaultValue = "") String subjectCode) {
         try {
-            List<Scheduler> list = schedulerServiceInterface.getListSchedulerBySubjectCode(
+            List<SchedulerDetailDto> list = schedulerServiceInterface.getListSchedulerBySubjectCode(
                     semesterId, subjectCode
             );
             if (list.isEmpty()) {

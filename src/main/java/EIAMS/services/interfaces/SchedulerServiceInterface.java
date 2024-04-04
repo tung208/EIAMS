@@ -1,5 +1,6 @@
 package EIAMS.services.interfaces;
 
+import EIAMS.dtos.SchedulerDetailDto;
 import EIAMS.entities.Scheduler;
 import EIAMS.entities.Student;
 import org.springframework.data.domain.Page;
@@ -13,5 +14,5 @@ public interface SchedulerServiceInterface {
     void arrangeLecturer(int semesterId);
     List<List<String>> list(Integer semesterId, String search, String startDate, String endDate);
     Page<Student> getListStudentInARoom(Integer schedulerId,String search, Integer page, Integer limit);
-    List<Scheduler> getListSchedulerBySubjectCode(Integer semesterId, String subjectCode);
+    List<SchedulerDetailDto> getListSchedulerBySubjectCode(Integer semesterId, String subjectCode);
 }
