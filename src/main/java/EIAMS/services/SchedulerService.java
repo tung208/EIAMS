@@ -7,6 +7,7 @@ import EIAMS.helper.Pagination;
 import EIAMS.repositories.*;
 import EIAMS.services.interfaces.SchedulerServiceInterface;
 import lombok.RequiredArgsConstructor;
+import org.apache.coyote.BadRequestException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -14,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -477,8 +479,22 @@ public class SchedulerService implements SchedulerServiceInterface {
         }
     }
 
+    public static Date getDateFromLocalDateTime(LocalDateTime localDateTime) throws ParseException {
+        LocalDate date = localDateTime.toLocalDate(); // Extract date part
+        LocalDateTime midnight = date.atStartOfDay(); // Set time to midnight
+        return Date.from(midnight.atZone(ZoneId.systemDefault()).toInstant());
+
+    }
+
+    public static String getTimeStringFromLocalDateTime(LocalDateTime localDateTime) {
+        int hour = localDateTime.getHour();
+        int minute = localDateTime.getMinute();
+
+        return String.format("%02dH%02d", hour, minute);
+    }
+
     @Override
-    public void setExamCode(int semesterId) {
+    public void setExamCode(int semesterId) throws Exception {
         List<Scheduler> schedulers = schedulerRepository.findAll();
         if (schedulers.isEmpty()) return;
 
@@ -487,10 +503,19 @@ public class SchedulerService implements SchedulerServiceInterface {
             String[] subjectCodesArray = subjectCodes.split(",");
             StringBuilder examIdsBuilder = new StringBuilder();
 
-            Arrays.stream(subjectCodesArray)
-                    .map(subjectCode -> examCodeRepository.findBySemesterIdAndSubjectCode(semesterId, subjectCode))
-                    .flatMap(List::stream)
-                    .forEach(e -> examIdsBuilder.append(e.getId()).append(","));
+            for (String subjectCode : subjectCodesArray) {
+                List<ExamCode> examCodes = examCodeRepository.findBySemesterIdAndSubjectCode(semesterId, subjectCode);
+                List<PlanExam> planExamsByCode = planExamRepository.findAllBySemesterIdAndSubjectCode(semesterId, subjectCode);
+                if(planExamsByCode.size() > examCodes.size()) {
+                    throw new Exception("Not enough exam code for " + planExamsByCode.size() + "slots");
+                }
+                String expectedTime = getTimeStringFromLocalDateTime(s.getStartDate())+"-"+getTimeStringFromLocalDateTime(s.getEndDate());
+                Date expectedDate = getDateFromLocalDateTime(s.getStartDate());
+                PlanExam planExam = planExamRepository.findBySemesterIdAndSubjectCodeAndExpectedDateAndExpectedTime(
+                        semesterId, subjectCode, expectedDate, expectedTime);
+                int indexOfPlanExam = planExamsByCode.indexOf(planExam);
+                examIdsBuilder.append(examCodes.get(indexOfPlanExam).getId()).append(",");
+            }
 
             String examIds = examIdsBuilder.toString();
             if (examIds.endsWith(",")) {
