@@ -12,11 +12,13 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 //import project.backend.repository.UserRepository;
 
 @Configuration
 @RequiredArgsConstructor
+@EnableWebMvc
 public class ApplicationConfig implements WebMvcConfigurer {
 
 //    private final UserRepository repository;
@@ -47,7 +49,9 @@ public class ApplicationConfig implements WebMvcConfigurer {
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping("/**");
+        registry.addMapping("/api/**")
+                .allowedOrigins("http://localhost:7000/")
+                .allowedMethods("PUT", "DELETE","GET", "POST");
     }
 
 }

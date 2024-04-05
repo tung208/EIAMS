@@ -62,13 +62,14 @@ public class StudentController {
                 new ResponseObject("OK", "Import Success", ""));
     }
 
+//    @CrossOrigin(origins = "http://localhost:7000/")
     @PutMapping("/update")
     public void updateStudent(@RequestBody StudentDto studentDto) {
         studentService.update(studentDto);
     }
 
-    @DeleteMapping("/delete")
-    public void deleteStudent(@RequestParam int id) {
+    @DeleteMapping("/delete/{id}")
+    public void deleteStudent(@PathVariable int id) {
         studentService.delete(id);
     }
 
