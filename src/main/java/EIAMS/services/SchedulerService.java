@@ -38,24 +38,23 @@ public class SchedulerService implements SchedulerServiceInterface {
     private final Pagination pagination;
 
     @Override
-    public List<List<String>> list(Integer semesterId, String search, String startDate, String endDate) {
+    public List<List<String>> list(String search, String startDate, String endDate) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         Map<String, Set<String>> subjectCodesByTimeRange = new LinkedHashMap<>();
 
         List<Object> results;
         if (startDate.isBlank() && endDate.isBlank()) {
-            results = schedulerRepository.findAllBySemesterIdAndSubjectCodeContains(semesterId, search);
+            results = schedulerRepository.findAllBySubjectCodeContains(search);
         } else if (startDate.isBlank() && !endDate.isBlank()) {
             LocalDateTime endDateSearch = LocalDateTime.parse(endDate, formatter);
-            results = schedulerRepository.findAllBySemesterIdAndEndDateBeforeAndSubjectCodeContains(semesterId, endDateSearch, search);
+            results = schedulerRepository.findAllByEndDateBeforeAndSubjectCodeContains(endDateSearch, search);
         } else if (!startDate.isBlank() && endDate.isBlank()) {
             LocalDateTime startDateSearch = LocalDateTime.parse(startDate, formatter);
-            results = schedulerRepository.findAllBySemesterIdAndStartDateAfterAndSubjectCodeContains(semesterId, startDateSearch, search);
+            results = schedulerRepository.findAllByStartDateAfterAndSubjectCodeContains(startDateSearch, search);
         } else {
             LocalDateTime endDateSearch = LocalDateTime.parse(endDate, formatter);
             LocalDateTime startDateSearch = LocalDateTime.parse(startDate, formatter);
-            results = schedulerRepository.findAllBySemesterIdAndStartDateAfterAndEndDateBeforeAndSubjectCodeContains(
-                    semesterId, startDateSearch, endDateSearch, search);
+            results = schedulerRepository.findAllByStartDateAfterAndEndDateBeforeAndSubjectCodeContains(startDateSearch, endDateSearch, search);
         }
 
         // Group subject codes by time range and eliminate duplicates

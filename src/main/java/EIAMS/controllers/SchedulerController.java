@@ -24,16 +24,13 @@ public class SchedulerController {
 
     @GetMapping(path = "/index")
     public ResponseEntity<ResponseObject> list(
-            @RequestParam(name = "semester_id") Integer semesterId,
             @RequestParam(name = "search", defaultValue = "") String search,
             @RequestParam(name = "start_date", defaultValue = "") String start_date,
             @RequestParam(name = "end_date", defaultValue = "") String end_date,
             @RequestParam(name = "page", required = false) Integer page,
             @RequestParam(name = "limit", required = false) Integer limit) {
         try {
-            List<List<String>> list = schedulerServiceInterface.list(
-                    semesterId, search, start_date, end_date
-            );
+            List<List<String>> list = schedulerServiceInterface.list(search, start_date, end_date);
             if (list.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
                         new ResponseObject("NOT FOUND", "", null));

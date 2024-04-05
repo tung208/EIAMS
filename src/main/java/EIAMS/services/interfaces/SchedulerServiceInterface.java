@@ -11,7 +11,7 @@ public interface SchedulerServiceInterface {
     void setExamCode(int semesterId);
     void arrangeLecturer(int semesterId);
     void updateLecturer(int schedulerId, int lecturerId);
-    List<List<String>> list(Integer semesterId, String search, String startDate, String endDate);
+    List<List<String>> list(String search, String startDate, String endDate);
     Page<Student> getListStudentInARoom(Integer schedulerId,String search, Integer page, Integer limit);
     List<SchedulerDetailDto> getListSchedulerBySubjectCode(Integer semesterId, String subjectCode);
     void swapLecturer(int schedulerId, int schedulerSwapId);
