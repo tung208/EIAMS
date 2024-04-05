@@ -128,6 +128,18 @@ public class SchedulerService implements SchedulerServiceInterface {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public void swapLecturer(int schedulerId, int schedulerSwapId) {
+        Scheduler scheduler = schedulerRepository.findById(schedulerId).get();
+        int oldId = scheduler.getLecturerId();
+        Scheduler schedulerSwap = schedulerRepository.findById(schedulerSwapId).get();
+        int newId = schedulerSwap.getLecturerId();
+        scheduler.setLecturerId(newId);
+        schedulerSwap.setLecturerId(oldId);
+        schedulerRepository.save(scheduler);
+        schedulerRepository.save(schedulerSwap);
+    }
+
     @Transactional
     public void deleteBySemesterId(Integer semesterId) {
         if (!schedulerRepository.findAllBySemesterId(semesterId).isEmpty()) {
@@ -685,10 +697,10 @@ public class SchedulerService implements SchedulerServiceInterface {
     }
 
     @Override
-    public Scheduler updateLecturer(int schedulerId, int lecturerId) {
+    public void updateLecturer(int schedulerId, int lecturerId) {
         Scheduler scheduler = schedulerRepository.findById(schedulerId).get();
         scheduler.setLecturerId(lecturerId);
-        return schedulerRepository.save(scheduler);
+        schedulerRepository.save(scheduler);
     }
 
     public boolean isAvailableSlotExamOfLecturer(int semesterId, int lecturerId) {

@@ -138,4 +138,17 @@ public class SchedulerController {
                     new ResponseObject("Fail", e.getMessage(), null));
         }
     }
+
+    @PostMapping(path = "swap-lecturer")
+    public ResponseEntity<ResponseObject> swapLecture(@RequestParam(name = "scheduler_id") Integer schedulerId,
+                                                        @RequestBody() Integer schedulerSwapId) {
+        try {
+            schedulerServiceInterface.swapLecturer(schedulerId,schedulerSwapId);
+            return ResponseEntity.status(HttpStatus.OK).body(
+                    new ResponseObject("OK", "Update Lecture Success", null));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    new ResponseObject("Fail", e.getMessage(), null));
+        }
+    }
 }
