@@ -68,7 +68,7 @@ CREATE TABLE `Scheduler` (
   `semester_id` int(11) NOT NULL,
   `slot_id` int(11),
   `room_id` int(11) NOT NULL,
-  `lecture_id` int(11) NOT NULL,
+  `lecturer_id` int(11),
   `subject_code` longtext,
   `exam_code_id` longtext,
   `student_id` longtext,

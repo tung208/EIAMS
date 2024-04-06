@@ -19,6 +19,7 @@ public interface PlanExamRepository extends JpaRepository<PlanExam, Integer> {
     List<PlanExam> findAllBySemesterIdAndExpectedDateAndExpectedTimeAndSubjectCodeIn(Integer semesterId, Date expectedDate, String expectedTime, Collection<String> subjectCode);
     List<PlanExam> findAllBySemesterIdAndExpectedDateAndExpectedTime(Integer semesterId, Date expectedDate, String expectedTime);
     List<PlanExam> findAllBySemesterIdAndSubjectCodeIn(Integer semesterId, Collection<String> subjectCode);
+    PlanExam findBySemesterIdAndSubjectCodeAndExpectedDateAndExpectedTime(Integer semesterId, String subjectCode, Date expectedDate, String expectedTime);
 
     @Query("SELECT s FROM PlanExam s " +
             "WHERE (s.semesterId = :semesterId)" +

@@ -16,53 +16,55 @@ public interface SchedulerRepository extends JpaRepository<Scheduler, Integer> {
     List<Scheduler> findAllBySemesterIdOrderByStartDate(Integer semesterId);
     List<Scheduler> findAllBySemesterIdAndSubjectCodeContainingOrderByStartDate(Integer semesterId, String subjectCode);
     Scheduler findBySemesterIdAndRoomIdAndStartDateAndEndDate(Integer semesterId, Integer roomId, LocalDateTime startDate, LocalDateTime endDate);
+
     @Query("""
             select s from Scheduler s
             where s.semesterId = ?1 and s.subjectCode <> ?2 and s.startDate = ?3 and s.endDate = ?4""")
     List<Scheduler> findAllBySemesterIdAndSubjectCodeNotAndStartDateAndEndDate(Integer semesterId, String subjectCode, LocalDateTime startDate, LocalDateTime endDate);
+
     @Query("""
             select s from Scheduler s
             where s.semesterId = ?1 and s.subjectCode not in ?2 and s.startDate = ?3 and s.endDate = ?4""")
     List<Scheduler> findAllBySemesterIdAndSubjectCodeNotInAndStartDateAndEndDate(Integer semesterId, Collection<String> subjectCode, LocalDateTime startDate, LocalDateTime endDate);
 
-    @Query("select s from Scheduler s where s.semesterId = ?1 and s.startDate < ?2 and s.endDate > ?3 order by s.startDate asc")
+    @Query("select s from Scheduler s where s.semesterId = ?1 and ((s.startDate > ?2 and s.endDate < ?3) or (s.startDate < ?2 and s.endDate > ?2) or (s.startDate < ?3 and s.endDate > ?3)) order by s.startDate asc")
     List<Scheduler> findAllBySemesterIdAndStartDateBeforeAndEndDateAfter(Integer semesterId, LocalDateTime startDate, LocalDateTime endDate);
+
     void deleteBySemesterId(Integer semesterId);
+
     @Query("""
             select distinct s.subjectCode, s.startDate, s.endDate from Scheduler s
-            where s.semesterId = ?1 and s.startDate > ?2 and s.endDate < ?3 and s.subjectCode like concat('%', ?4, '%')
+            where s.startDate > ?1 and s.endDate < ?2 and s.subjectCode like concat('%', ?3, '%')
             order by s.startDate asc
             """)
-    List<Object> findAllBySemesterIdAndStartDateAfterAndEndDateBeforeAndSubjectCodeContains(
-            Integer semesterId, LocalDateTime startDate, LocalDateTime endDate, String subjectCode);
-    @Query("select distinct s.subjectCode, s.startDate, s.endDate from Scheduler s where s.semesterId = ?1 and s.subjectCode like concat('%', ?2, '%')" +
+    List<Object> findAllByStartDateAfterAndEndDateBeforeAndSubjectCodeContains(LocalDateTime startDate, LocalDateTime endDate, String subjectCode);
+    @Query("select distinct s.subjectCode, s.startDate, s.endDate from Scheduler s where s.subjectCode like concat('%', ?1, '%')" +
             "order by s.startDate asc")
-    List<Object> findAllBySemesterIdAndSubjectCodeContains(Integer semesterId, String subjectCode);
+    List<Object> findAllBySubjectCodeContains(String subjectCode);
     @Query("""
             select distinct s.subjectCode, s.startDate, s.endDate from Scheduler s
-            where s.semesterId = ?1 and s.startDate > ?2 and s.subjectCode like concat('%', ?3, '%')
+            where s.startDate > ?1 and s.subjectCode like concat('%', ?2, '%')
             order by s.startDate asc
             """)
-    List<Object> findAllBySemesterIdAndStartDateAfterAndSubjectCodeContains(
-            Integer semesterId, LocalDateTime startDate, String subjectCode);
+    List<Object> findAllByStartDateAfterAndSubjectCodeContains(LocalDateTime startDate, String subjectCode);
     @Query("""
             select distinct s.subjectCode, s.startDate, s.endDate from Scheduler s
-            where s.semesterId = ?1 and s.endDate < ?2 and s.subjectCode like concat('%', ?3, '%')
+            where s.endDate < ?1 and s.subjectCode like concat('%', ?2, '%')
             order by s.startDate asc
             """)
-    List<Object> findAllBySemesterIdAndEndDateBeforeAndSubjectCodeContains(
-            Integer semesterId, LocalDateTime endDate, String subjectCode);
+    List<Object> findAllByEndDateBeforeAndSubjectCodeContains(LocalDateTime endDate, String subjectCode);
 
     long countAllBySemesterId(Integer semesterId);
 
     int countAllBySemesterIdAndLecturerId(Integer semesterId, Integer lecturerId);
 
     List<Scheduler> findAllBySemesterIdAndSubjectCodeIn(Integer semesterId, Collection<String> subjectCode);
+
     List<Scheduler> findAllBySemesterIdAndSubjectCodeNotIn(Integer semesterId, Collection<String> subjectCode);
 
     @Query("""
             select s from Scheduler s
-            where s.semesterId = ?1 and s.lecturerId = ?2 and ((s.startDate >= ?3 and s.endDate <= ?4) or (s.startDate > ?3 and s.endDate < ?4) or (s.startDate < ?3 and s.endDate > ?3) or (s.startDate < ?4 and s.endDate > ?4))""")
+            where s.semesterId = ?1 and s.lecturerId = ?2 and ((s.startDate >= ?3 and s.endDate <= ?4) or (s.startDate <= ?3 and s.endDate >= ?3) or (s.startDate <= ?4 and s.endDate >= ?4))""")
     List<Scheduler> findBySemesterIdAndLecturerIdAvailable(Integer semesterId, Integer lecturerId, LocalDateTime startDate, LocalDateTime endDate);
 
     @Modifying

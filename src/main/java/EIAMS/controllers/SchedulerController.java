@@ -1,5 +1,6 @@
 package EIAMS.controllers;
 
+import EIAMS.dtos.SchedulerDetailDto;
 import EIAMS.entities.Scheduler;
 import EIAMS.entities.Student;
 import EIAMS.entities.responeObject.ResponseObject;
@@ -9,10 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -26,16 +24,13 @@ public class SchedulerController {
 
     @GetMapping(path = "/index")
     public ResponseEntity<ResponseObject> list(
-            @RequestParam(name = "semester_id") Integer semesterId,
             @RequestParam(name = "search", defaultValue = "") String search,
             @RequestParam(name = "start_date", defaultValue = "") String start_date,
             @RequestParam(name = "end_date", defaultValue = "") String end_date,
             @RequestParam(name = "page", required = false) Integer page,
             @RequestParam(name = "limit", required = false) Integer limit) {
         try {
-            List<List<String>> list = schedulerServiceInterface.list(
-                    semesterId, search, start_date, end_date
-            );
+            List<List<String>> list = schedulerServiceInterface.list(search, start_date, end_date);
             if (list.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
                         new ResponseObject("NOT FOUND", "", null));
@@ -87,9 +82,9 @@ public class SchedulerController {
     @GetMapping(path = "/get-by-subject")
     public ResponseEntity<ResponseObject> listScheduler(
             @RequestParam(name = "semester_id") Integer semesterId,
-            @RequestParam(name = "subject_code") String subjectCode) {
+            @RequestParam(name = "subject_code", defaultValue = "") String subjectCode) {
         try {
-            List<Scheduler> list = schedulerServiceInterface.getListSchedulerBySubjectCode(
+            List<SchedulerDetailDto> list = schedulerServiceInterface.getListSchedulerBySubjectCode(
                     semesterId, subjectCode
             );
             if (list.isEmpty()) {
@@ -119,13 +114,38 @@ public class SchedulerController {
 
     @GetMapping(path = "arrange-lecturer")
     public ResponseEntity<ResponseObject> arrangeLecturer(@RequestParam(name = "semester_id") Integer semesterId) {
-//        try {
+        try {
             schedulerServiceInterface.arrangeLecturer(semesterId);
             return ResponseEntity.status(HttpStatus.OK).body(
                     new ResponseObject("OK", "Arrange Lecturer Success", null));
-//        } catch (Exception e) {
-//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-//                    new ResponseObject("Fail", e.getMessage(), null));
-//        }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    new ResponseObject("Fail", e.getMessage(), null));
+        }
+    }
+    @PostMapping(path = "update-lecturer")
+    public ResponseEntity<ResponseObject> updateLecture(@RequestParam(name = "scheduler_id") Integer schedulerId,
+                                                        @RequestBody() Integer lecturerId) {
+        try {
+            schedulerServiceInterface.updateLecturer(schedulerId,lecturerId);
+            return ResponseEntity.status(HttpStatus.OK).body(
+                    new ResponseObject("OK", "Update Lecture Success", null));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    new ResponseObject("Fail", e.getMessage(), null));
+        }
+    }
+
+    @PostMapping(path = "swap-lecturer")
+    public ResponseEntity<ResponseObject> swapLecture(@RequestParam(name = "scheduler_id") Integer schedulerId,
+                                                        @RequestBody() Integer schedulerSwapId) {
+        try {
+            schedulerServiceInterface.swapLecturer(schedulerId,schedulerSwapId);
+            return ResponseEntity.status(HttpStatus.OK).body(
+                    new ResponseObject("OK", "Update Lecture Success", null));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    new ResponseObject("Fail", e.getMessage(), null));
+        }
     }
 }

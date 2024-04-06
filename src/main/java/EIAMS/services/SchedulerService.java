@@ -1,11 +1,13 @@
 package EIAMS.services;
 
 import EIAMS.constants.DBTableUtils;
+import EIAMS.dtos.SchedulerDetailDto;
 import EIAMS.entities.*;
 import EIAMS.helper.Pagination;
 import EIAMS.repositories.*;
 import EIAMS.services.interfaces.SchedulerServiceInterface;
 import lombok.RequiredArgsConstructor;
+import org.apache.coyote.BadRequestException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -13,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -26,6 +29,7 @@ import static EIAMS.constants.DBTableUtils.SUBJECT_CODE_SPECIAL;
 public class SchedulerService implements SchedulerServiceInterface {
     private final StudentSubjectRepository studentSubjectRepository;
     private final StudentRepository studentRepository;
+    private final SemesterRepository semesterRepository;
     private final RoomRepository roomRepository;
     private final SubjectRepository subjectRepository;
     private final SlotRepository slotRepository;
@@ -36,24 +40,23 @@ public class SchedulerService implements SchedulerServiceInterface {
     private final Pagination pagination;
 
     @Override
-    public List<List<String>> list(Integer semesterId, String search, String startDate, String endDate) {
+    public List<List<String>> list(String search, String startDate, String endDate) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         Map<String, Set<String>> subjectCodesByTimeRange = new LinkedHashMap<>();
 
         List<Object> results;
         if (startDate.isBlank() && endDate.isBlank()) {
-            results = schedulerRepository.findAllBySemesterIdAndSubjectCodeContains(semesterId, search);
+            results = schedulerRepository.findAllBySubjectCodeContains(search);
         } else if (startDate.isBlank() && !endDate.isBlank()) {
             LocalDateTime endDateSearch = LocalDateTime.parse(endDate, formatter);
-            results = schedulerRepository.findAllBySemesterIdAndEndDateBeforeAndSubjectCodeContains(semesterId, endDateSearch, search);
+            results = schedulerRepository.findAllByEndDateBeforeAndSubjectCodeContains(endDateSearch, search);
         } else if (!startDate.isBlank() && endDate.isBlank()) {
             LocalDateTime startDateSearch = LocalDateTime.parse(startDate, formatter);
-            results = schedulerRepository.findAllBySemesterIdAndStartDateAfterAndSubjectCodeContains(semesterId, startDateSearch, search);
+            results = schedulerRepository.findAllByStartDateAfterAndSubjectCodeContains(startDateSearch, search);
         } else {
             LocalDateTime endDateSearch = LocalDateTime.parse(endDate, formatter);
             LocalDateTime startDateSearch = LocalDateTime.parse(startDate, formatter);
-            results = schedulerRepository.findAllBySemesterIdAndStartDateAfterAndEndDateBeforeAndSubjectCodeContains(
-                    semesterId, startDateSearch, endDateSearch, search);
+            results = schedulerRepository.findAllByStartDateAfterAndEndDateBeforeAndSubjectCodeContains(startDateSearch, endDateSearch, search);
         }
 
         // Group subject codes by time range and eliminate duplicates
@@ -100,8 +103,42 @@ public class SchedulerService implements SchedulerServiceInterface {
     }
 
     @Override
-    public List<Scheduler> getListSchedulerBySubjectCode(Integer semesterId, String subjectCode) {
-        return schedulerRepository.findAllBySemesterIdAndSubjectCodeContainingOrderByStartDate(semesterId, subjectCode);
+    public List<SchedulerDetailDto> getListSchedulerBySubjectCode(Integer semesterId, String subjectCode) {
+        List<Scheduler> schedulers = schedulerRepository.findAllBySemesterIdAndSubjectCodeContainingOrderByStartDate(semesterId, subjectCode);
+
+        return schedulers.stream()
+                .map(scheduler -> {
+                    String lecturerEmail = null;
+                    if(scheduler.getLecturerId() != null && lecturerRepository.findById(scheduler.getLecturerId()).isPresent()){
+                        lecturerEmail = lecturerRepository.findById(scheduler.getLecturerId()).get().getEmail();
+                    };
+                    return SchedulerDetailDto.builder()
+                            .id(scheduler.getId())
+                            .semesterId(scheduler.getSemesterId())
+                            .semesterName(semesterRepository.findById(scheduler.getSemesterId()).get().getName())
+                            .lecturerId(scheduler.getLecturerId())
+                            .lecturerEmail(lecturerEmail)
+                            .startDate(scheduler.getStartDate())
+                            .endDate(scheduler.getEndDate())
+                            .examCodeId(scheduler.getExamCodeId())
+                            .roomId(scheduler.getRoomId())
+                            .roomName(roomRepository.findById(scheduler.getRoomId()).get().getName())
+                            .studentId(scheduler.getStudentId())
+                            .build();
+                })
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public void swapLecturer(int schedulerId, int schedulerSwapId) {
+        Scheduler scheduler = schedulerRepository.findById(schedulerId).get();
+        int oldId = scheduler.getLecturerId();
+        Scheduler schedulerSwap = schedulerRepository.findById(schedulerSwapId).get();
+        int newId = schedulerSwap.getLecturerId();
+        scheduler.setLecturerId(newId);
+        schedulerSwap.setLecturerId(oldId);
+        schedulerRepository.save(scheduler);
+        schedulerRepository.save(schedulerSwap);
     }
 
     @Transactional
@@ -442,8 +479,22 @@ public class SchedulerService implements SchedulerServiceInterface {
         }
     }
 
+    public static Date getDateFromLocalDateTime(LocalDateTime localDateTime) throws ParseException {
+        LocalDate date = localDateTime.toLocalDate(); // Extract date part
+        LocalDateTime midnight = date.atStartOfDay(); // Set time to midnight
+        return Date.from(midnight.atZone(ZoneId.systemDefault()).toInstant());
+
+    }
+
+    public static String getTimeStringFromLocalDateTime(LocalDateTime localDateTime) {
+        int hour = localDateTime.getHour();
+        int minute = localDateTime.getMinute();
+
+        return String.format("%02dH%02d", hour, minute);
+    }
+
     @Override
-    public void setExamCode(int semesterId) {
+    public void setExamCode(int semesterId) throws Exception {
         List<Scheduler> schedulers = schedulerRepository.findAll();
         if (schedulers.isEmpty()) return;
 
@@ -452,10 +503,19 @@ public class SchedulerService implements SchedulerServiceInterface {
             String[] subjectCodesArray = subjectCodes.split(",");
             StringBuilder examIdsBuilder = new StringBuilder();
 
-            Arrays.stream(subjectCodesArray)
-                    .map(subjectCode -> examCodeRepository.findBySemesterIdAndSubjectCode(semesterId, subjectCode))
-                    .flatMap(List::stream)
-                    .forEach(e -> examIdsBuilder.append(e.getId()).append(","));
+            for (String subjectCode : subjectCodesArray) {
+                List<ExamCode> examCodes = examCodeRepository.findBySemesterIdAndSubjectCode(semesterId, subjectCode);
+                List<PlanExam> planExamsByCode = planExamRepository.findAllBySemesterIdAndSubjectCode(semesterId, subjectCode);
+                if(planExamsByCode.size() > examCodes.size()) {
+                    throw new Exception("Not enough exam code for " + planExamsByCode.size() + "slots");
+                }
+                String expectedTime = getTimeStringFromLocalDateTime(s.getStartDate())+"-"+getTimeStringFromLocalDateTime(s.getEndDate());
+                Date expectedDate = getDateFromLocalDateTime(s.getStartDate());
+                PlanExam planExam = planExamRepository.findBySemesterIdAndSubjectCodeAndExpectedDateAndExpectedTime(
+                        semesterId, subjectCode, expectedDate, expectedTime);
+                int indexOfPlanExam = planExamsByCode.indexOf(planExam);
+                examIdsBuilder.append(examCodes.get(indexOfPlanExam).getId()).append(",");
+            }
 
             String examIds = examIdsBuilder.toString();
             if (examIds.endsWith(",")) {
@@ -658,6 +718,13 @@ public class SchedulerService implements SchedulerServiceInterface {
                 }
             }
         }
+    }
+
+    @Override
+    public void updateLecturer(int schedulerId, int lecturerId) {
+        Scheduler scheduler = schedulerRepository.findById(schedulerId).get();
+        scheduler.setLecturerId(lecturerId);
+        schedulerRepository.save(scheduler);
     }
 
     public boolean isAvailableSlotExamOfLecturer(int semesterId, int lecturerId) {
