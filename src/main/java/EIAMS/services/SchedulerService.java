@@ -507,7 +507,7 @@ public class SchedulerService implements SchedulerServiceInterface {
                 List<ExamCode> examCodes = examCodeRepository.findBySemesterIdAndSubjectCode(semesterId, subjectCode);
                 List<PlanExam> planExamsByCode = planExamRepository.findAllBySemesterIdAndSubjectCode(semesterId, subjectCode);
                 if(planExamsByCode.size() > examCodes.size()) {
-                    throw new Exception("Not enough exam code for " + planExamsByCode.size() + "slots");
+                    throw new Exception("Not enough exam code for " + planExamsByCode.size() + "slots of subject " + subjectCode);
                 }
                 String expectedTime = getTimeStringFromLocalDateTime(s.getStartDate())+"-"+getTimeStringFromLocalDateTime(s.getEndDate());
                 Date expectedDate = getDateFromLocalDateTime(s.getStartDate());

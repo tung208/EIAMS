@@ -27,7 +27,8 @@ public interface SchedulerRepository extends JpaRepository<Scheduler, Integer> {
             where s.semesterId = ?1 and s.subjectCode not in ?2 and s.startDate = ?3 and s.endDate = ?4""")
     List<Scheduler> findAllBySemesterIdAndSubjectCodeNotInAndStartDateAndEndDate(Integer semesterId, Collection<String> subjectCode, LocalDateTime startDate, LocalDateTime endDate);
 
-    @Query("select s from Scheduler s where s.semesterId = ?1 and ((s.startDate > ?2 and s.endDate < ?3) or (s.startDate < ?2 and s.endDate > ?2) or (s.startDate < ?3 and s.endDate > ?3)) order by s.startDate asc")
+    @Query("select s from Scheduler s where s.semesterId = ?1 and " +
+            "((s.startDate > ?2 and s.endDate <= ?3) or (s.startDate >= ?2 and s.endDate < ?3) or (s.startDate < ?2 and s.endDate > ?2) or (s.startDate < ?3 and s.endDate > ?3)) order by s.startDate asc")
     List<Scheduler> findAllBySemesterIdAndStartDateBeforeAndEndDateAfter(Integer semesterId, LocalDateTime startDate, LocalDateTime endDate);
 
     void deleteBySemesterId(Integer semesterId);
