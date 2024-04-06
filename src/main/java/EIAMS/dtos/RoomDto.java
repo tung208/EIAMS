@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.Value;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 
 /**
@@ -18,4 +20,8 @@ public class RoomDto {
     String name;
     String type;
     Integer quantityStudent;
+
+    @NotNull
+    @NotBlank
+    Integer semesterId;
 }

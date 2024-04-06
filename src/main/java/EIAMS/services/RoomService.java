@@ -1,5 +1,6 @@
 package EIAMS.services;
 
+import EIAMS.dtos.RoomDto;
 import EIAMS.entities.Room;
 import EIAMS.entities.csvRepresentation.RoomRepresentation;
 import EIAMS.repositories.RoomRepository;
@@ -20,6 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -81,5 +83,37 @@ public class RoomService implements RoomServiceInterface {
     public Page<Room> search(Integer page, Integer limit, Integer semesterId , String name) {
         Pageable pageable = PageRequest.of(page - 1, limit, Sort.by("id").descending());
         return roomRepository.findByDynamic(semesterId, name, pageable);
+    }
+
+    @Override
+    public Room create(RoomDto roomDto) {
+        Room room = Room.builder()
+                .name(roomDto.getName())
+                .type(roomDto.getType())
+                .quantityStudent(roomDto.getQuantityStudent())
+                .semesterId(roomDto.getSemesterId())
+                .build();
+        roomRepository.save(room);
+        return room;
+    }
+
+    @Override
+    public void update(int id, RoomDto roomDto) {
+        Optional<Room> room = roomRepository.findById(id);
+        if(room.isPresent()){
+            Room r = Room.builder()
+                    .id(id)
+                    .name(roomDto.getName())
+                    .semesterId(roomDto.getSemesterId())
+                    .type(roomDto.getType())
+                    .quantityStudent(roomDto.getQuantityStudent())
+                    .build();
+            roomRepository.save(r);
+        }
+    }
+
+    @Override
+    public void delete(int id) {
+        roomRepository.deleteById(id);
     }
 }
