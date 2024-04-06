@@ -19,4 +19,5 @@ public interface SchedulerServiceInterface {
     Page<Student> getListStudentInARoom(Integer schedulerId,String search, Integer page, Integer limit);
     List<SchedulerDetailDto> getListSchedulerBySubjectCode(Integer semesterId, String subjectCode);
     void swapLecturer(int schedulerId, int schedulerSwapId) throws Exception;
+    Scheduler get(int schedulerId);
 }

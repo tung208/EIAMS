@@ -65,6 +65,24 @@ public class SchedulerController {
         }
     }
 
+    @GetMapping(path = "/get")
+    public ResponseEntity<ResponseObject> getById(
+            @RequestParam(name = "id") Integer id){
+        try {
+            Scheduler s = schedulerServiceInterface.get(id);
+            if (s == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                        new ResponseObject("NOT FOUND", "", null));
+            } else {
+                return ResponseEntity.status(HttpStatus.OK).body(
+                        new ResponseObject("OK", "", s));
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    new ResponseObject("Fail", e.getMessage(), null));
+        }
+    }
+
     @GetMapping(path = "/arrange")
     public ResponseEntity<ResponseObject> arrangeStudent(@RequestParam(name = "semester_id") Integer semesterId) throws Exception {
         try {

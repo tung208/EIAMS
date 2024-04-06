@@ -157,6 +157,13 @@ public class SchedulerService implements SchedulerServiceInterface {
         }
     }
 
+    @Override
+    public Scheduler get(int schedulerId) {
+        if(schedulerRepository.findById(schedulerId).isPresent()) {
+            return schedulerRepository.findById(schedulerId).get();
+        } else return null;
+    }
+
     @Transactional
     public void deleteBySemesterId(Integer semesterId) {
         if (!schedulerRepository.findAllBySemesterId(semesterId).isEmpty()) {
