@@ -30,7 +30,7 @@ public class SchedulerController {
             @RequestParam(name = "page", required = false) Integer page,
             @RequestParam(name = "limit", required = false) Integer limit) {
         try {
-            List<List<String>> list = schedulerServiceInterface.list(search, start_date, end_date);
+            List<Object> list = schedulerServiceInterface.list(search, start_date, end_date);
             if (list.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
                         new ResponseObject("NOT FOUND", "", null));

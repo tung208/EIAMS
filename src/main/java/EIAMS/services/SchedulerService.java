@@ -40,7 +40,7 @@ public class SchedulerService implements SchedulerServiceInterface {
     private final Pagination pagination;
 
     @Override
-    public List<List<String>> list(String search, String startDate, String endDate) {
+    public List<Object> list(String search, String startDate, String endDate) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         Map<String, Set<String>> subjectCodesByTimeRange = new LinkedHashMap<>();
 
@@ -59,30 +59,30 @@ public class SchedulerService implements SchedulerServiceInterface {
             results = schedulerRepository.findAllByStartDateAfterAndEndDateBeforeAndSubjectCodeContains(startDateSearch, endDateSearch, search);
         }
 
-        // Group subject codes by time range and eliminate duplicates
-        for (Object result : results) {
-            if (result instanceof Object[]) {
-                Object[] row = (Object[]) result;
-                String startTime = row[1].toString();
-                String endTime = row[2].toString();
-                String timeRangeKey = startTime + "_" + endTime;
-                String[] subjectCodes = row[0].toString().split(",");
-                Set<String> uniqueSubjectCodes = subjectCodesByTimeRange.computeIfAbsent(timeRangeKey, k -> new HashSet<>());
-                uniqueSubjectCodes.addAll(Arrays.asList(subjectCodes));
-            }
-        }
+//        // Group subject codes by time range and eliminate duplicates
+//        for (Object result : results) {
+//            if (result instanceof Object[]) {
+//                Object[] row = (Object[]) result;
+//                String startTime = row[1].toString();
+//                String endTime = row[2].toString();
+//                String timeRangeKey = startTime + "_" + endTime;
+//                String[] subjectCodes = row[0].toString().split(",");
+//                Set<String> uniqueSubjectCodes = subjectCodesByTimeRange.computeIfAbsent(timeRangeKey, k -> new HashSet<>());
+//                uniqueSubjectCodes.addAll(Arrays.asList(subjectCodes));
+//            }
+//        }
+//
+//        // Convert map entries to List<List<String>> for response
+//        List<List<String>> response = new ArrayList<>();
+//        for (Map.Entry<String, Set<String>> entry : subjectCodesByTimeRange.entrySet()) {
+//            List<String> entryList = new ArrayList<>();
+//            entryList.add(String.join(",", entry.getValue()));
+//            entryList.add(entry.getKey().split("_")[0]); // Start time
+//            entryList.add(entry.getKey().split("_")[1]); // End time
+//            response.add(entryList);
+//        }
 
-        // Convert map entries to List<List<String>> for response
-        List<List<String>> response = new ArrayList<>();
-        for (Map.Entry<String, Set<String>> entry : subjectCodesByTimeRange.entrySet()) {
-            List<String> entryList = new ArrayList<>();
-            entryList.add(String.join(",", entry.getValue()));
-            entryList.add(entry.getKey().split("_")[0]); // Start time
-            entryList.add(entry.getKey().split("_")[1]); // End time
-            response.add(entryList);
-        }
-
-        return response;
+        return results;
     }
     @Override
     public Page<Student> getListStudentInARoom(Integer schedulerId, String search, Integer page, Integer limit) {
@@ -130,15 +130,22 @@ public class SchedulerService implements SchedulerServiceInterface {
     }
 
     @Override
-    public void swapLecturer(int schedulerId, int schedulerSwapId) {
+    public void swapLecturer(int schedulerId, int schedulerSwapId) throws Exception {
         Scheduler scheduler = schedulerRepository.findById(schedulerId).get();
         int oldId = scheduler.getLecturerId();
         Scheduler schedulerSwap = schedulerRepository.findById(schedulerSwapId).get();
         int newId = schedulerSwap.getLecturerId();
-        scheduler.setLecturerId(newId);
-        schedulerSwap.setLecturerId(oldId);
-        schedulerRepository.save(scheduler);
-        schedulerRepository.save(schedulerSwap);
+        LocalDateTime newStartDate = schedulerSwap.getStartDate();
+        LocalDateTime newEndDate = schedulerSwap.getEndDate();
+        if(!schedulerRepository.findAllBySemesterIdAndStartDateAndEndDateAndIdNotAndLectureId(
+                scheduler.getSemesterId(), newStartDate, newEndDate, scheduler.getId(), scheduler.getLecturerId()).isEmpty()){
+            throw new Exception("It is not possible to change teachers because this teacher has an exam scheduled conflict time");
+        } else {
+            scheduler.setLecturerId(newId);
+            schedulerSwap.setLecturerId(oldId);
+            schedulerRepository.save(scheduler);
+            schedulerRepository.save(schedulerSwap);
+        }
     }
 
     @Transactional
