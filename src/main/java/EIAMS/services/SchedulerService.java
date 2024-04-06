@@ -166,9 +166,32 @@ public class SchedulerService implements SchedulerServiceInterface {
     }
 
     @Override
-    public Scheduler get(int schedulerId) {
+    public SchedulerDetailDto get(int schedulerId) {
         if(schedulerRepository.findById(schedulerId).isPresent()) {
-            return schedulerRepository.findById(schedulerId).get();
+            Scheduler s = schedulerRepository.findById(schedulerId).get();
+            Room room = roomRepository.findById(s.getRoomId()).get();
+            String lecturerEmail = null;
+            if(s.getLecturerId() != null){
+                Lecturer lecturer = lecturerRepository.findById(s.getLecturerId()).get();
+                lecturerEmail = lecturer.getEmail();
+            }
+            String semesterName = semesterRepository.findById(s.getSemesterId()).get().getName();
+            SchedulerDetailDto schedulerDetailDto = new SchedulerDetailDto();
+            schedulerDetailDto.setId(s.getId());
+            schedulerDetailDto.setSemesterId(s.getSemesterId());
+            schedulerDetailDto.setStartDate(s.getStartDate());
+            schedulerDetailDto.setEndDate(s.getEndDate());
+            schedulerDetailDto.setLecturerId(s.getLecturerId());
+            schedulerDetailDto.setRoomId(s.getRoomId());
+            schedulerDetailDto.setStudentId(s.getStudentId());
+            schedulerDetailDto.setRoomName(room.getName());
+            schedulerDetailDto.setLecturerEmail(lecturerEmail);
+            schedulerDetailDto.setExamCodeId(s.getExamCodeId());
+            schedulerDetailDto.setSlotId(s.getSlotId());
+            schedulerDetailDto.setSemesterName(semesterName);
+
+            return schedulerDetailDto;
+
         } else return null;
     }
 

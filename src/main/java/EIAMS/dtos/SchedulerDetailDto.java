@@ -1,13 +1,15 @@
 package EIAMS.dtos;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
+
 import java.time.LocalDateTime;
 
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 @Builder
+@Setter
+@Getter
 public class SchedulerDetailDto {
     Integer id;
     Integer semesterId;

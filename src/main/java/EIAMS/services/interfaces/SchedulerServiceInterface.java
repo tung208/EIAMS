@@ -17,5 +17,5 @@ public interface SchedulerServiceInterface {
     List<StudentScheduleDto> getListStudentInARoom(Integer schedulerId, String search);
     List<SchedulerDetailDto> getListSchedulerBySubjectCode(Integer semesterId, String subjectCode);
     void swapLecturer(int schedulerId, int schedulerSwapId) throws Exception;
-    Scheduler get(int schedulerId);
+    SchedulerDetailDto get(int schedulerId);
 }

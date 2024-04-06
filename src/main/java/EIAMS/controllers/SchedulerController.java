@@ -70,7 +70,7 @@ public class SchedulerController {
     public ResponseEntity<ResponseObject> getById(
             @RequestParam(name = "id") Integer id){
         try {
-            Scheduler s = schedulerServiceInterface.get(id);
+            SchedulerDetailDto s = schedulerServiceInterface.get(id);
             if (s == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
                         new ResponseObject("NOT FOUND", "", null));
