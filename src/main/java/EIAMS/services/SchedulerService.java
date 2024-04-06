@@ -40,11 +40,11 @@ public class SchedulerService implements SchedulerServiceInterface {
     private final Pagination pagination;
 
     @Override
-    public List<Object> list(String search, String startDate, String endDate) {
+    public List<Room> list(String search, String startDate, String endDate) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         Map<String, Set<String>> subjectCodesByTimeRange = new LinkedHashMap<>();
 
-        List<Object> results;
+        List<Integer> results;
         if (startDate.isBlank() && endDate.isBlank()) {
             results = schedulerRepository.findAllBySubjectCodeContains(search);
         } else if (startDate.isBlank() && !endDate.isBlank()) {
@@ -82,8 +82,17 @@ public class SchedulerService implements SchedulerServiceInterface {
 //            response.add(entryList);
 //        }
 
-        return results;
+        return roomRepository.findAllByIdIn(results);
     }
+
+    @Override
+    public List<Scheduler> listSchedulerByRoom(int roomId, String startDate, String endDate) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        LocalDateTime endDateSearch = LocalDateTime.parse(endDate, formatter);
+        LocalDateTime startDateSearch = LocalDateTime.parse(startDate, formatter);
+        return schedulerRepository.findAllByRoomIdAndStartDateAfterAndEndDateBefore(roomId,startDateSearch,endDateSearch);
+    }
+
     @Override
     public Page<Student> getListStudentInARoom(Integer schedulerId, String search, Integer page, Integer limit) {
         Pageable pageable = pagination.getPageable(page, limit);

@@ -42,22 +42,22 @@ public interface SchedulerRepository extends JpaRepository<Scheduler, Integer> {
             where s.startDate > ?1 and s.endDate < ?2 and s.subjectCode like concat('%', ?3, '%')
             order by s.roomId asc
             """)
-    List<Object> findAllByStartDateAfterAndEndDateBeforeAndSubjectCodeContains(LocalDateTime startDate, LocalDateTime endDate, String subjectCode);
+    List<Integer> findAllByStartDateAfterAndEndDateBeforeAndSubjectCodeContains(LocalDateTime startDate, LocalDateTime endDate, String subjectCode);
     @Query("select distinct s.roomId from Scheduler s where s.subjectCode like concat('%', ?1, '%')" +
             "order by s.roomId asc")
-    List<Object> findAllBySubjectCodeContains(String subjectCode);
+    List<Integer> findAllBySubjectCodeContains(String subjectCode);
     @Query("""
             select distinct s.roomId from Scheduler s
             where s.startDate > ?1 and s.subjectCode like concat('%', ?2, '%')
             order by s.roomId asc
             """)
-    List<Object> findAllByStartDateAfterAndSubjectCodeContains(LocalDateTime startDate, String subjectCode);
+    List<Integer> findAllByStartDateAfterAndSubjectCodeContains(LocalDateTime startDate, String subjectCode);
     @Query("""
             select distinct s.roomId from Scheduler s
             where s.endDate < ?1 and s.subjectCode like concat('%', ?2, '%')
             order by s.roomId asc
             """)
-    List<Object> findAllByEndDateBeforeAndSubjectCodeContains(LocalDateTime endDate, String subjectCode);
+    List<Integer> findAllByEndDateBeforeAndSubjectCodeContains(LocalDateTime endDate, String subjectCode);
 
     long countAllBySemesterId(Integer semesterId);
 
@@ -76,4 +76,7 @@ public interface SchedulerRepository extends JpaRepository<Scheduler, Integer> {
     @Query("""
         update Scheduler s set s.lecturerId = 0 where s.semesterId = ?1""")
     void resetLecturerId(int semesterId);
+
+    @Query("select s from Scheduler s where s.roomId = ?1 and s.startDate >= ?2 and s.endDate <= ?3")
+    List<Scheduler> findAllByRoomIdAndStartDateAfterAndEndDateBefore(Integer roomId, LocalDateTime startDate, LocalDateTime endDate);
 }

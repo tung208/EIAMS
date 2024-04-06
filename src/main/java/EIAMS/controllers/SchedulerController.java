@@ -1,6 +1,7 @@
 package EIAMS.controllers;
 
 import EIAMS.dtos.SchedulerDetailDto;
+import EIAMS.entities.Room;
 import EIAMS.entities.Scheduler;
 import EIAMS.entities.Student;
 import EIAMS.entities.responeObject.ResponseObject;
@@ -30,7 +31,27 @@ public class SchedulerController {
             @RequestParam(name = "page", required = false) Integer page,
             @RequestParam(name = "limit", required = false) Integer limit) {
         try {
-            List<Object> list = schedulerServiceInterface.list(search, start_date, end_date);
+            List<Room> list = schedulerServiceInterface.list(search, start_date, end_date);
+            if (list.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                        new ResponseObject("NOT FOUND", "", null));
+            } else {
+                return ResponseEntity.status(HttpStatus.OK).body(
+                        new ResponseObject("OK", "", list));
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    new ResponseObject("Fail", e.getMessage(), null));
+        }
+    }
+
+    @GetMapping(path = "/list-by-room")
+    public ResponseEntity<ResponseObject> listByRoom(
+            @RequestParam(name = "room_id") Integer roomId,
+            @RequestParam(name = "start_date", defaultValue = "") String start_date,
+            @RequestParam(name = "end_date", defaultValue = "") String end_date) {
+        try {
+            List<Scheduler> list = schedulerServiceInterface.listSchedulerByRoom(roomId, start_date, end_date);
             if (list.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
                         new ResponseObject("NOT FOUND", "", null));
