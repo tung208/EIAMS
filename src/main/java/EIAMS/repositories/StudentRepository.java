@@ -27,8 +27,8 @@ public interface StudentRepository extends JpaRepository<Student, Integer> {
     Page<Student> findAllByRollNumberContainingIgnoreCaseOrFullNameContainingIgnoreCaseAndMemberCodeContainingIgnoreCase(
             String rollNumber, String fullName, String memberCode, Pageable pageable);
 
-    Page<Student> findAllByRollNumberInAndFullNameContainingIgnoreCaseOrCmtndContainingIgnoreCaseAndMemberCodeContainingIgnoreCase(
-            Collection<String> rollNumbers, String fullName, String cmt, String memberCode, Pageable pageable);
+    List<Student> findAllByRollNumberInAndFullNameContainingIgnoreCaseOrCmtndContainingIgnoreCaseAndMemberCodeContainingIgnoreCase(
+            Collection<String> rollNumbers, String fullName, String cmt, String memberCode);
 
     @Query("SELECT s FROM Student s " +
             "WHERE (:rollNumber = '' or s.rollNumber LIKE %:rollNumber% )" +

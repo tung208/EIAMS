@@ -31,4 +31,5 @@ public interface StudentSubjectRepository extends JpaRepository<StudentSubject, 
             + "AND (:blackList = 10 or s.blackList = :blackList )"
     )
     Page<StudentSubject> findByDynamic(int semesterId, String rollNumber, String subjectCode, String groupName, int blackList, Pageable pageable);
+    StudentSubject findBySemesterIdAndSubjectCodeAndRollNumber(Integer semesterId, String subjectCode, String rollNumber);
 }

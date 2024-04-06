@@ -1,6 +1,7 @@
 package EIAMS.controllers;
 
 import EIAMS.dtos.SchedulerDetailDto;
+import EIAMS.dtos.StudentScheduleDto;
 import EIAMS.entities.Room;
 import EIAMS.entities.Scheduler;
 import EIAMS.entities.Student;
@@ -98,12 +99,10 @@ public class SchedulerController {
     @GetMapping(path = "/student")
     public ResponseEntity<ResponseObject> listStudent(
             @RequestParam(name = "scheduler_id") Integer schedulerId,
-            @RequestParam(name = "search", defaultValue = "") String search,
-            @RequestParam(name = "page", required = false) Integer page,
-            @RequestParam(name = "limit", required = false) Integer limit) {
+            @RequestParam(name = "search", defaultValue = "") String search) {
         try {
-            Page<Student> list = schedulerServiceInterface.getListStudentInARoom(
-                    schedulerId, search, page, limit
+            List<StudentScheduleDto> list = schedulerServiceInterface.getListStudentInARoom(
+                    schedulerId, search
             );
             if (list.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(

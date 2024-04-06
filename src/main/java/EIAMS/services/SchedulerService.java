@@ -2,13 +2,12 @@ package EIAMS.services;
 
 import EIAMS.constants.DBTableUtils;
 import EIAMS.dtos.SchedulerDetailDto;
+import EIAMS.dtos.StudentScheduleDto;
 import EIAMS.entities.*;
 import EIAMS.helper.Pagination;
 import EIAMS.repositories.*;
 import EIAMS.services.interfaces.SchedulerServiceInterface;
 import lombok.RequiredArgsConstructor;
-import org.apache.coyote.BadRequestException;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -94,8 +93,8 @@ public class SchedulerService implements SchedulerServiceInterface {
     }
 
     @Override
-    public Page<Student> getListStudentInARoom(Integer schedulerId, String search, Integer page, Integer limit) {
-        Pageable pageable = pagination.getPageable(page, limit);
+    public List<StudentScheduleDto> getListStudentInARoom(Integer schedulerId, String search) {
+        List<StudentScheduleDto> studentScheduleDtos = new ArrayList<>();
         Scheduler scheduler = schedulerRepository.findById(schedulerId).get();
         String[] assignedStudents = scheduler.getStudentId().split(",");
         Collection<Integer> studentIds = new ArrayList<>();
@@ -103,12 +102,21 @@ public class SchedulerService implements SchedulerServiceInterface {
             studentIds.add(Integer.parseInt(sId));
         }
         List<StudentSubject> studentSubjects = studentSubjectRepository.findAllBySemesterIdAndIdIn(scheduler.getSemesterId(), studentIds);
-        Collection<String> rollNumbers = new ArrayList<>();
+
         for (StudentSubject s : studentSubjects) {
-            rollNumbers.add(s.getRollNumber());
+            Student student = studentRepository.findByRollNumber(s.getRollNumber()).get();
+            StudentScheduleDto studentScheduleDto = new StudentScheduleDto();
+            studentScheduleDto.setId(student.getId());
+            studentScheduleDto.setCmtnd(student.getCmtnd());
+            studentScheduleDto.setRollNumber(student.getRollNumber());
+            studentScheduleDto.setBlackList(s.getBlackList());
+            studentScheduleDto.setSemesterId(s.getSemesterId());
+            studentScheduleDto.setFullName(student.getFullName());
+            studentScheduleDto.setMemberCode(student.getMemberCode());
+            studentScheduleDto.setSubjectCode(s.getSubjectCode());
+            studentScheduleDtos.add(studentScheduleDto);
         }
-        return studentRepository.findAllByRollNumberInAndFullNameContainingIgnoreCaseOrCmtndContainingIgnoreCaseAndMemberCodeContainingIgnoreCase(
-                rollNumbers, search, search, search, pageable);
+        return studentScheduleDtos;
     }
 
     @Override
