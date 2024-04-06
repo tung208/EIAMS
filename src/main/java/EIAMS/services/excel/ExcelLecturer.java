@@ -41,26 +41,19 @@ public class ExcelLecturer {
                 }
 
 
-//                // Lấy chỉ số của ô cuối cùng trong hàng
-                int lastCellIndex = row.getLastCellNum();
-                // Lặp qua từng ô trong hàng
-                for (int i = 2; i < lastCellIndex; i++) {
-                    Cell cell = row.getCell(i);
-                    String cellValue = isValidExcel.getValueFromCell(cell);
+               // Lấy chỉ số của ô cuối cùng trong hàng
 
-                    if (cellValue != ""){
-                        LecturerRepresentation element = new LecturerRepresentation();
-                        String totalSlot = isValidExcel.getValueFromCell(row.getCell(1));
-                        if (totalSlot == ""){
-                            element.setTotalSlot(10);
-                        } else {
-                            element.setTotalSlot((int) Double.parseDouble(totalSlot));
-                        }
-                        element.setEmail(isValidExcel.getValueFromCell(row.getCell(0)));
-                        element.setExamSubject(isValidExcel.getValueFromCell(row.getCell(2)));
-                        lecturerRepresentations.add(element);
-                    }
+                LecturerRepresentation element = new LecturerRepresentation();
+                String totalSlot = isValidExcel.getValueFromCell(row.getCell(1));
+                if (totalSlot == ""){
+                    element.setTotalSlot(10);
+                } else {
+                    element.setTotalSlot((int) Double.parseDouble(totalSlot));
                 }
+                element.setEmail(isValidExcel.getValueFromCell(row.getCell(0)));
+                element.setExamSubject(isValidExcel.getValueFromCell(row.getCell(2)));
+                lecturerRepresentations.add(element);
+
 
             }
         } catch (IOException e){
