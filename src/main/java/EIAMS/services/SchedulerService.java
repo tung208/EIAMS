@@ -175,7 +175,10 @@ public class SchedulerService implements SchedulerServiceInterface {
                 Lecturer lecturer = lecturerRepository.findById(s.getLecturerId()).get();
                 lecturerEmail = lecturer.getEmail();
             }
-            String semesterName = semesterRepository.findById(s.getSemesterId()).get().getName();
+            String semesterName = null;
+            if(semesterRepository.findById(s.getSemesterId()).isPresent()){
+                semesterName = semesterRepository.findById(s.getSemesterId()).get().getName();
+            }
             SchedulerDetailDto schedulerDetailDto = new SchedulerDetailDto();
             schedulerDetailDto.setId(s.getId());
             schedulerDetailDto.setSemesterId(s.getSemesterId());
