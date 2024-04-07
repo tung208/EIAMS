@@ -45,17 +45,17 @@ public class SchedulerService implements SchedulerServiceInterface {
 
         List<Integer> results;
         if (startDate.isBlank() && endDate.isBlank()) {
-            results = schedulerRepository.findAllBySubjectCodeContains(search);
+            results = schedulerRepository.findAllRoom();
         } else if (startDate.isBlank() && !endDate.isBlank()) {
             LocalDateTime endDateSearch = LocalDateTime.parse(endDate, formatter);
-            results = schedulerRepository.findAllByEndDateBeforeAndSubjectCodeContains(endDateSearch, search);
+            results = schedulerRepository.findAllRoomByEndDateBefore(endDateSearch);
         } else if (!startDate.isBlank() && endDate.isBlank()) {
             LocalDateTime startDateSearch = LocalDateTime.parse(startDate, formatter);
-            results = schedulerRepository.findAllByStartDateAfterAndSubjectCodeContains(startDateSearch, search);
+            results = schedulerRepository.findAllRoomByStartDateAfter(startDateSearch);
         } else {
             LocalDateTime endDateSearch = LocalDateTime.parse(endDate, formatter);
             LocalDateTime startDateSearch = LocalDateTime.parse(startDate, formatter);
-            results = schedulerRepository.findAllByStartDateAfterAndEndDateBeforeAndSubjectCodeContains(startDateSearch, endDateSearch, search);
+            results = schedulerRepository.findAllRoomByStartDateAfterAndEndDateBefore(startDateSearch, endDateSearch);
         }
 
 //        // Group subject codes by time range and eliminate duplicates
@@ -81,7 +81,7 @@ public class SchedulerService implements SchedulerServiceInterface {
 //            response.add(entryList);
 //        }
 
-        return roomRepository.findAllByIdIn(results);
+        return roomRepository.findAllByIdInAndNameContainsIgnoreCase(results, search);
     }
 
     @Override

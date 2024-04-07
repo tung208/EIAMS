@@ -8,6 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import java.util.Collection;
 import java.util.List;
 
 public interface RoomRepository extends JpaRepository<Room, Integer> {
@@ -21,6 +22,6 @@ public interface RoomRepository extends JpaRepository<Room, Integer> {
             "AND (:name = '' or s.name LIKE %:name% )" )
     Page<Room> findByDynamic(Integer semesterId, String name, Pageable pageable);
 
-    List<Room> findAllByIdIn(List<Integer> ids);
+    List<Room> findAllByIdInAndNameContainsIgnoreCase(Collection<Integer> id, String name);
 
 }

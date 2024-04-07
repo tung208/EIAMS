@@ -43,25 +43,47 @@ public interface SchedulerRepository extends JpaRepository<Scheduler, Integer> {
 
     @Query("""
             select distinct s.roomId from Scheduler s
-            where s.startDate > ?1 and s.endDate < ?2 and s.subjectCode like concat('%', ?3, '%')
+            where s.startDate > ?1 and s.endDate < ?2
             order by s.roomId asc
             """)
-    List<Integer> findAllByStartDateAfterAndEndDateBeforeAndSubjectCodeContains(LocalDateTime startDate, LocalDateTime endDate, String subjectCode);
-    @Query("select distinct s.roomId from Scheduler s where s.subjectCode like concat('%', ?1, '%')" +
+    List<Integer> findAllRoomByStartDateAfterAndEndDateBefore(LocalDateTime startDate, LocalDateTime endDate);
+    @Query("select distinct s.roomId from Scheduler s " +
             "order by s.roomId asc")
-    List<Integer> findAllBySubjectCodeContains(String subjectCode);
+    List<Integer> findAllRoom();
     @Query("""
             select distinct s.roomId from Scheduler s
+            where s.startDate > ?1
+            order by s.roomId asc
+            """)
+    List<Integer> findAllRoomByStartDateAfter(LocalDateTime startDate);
+    @Query("""
+            select distinct s.roomId from Scheduler s
+            where s.endDate < ?1
+            order by s.roomId asc
+            """)
+    List<Integer> findAllRoomByEndDateBefore(LocalDateTime endDate);
+
+    @Query("""
+            select distinct s.subjectCode, s.startDate, s.endDate from Scheduler s
+            where s.startDate > ?1 and s.endDate < ?2 and s.subjectCode like concat('%', ?3, '%')
+            order by s.startDate asc
+            """)
+    List<Object> findAllByStartDateAfterAndEndDateBeforeAndSubjectCodeContains(LocalDateTime startDate, LocalDateTime endDate, String subjectCode);
+    @Query("select distinct s.subjectCode, s.startDate, s.endDate from Scheduler s where s.subjectCode like concat('%', ?1, '%')" +
+            "order by s.startDate asc")
+    List<Object> findAllBySubjectCodeContains(String subjectCode);
+    @Query("""
+            select distinct s.subjectCode, s.startDate, s.endDate from Scheduler s
             where s.startDate > ?1 and s.subjectCode like concat('%', ?2, '%')
-            order by s.roomId asc
+            order by s.startDate asc
             """)
-    List<Integer> findAllByStartDateAfterAndSubjectCodeContains(LocalDateTime startDate, String subjectCode);
+    List<Object> findAllByStartDateAfterAndSubjectCodeContains(LocalDateTime startDate, String subjectCode);
     @Query("""
-            select distinct s.roomId from Scheduler s
+            select distinct s.subjectCode, s.startDate, s.endDate from Scheduler s
             where s.endDate < ?1 and s.subjectCode like concat('%', ?2, '%')
-            order by s.roomId asc
+            order by s.startDate asc
             """)
-    List<Integer> findAllByEndDateBeforeAndSubjectCodeContains(LocalDateTime endDate, String subjectCode);
+    List<Object> findAllByEndDateBeforeAndSubjectCodeContains(LocalDateTime endDate, String subjectCode);
 
     long countAllBySemesterId(Integer semesterId);
 
