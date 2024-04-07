@@ -778,10 +778,19 @@ public class SchedulerService implements SchedulerServiceInterface {
     }
 
     @Override
-    public void updateLecturer(int schedulerId, int lecturerId) {
+    public void updateLecturer(int schedulerId, int lecturerId) throws Exception {
         Scheduler scheduler = schedulerRepository.findById(schedulerId).get();
-        scheduler.setLecturerId(lecturerId);
-        schedulerRepository.save(scheduler);
+        LocalDateTime startDate = scheduler.getStartDate();
+        LocalDateTime endDate = scheduler.getEndDate();
+        if(lecturerId != scheduler.getLecturerId()) {
+            if (!schedulerRepository.findAllBySemesterIdAndStartDateAndEndDateAndLectureId(
+                    scheduler.getSemesterId(), startDate, endDate, scheduler.getId(), lecturerId).isEmpty()) {
+                throw new Exception("It is not possible to change teachers because this teacher has an exam scheduled conflict time");
+            } else {
+                scheduler.setLecturerId(lecturerId);
+                schedulerRepository.save(scheduler);
+            }
+        }
     }
 
     public boolean isAvailableSlotExamOfLecturer(int semesterId, int lecturerId) {
