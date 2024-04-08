@@ -128,7 +128,7 @@ public interface SchedulerRepository extends JpaRepository<Scheduler, Integer> {
 
     @Modifying
     @Query("""
-        update Scheduler s set s.lecturerId = 0 where s.semesterId = ?1""")
+        update Scheduler s set s.lecturerId = null where s.semesterId = ?1 and s.lecturerId <> null""")
     void resetLecturerId(int semesterId);
 
     @Query("select s from Scheduler s where s.roomId = ?1 and s.startDate >= ?2 and s.endDate <= ?3")
