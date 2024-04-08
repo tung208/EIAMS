@@ -48,10 +48,10 @@ public class LecturerController {
         Lecturer lecturer = lecturerService.create(lecturerDto);
         if (lecturer != null){
             return ResponseEntity.status(HttpStatus.CREATED).body(
-                    new ResponseObject("NOT OK", "Create Not Success", lecturer));
+                    new ResponseObject("OK", "Create Success", lecturer));
         }
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-                new ResponseObject("OK", "Create Success", null));
+                new ResponseObject("FAIL", "Create Fail", null));
     }
 
     @PutMapping("/{id}")
