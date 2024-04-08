@@ -39,23 +39,39 @@ public class SchedulerService implements SchedulerServiceInterface {
     private final Pagination pagination;
 
     @Override
-    public List<Room> list(String search, String startDate, String endDate) {
+    public List<Room> list(String search, String startDate, String endDate, String lecturerId) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         Map<String, Set<String>> subjectCodesByTimeRange = new LinkedHashMap<>();
 
         List<Integer> results;
         if (startDate.isBlank() && endDate.isBlank()) {
-            results = schedulerRepository.findAllRoom();
+            if(lecturerId.isBlank()){
+                results = schedulerRepository.findAllRoom();
+            }else {
+                results = schedulerRepository.findAllRoomByLecturerId(Integer.valueOf(lecturerId));
+            }
         } else if (startDate.isBlank() && !endDate.isBlank()) {
             LocalDateTime endDateSearch = LocalDateTime.parse(endDate, formatter);
-            results = schedulerRepository.findAllRoomByEndDateBefore(endDateSearch);
+            if(lecturerId.isBlank()){
+                results = schedulerRepository.findAllRoomByEndDateBefore(endDateSearch);
+            } else {
+                results = schedulerRepository.findAllRoomByEndDateBeforeAndLecturerId(endDateSearch, Integer.valueOf(lecturerId));
+            }
         } else if (!startDate.isBlank() && endDate.isBlank()) {
             LocalDateTime startDateSearch = LocalDateTime.parse(startDate, formatter);
-            results = schedulerRepository.findAllRoomByStartDateAfter(startDateSearch);
+            if(lecturerId.isBlank()){
+                results = schedulerRepository.findAllRoomByStartDateAfter(startDateSearch);
+            } else {
+                results = schedulerRepository.findAllRoomByStartDateAfterAndLecturerId(startDateSearch, Integer.valueOf(lecturerId));
+            }
         } else {
             LocalDateTime endDateSearch = LocalDateTime.parse(endDate, formatter);
             LocalDateTime startDateSearch = LocalDateTime.parse(startDate, formatter);
-            results = schedulerRepository.findAllRoomByStartDateAfterAndEndDateBefore(startDateSearch, endDateSearch);
+            if(lecturerId.isBlank()){
+                results = schedulerRepository.findAllRoomByStartDateAfterAndEndDateBefore(startDateSearch, endDateSearch);
+            } else {
+                results = schedulerRepository.findAllRoomByStartDateAfterAndEndDateBeforeAndLecturerId(startDateSearch, endDateSearch, Integer.valueOf(lecturerId));
+            }
         }
 
 //        // Group subject codes by time range and eliminate duplicates
@@ -85,11 +101,16 @@ public class SchedulerService implements SchedulerServiceInterface {
     }
 
     @Override
-    public List<Scheduler> listSchedulerByRoom(int roomId, String startDate, String endDate) {
+    public List<Scheduler> listSchedulerByRoom(int roomId, String startDate, String endDate, String lecturerId) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         LocalDateTime endDateSearch = LocalDateTime.parse(endDate, formatter);
         LocalDateTime startDateSearch = LocalDateTime.parse(startDate, formatter);
-        return schedulerRepository.findAllByRoomIdAndStartDateAfterAndEndDateBefore(roomId,startDateSearch,endDateSearch);
+        if(lecturerId.isBlank()){
+            return schedulerRepository.findAllByRoomIdAndStartDateAfterAndEndDateBefore(roomId,startDateSearch,endDateSearch);
+        } else {
+            return schedulerRepository.findAllByRoomIdAndStartDateAfterAndEndDateBeforeAndLecturerId(roomId,startDateSearch,endDateSearch, Integer.valueOf(lecturerId));
+        }
+
     }
 
     @Override
