@@ -47,11 +47,11 @@ public class LecturerController {
     public ResponseEntity<ResponseObject> create(@RequestBody LecturerDto lecturerDto){
         Lecturer lecturer = lecturerService.create(lecturerDto);
         if (lecturer != null){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-                    new ResponseObject("NOT OK", "Create Not Success", ""));
+            return ResponseEntity.status(HttpStatus.CREATED).body(
+                    new ResponseObject("NOT OK", "Create Not Success", lecturer));
         }
-        return ResponseEntity.status(HttpStatus.CREATED).body(
-                new ResponseObject("OK", "Create Success", lecturer));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                new ResponseObject("OK", "Create Success", null));
     }
 
     @PutMapping("/{id}")
