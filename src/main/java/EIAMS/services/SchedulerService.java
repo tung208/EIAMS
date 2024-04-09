@@ -1,6 +1,7 @@
 package EIAMS.services;
 
 import EIAMS.constants.DBTableUtils;
+import EIAMS.dtos.LecturerToArrangeDto;
 import EIAMS.dtos.SchedulerDetailDto;
 import EIAMS.dtos.StudentScheduleDto;
 import EIAMS.entities.*;
@@ -751,6 +752,14 @@ public class SchedulerService implements SchedulerServiceInterface {
         List<Scheduler> schedulerWithSpecialSubject = schedulerRepository.findAllBySemesterIdAndSubjectCodeIn(semesterId, SUBJECT_CODE_SPECIAL);
 
         List<Scheduler> schedulerWithNormalSubject = schedulerRepository.findAllBySemesterIdAndSubjectCodeNotIn(semesterId, SUBJECT_CODE_SPECIAL);
+        List<Lecturer> allLecturers = lecturerRepository.findAllBySemesterId(semesterId);
+        List<LecturerToArrangeDto> lecturerToArrange = new ArrayList<>();
+        allLecturers.forEach(lecturer -> {
+            LecturerToArrangeDto lecturerToArrangeDto = new LecturerToArrangeDto();
+            lecturerToArrangeDto.setLecturer(lecturer);
+            lecturerToArrangeDto.setCountSlotArrange(lecturer.getTotalSlot());
+            lecturerToArrange.add(lecturerToArrangeDto);
+        });
 
         schedulerWithSpecialSubject.forEach(scheduler -> {
             String[] subjectCodes = scheduler.getSubjectCode().split(",");
@@ -758,22 +767,34 @@ public class SchedulerService implements SchedulerServiceInterface {
                     .filter(SUBJECT_CODE_SPECIAL::contains)
                     .findFirst()
                     .orElse("");
-            List<Lecturer> lecturersAvailable = lecturerRepository.findLecturersWithAvailableSlotsAndExamSubjectContains(semesterId, subjectMatch);
-            for (Lecturer lecturer : lecturersAvailable) {
-                if (isNotHaveSlotExamOfLecturer(semesterId, lecturer.getId(), scheduler)) {
-                    scheduler.setLecturerId(lecturer.getId());
+
+            for (LecturerToArrangeDto lecturer : lecturerToArrange) {
+                if(lecturer.getCountSlotArrange() == 0) {
+                    break;
+                }
+                if (isNotHaveSlotExamOfLecturer(semesterId, lecturer.getLecturer().getId(), scheduler) &&
+                        (Arrays.stream(lecturer.getLecturer().getExamSubject().split(",")).anyMatch(subject -> subject.contains(subjectMatch)))) {
+                    scheduler.setLecturerId(lecturer.getLecturer().getId());
                     schedulersToSave.add(scheduler);
+                    lecturer.setCountSlotArrange(lecturer.getCountSlotArrange() - 1);
+                    System.out.println(lecturer.getCountSlotArrange());
                     break;
                 }
             }
         });
         schedulerWithNormalSubject.forEach(scheduler -> {
-            List<Lecturer> lecturersAvailable = lecturerRepository.findLecturersWithAvailableSlots(semesterId);
-            for (Lecturer lecturer : lecturersAvailable) {
-                if (isNotHaveSlotExamOfLecturer(semesterId, lecturer.getId(), scheduler)) {
-                    scheduler.setLecturerId(lecturer.getId());
-                    schedulersToSave.add(scheduler);
-                    break;
+            if (!lecturerToArrange.isEmpty()) {
+                for (LecturerToArrangeDto lecturer : lecturerToArrange) {
+                    if(lecturer.getCountSlotArrange() == 0) {
+                        break;
+                    }
+                    if (isNotHaveSlotExamOfLecturer(semesterId, lecturer.getLecturer().getId(), scheduler)) {
+                        scheduler.setLecturerId(lecturer.getLecturer().getId());
+                        schedulersToSave.add(scheduler);
+                        lecturer.setCountSlotArrange(lecturer.getCountSlotArrange() - 1);
+                        System.out.println(lecturer.getCountSlotArrange());
+                        break;
+                    }
                 }
             }
         });
