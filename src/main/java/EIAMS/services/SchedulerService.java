@@ -41,7 +41,6 @@ public class SchedulerService implements SchedulerServiceInterface {
     @Override
     public List<Room> list(String search, String startDate, String endDate, String lecturerId) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        Map<String, Set<String>> subjectCodesByTimeRange = new LinkedHashMap<>();
 
         List<Integer> results;
         if (startDate.isBlank() && endDate.isBlank()) {
@@ -461,15 +460,6 @@ public class SchedulerService implements SchedulerServiceInterface {
             List<StudentSubject> allStudentBlackListPerSlot = students.stream()
                     .filter(student -> (student.getBlackList() != null && student.getBlackList() == 1))
                     .collect(Collectors.toList());
-            List<String> uniqueSubjectCodesBlackList = allStudentBlackListPerSlot.stream()
-                    .map(StudentSubject::getSubjectCode)
-                    .distinct()
-                    .toList();
-            List<String> uniqueSubjectCodesLegit = allStudentBlackListPerSlot.stream()
-                    .map(StudentSubject::getSubjectCode)
-                    .distinct()
-                    .toList();
-
             List<Room> availableCommonRooms = getAvailableRoom(planExam, roomCommon);
             List<Room> availableLabRooms = getAvailableRoom(planExam, labs);
 
@@ -759,27 +749,35 @@ public class SchedulerService implements SchedulerServiceInterface {
     @Transactional
     public void arrangeLecturer(int semesterId) {
         schedulerRepository.resetLecturerId(semesterId);
-        List<Lecturer> allLecturers = lecturerRepository.findAllBySemesterId(semesterId);
-
-        List<Scheduler> schedulers = schedulerRepository.findAllBySemesterIdOrderByStartDate(semesterId);
-
         List<Scheduler> schedulersToSave = new ArrayList<>();
+        List<Scheduler> schedulerWithSpecialSubject = schedulerRepository.findAllBySemesterIdAndSubjectCodeIn(semesterId, SUBJECT_CODE_SPECIAL);
 
-        schedulers.forEach(scheduler -> {
+        List<Scheduler> schedulerWithNormalSubject = schedulerRepository.findAllBySemesterIdAndSubjectCodeNotIn(semesterId, SUBJECT_CODE_SPECIAL);
+
+        schedulerWithSpecialSubject.forEach(scheduler -> {
             String[] subjectCodes = scheduler.getSubjectCode().split(",");
             String subjectMatch = Arrays.stream(subjectCodes)
                     .filter(SUBJECT_CODE_SPECIAL::contains)
                     .findFirst()
-                    .orElse(null);
-
-            allLecturers.stream()
-                    .filter(lecturer -> isAvailableSlotExamOfLecturer(semesterId, lecturer.getId()) && isNotHaveSlotExamOfLecturer(semesterId, lecturer.getId(), scheduler))
-                    .filter(lecturer -> subjectMatch == null || Arrays.asList(lecturer.getExamSubject().split(",")).contains(subjectMatch))
-                    .findFirst()
-                    .ifPresent(lecturer -> {
-                        scheduler.setLecturerId(lecturer.getId());
-                        schedulerRepository.save(scheduler);
-                    });
+                    .orElse("");
+            List<Lecturer> lecturersAvailable = lecturerRepository.findLecturersWithAvailableSlotsAndExamSubjectContains(semesterId, subjectMatch);
+            for (Lecturer lecturer : lecturersAvailable) {
+                if (isNotHaveSlotExamOfLecturer(semesterId, lecturer.getId(), scheduler)) {
+                    scheduler.setLecturerId(lecturer.getId());
+                    schedulersToSave.add(scheduler);
+                    break;
+                }
+            }
+        });
+        schedulerWithNormalSubject.forEach(scheduler -> {
+            List<Lecturer> lecturersAvailable = lecturerRepository.findLecturersWithAvailableSlots(semesterId);
+            for (Lecturer lecturer : lecturersAvailable) {
+                if (isNotHaveSlotExamOfLecturer(semesterId, lecturer.getId(), scheduler)) {
+                    scheduler.setLecturerId(lecturer.getId());
+                    schedulersToSave.add(scheduler);
+                    break;
+                }
+            }
         });
         schedulerRepository.saveAll(schedulersToSave);
     }

@@ -22,6 +22,7 @@ public interface RoomRepository extends JpaRepository<Room, Integer> {
             "AND (:name = '' or s.name LIKE %:name% )" )
     Page<Room> findByDynamic(Integer semesterId, String name, Pageable pageable);
 
+    @Query("select r from Room r where r.id in ?1 and upper(r.name) like upper(concat('%', ?2, '%'))")
     List<Room> findAllByIdInAndNameContainsIgnoreCase(Collection<Integer> id, String name);
 
 }

@@ -6,6 +6,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
@@ -115,6 +116,7 @@ public interface SchedulerRepository extends JpaRepository<Scheduler, Integer> {
 
     long countAllBySemesterId(Integer semesterId);
 
+    @Query("select count(s) from Scheduler s where s.semesterId = ?1 and s.lecturerId = ?2")
     int countAllBySemesterIdAndLecturerId(Integer semesterId, Integer lecturerId);
 
     List<Scheduler> findAllBySemesterIdAndSubjectCodeIn(Integer semesterId, Collection<String> subjectCode);
@@ -127,8 +129,8 @@ public interface SchedulerRepository extends JpaRepository<Scheduler, Integer> {
     List<Scheduler> findBySemesterIdAndLecturerIdAvailable(Integer semesterId, Integer lecturerId, LocalDateTime startDate, LocalDateTime endDate);
 
     @Modifying
-    @Query("""
-        update Scheduler s set s.lecturerId = null where s.semesterId = ?1 and s.lecturerId <> null""")
+    @Query("UPDATE Scheduler s SET s.lecturerId = null WHERE s.semesterId = ?1 AND s.lecturerId IS NOT NULL")
+    @Transactional
     void resetLecturerId(int semesterId);
 
     @Query("select s from Scheduler s where s.roomId = ?1 and s.startDate >= ?2 and s.endDate <= ?3")
