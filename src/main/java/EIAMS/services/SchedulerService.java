@@ -18,7 +18,6 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static EIAMS.constants.DBTableUtils.SUBJECT_CODE_SPECIAL;
@@ -149,7 +148,6 @@ public class SchedulerService implements SchedulerServiceInterface {
                     if (scheduler.getLecturerId() != null && lecturerRepository.findById(scheduler.getLecturerId()).isPresent()) {
                         lecturerEmail = lecturerRepository.findById(scheduler.getLecturerId()).get().getEmail();
                     }
-                    ;
                     return SchedulerDetailDto.builder()
                             .id(scheduler.getId())
                             .semesterId(scheduler.getSemesterId())
@@ -546,7 +544,7 @@ public class SchedulerService implements SchedulerServiceInterface {
         }
     }
 
-    public static Date getDateFromLocalDateTime(LocalDateTime localDateTime) throws ParseException {
+    public static Date getDateFromLocalDateTime(LocalDateTime localDateTime) {
         LocalDate date = localDateTime.toLocalDate(); // Extract date part
         LocalDateTime midnight = date.atStartOfDay(); // Set time to midnight
         return Date.from(midnight.atZone(ZoneId.systemDefault()).toInstant());
@@ -782,12 +780,12 @@ public class SchedulerService implements SchedulerServiceInterface {
         schedulerRepository.saveAll(schedulersToSave);
     }
 
-    public boolean isAvailableSlotExamOfLecturer(int semesterId, int lecturerId) {
-        Lecturer lecturer = lecturerRepository.findLecturerByIdAndSemesterId(lecturerId, semesterId);
-        int slotMin = lecturer.getTotalSlot();
-        int slotExamNow = schedulerRepository.countAllBySemesterIdAndLecturerId(semesterId, lecturerId);
-        return slotExamNow < slotMin;
-    }
+//    public boolean isAvailableSlotExamOfLecturer(int semesterId, int lecturerId) {
+//        Lecturer lecturer = lecturerRepository.findLecturerByIdAndSemesterId(lecturerId, semesterId);
+//        int slotMin = lecturer.getTotalSlot();
+//        int slotExamNow = schedulerRepository.countAllBySemesterIdAndLecturerId(semesterId, lecturerId);
+//        return slotExamNow < slotMin;
+//    }
 
     public boolean isNotHaveSlotExamOfLecturer(int semesterId, int lecturerId, Scheduler scheduler) {
         List<Scheduler> schedulers = schedulerRepository.findBySemesterIdAndLecturerIdAvailable(semesterId, lecturerId, scheduler.getStartDate(), scheduler.getEndDate());
