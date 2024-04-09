@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 
 public interface SchedulerRepository extends JpaRepository<Scheduler, Integer> {
@@ -49,6 +50,13 @@ public interface SchedulerRepository extends JpaRepository<Scheduler, Integer> {
             """)
     List<Integer> findAllRoomByStartDateAfterAndEndDateBeforeAndLecturerId(LocalDateTime startDate, LocalDateTime endDate, Integer lecturerId);
 
+    @Query("""
+            select DISTINCT s.roomId, function('date', s.startDate) from Scheduler s
+            where function('date', s.startDate) >= function('date', ?1) and function('date', s.endDate) <= function('date', ?2) and s.lecturerId = ?3
+            order by s.roomId asc
+            """)
+    List<Object[]> findAllRoomByDateAndLecturerId(LocalDateTime startDate, LocalDateTime endDate, Integer lecturerId);
+
 
     @Query("""
             select distinct s.roomId from Scheduler s
@@ -57,6 +65,13 @@ public interface SchedulerRepository extends JpaRepository<Scheduler, Integer> {
             """)
     List<Integer> findAllRoomByStartDateAfterAndEndDateBefore(LocalDateTime startDate, LocalDateTime endDated);
 
+    @Query("""
+             select DISTINCT s.roomId, function('date', s.startDate) from Scheduler s
+            where function('date', s.startDate) >= function('date', ?1) and function('date', s.endDate) <= function('date', ?2)
+            order by s.roomId asc
+            """)
+    List<Object[]> findAllRoomByDate(LocalDateTime startDate, LocalDateTime endDate);
+
     @Query("select distinct s.roomId from Scheduler s where s.lecturerId = ?1" +
             "order by s.roomId asc")
     List<Integer> findAllRoomByLecturerId(Integer lecturerId);
@@ -64,6 +79,7 @@ public interface SchedulerRepository extends JpaRepository<Scheduler, Integer> {
     @Query("select distinct s.roomId from Scheduler s " +
             "order by s.roomId asc")
     List<Integer> findAllRoom();
+
     @Query("""
             select distinct s.roomId from Scheduler s
             where s.startDate > ?1 and s.lecturerId = ?2
