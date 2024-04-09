@@ -105,6 +105,4 @@ public interface SchedulerRepository extends JpaRepository<Scheduler, Integer> {
 
     @Query("select s from Scheduler s where s.roomId = ?1 and s.startDate >= ?2 and s.endDate <= ?3")
     List<Scheduler> findAllByRoomIdAndStartDateAfterAndEndDateBefore(Integer roomId, LocalDateTime startDate, LocalDateTime endDate);
-
-
 }

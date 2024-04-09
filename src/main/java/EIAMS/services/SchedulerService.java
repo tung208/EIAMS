@@ -8,7 +8,6 @@ import EIAMS.helper.Pagination;
 import EIAMS.repositories.*;
 import EIAMS.services.interfaces.SchedulerServiceInterface;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,6 +18,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static EIAMS.constants.DBTableUtils.SUBJECT_CODE_SPECIAL;
@@ -39,23 +39,39 @@ public class SchedulerService implements SchedulerServiceInterface {
     private final Pagination pagination;
 
     @Override
-    public List<Room> list(String search, String startDate, String endDate) {
+    public List<Room> list(String search, String startDate, String endDate, String lecturerId) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         Map<String, Set<String>> subjectCodesByTimeRange = new LinkedHashMap<>();
 
         List<Integer> results;
         if (startDate.isBlank() && endDate.isBlank()) {
-            results = schedulerRepository.findAllRoom();
+            if (lecturerId.isBlank()) {
+                results = schedulerRepository.findAllRoom();
+            } else {
+                results = schedulerRepository.findAllRoomByLecturerId(Integer.valueOf(lecturerId));
+            }
         } else if (startDate.isBlank() && !endDate.isBlank()) {
             LocalDateTime endDateSearch = LocalDateTime.parse(endDate, formatter);
-            results = schedulerRepository.findAllRoomByEndDateBefore(endDateSearch);
+            if (lecturerId.isBlank()) {
+                results = schedulerRepository.findAllRoomByEndDateBefore(endDateSearch);
+            } else {
+                results = schedulerRepository.findAllRoomByEndDateBeforeAndLecturerId(endDateSearch, Integer.valueOf(lecturerId));
+            }
         } else if (!startDate.isBlank() && endDate.isBlank()) {
             LocalDateTime startDateSearch = LocalDateTime.parse(startDate, formatter);
-            results = schedulerRepository.findAllRoomByStartDateAfter(startDateSearch);
+            if (lecturerId.isBlank()) {
+                results = schedulerRepository.findAllRoomByStartDateAfter(startDateSearch);
+            } else {
+                results = schedulerRepository.findAllRoomByStartDateAfterAndLecturerId(startDateSearch, Integer.valueOf(lecturerId));
+            }
         } else {
             LocalDateTime endDateSearch = LocalDateTime.parse(endDate, formatter);
             LocalDateTime startDateSearch = LocalDateTime.parse(startDate, formatter);
-            results = schedulerRepository.findAllRoomByStartDateAfterAndEndDateBefore(startDateSearch, endDateSearch);
+            if (lecturerId.isBlank()) {
+                results = schedulerRepository.findAllRoomByStartDateAfterAndEndDateBefore(startDateSearch, endDateSearch);
+            } else {
+                results = schedulerRepository.findAllRoomByStartDateAfterAndEndDateBeforeAndLecturerId(startDateSearch, endDateSearch, Integer.valueOf(lecturerId));
+            }
         }
 
 //        // Group subject codes by time range and eliminate duplicates
@@ -85,11 +101,16 @@ public class SchedulerService implements SchedulerServiceInterface {
     }
 
     @Override
-    public List<Scheduler> listSchedulerByRoom(int roomId, String startDate, String endDate) {
+    public List<Scheduler> listSchedulerByRoom(int roomId, String startDate, String endDate, String lecturerId) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         LocalDateTime endDateSearch = LocalDateTime.parse(endDate, formatter);
         LocalDateTime startDateSearch = LocalDateTime.parse(startDate, formatter);
-        return schedulerRepository.findAllByRoomIdAndStartDateAfterAndEndDateBefore(roomId,startDateSearch,endDateSearch);
+        if (lecturerId.isBlank()) {
+            return schedulerRepository.findAllByRoomIdAndStartDateAfterAndEndDateBefore(roomId, startDateSearch, endDateSearch);
+        } else {
+            return schedulerRepository.findAllByRoomIdAndStartDateAfterAndEndDateBeforeAndLecturerId(roomId, startDateSearch, endDateSearch, Integer.valueOf(lecturerId));
+        }
+
     }
 
     @Override
@@ -126,9 +147,10 @@ public class SchedulerService implements SchedulerServiceInterface {
         return schedulers.stream()
                 .map(scheduler -> {
                     String lecturerEmail = null;
-                    if(scheduler.getLecturerId() != null && lecturerRepository.findById(scheduler.getLecturerId()).isPresent()){
+                    if (scheduler.getLecturerId() != null && lecturerRepository.findById(scheduler.getLecturerId()).isPresent()) {
                         lecturerEmail = lecturerRepository.findById(scheduler.getLecturerId()).get().getEmail();
-                    };
+                    }
+                    ;
                     return SchedulerDetailDto.builder()
                             .id(scheduler.getId())
                             .semesterId(scheduler.getSemesterId())
@@ -154,8 +176,8 @@ public class SchedulerService implements SchedulerServiceInterface {
         int newId = schedulerSwap.getLecturerId();
         LocalDateTime newStartDate = schedulerSwap.getStartDate();
         LocalDateTime newEndDate = schedulerSwap.getEndDate();
-        if(!schedulerRepository.findAllBySemesterIdAndStartDateAndEndDateAndIdNotAndLectureId(
-                scheduler.getSemesterId(), newStartDate, newEndDate, scheduler.getId(), scheduler.getLecturerId()).isEmpty()){
+        if (!schedulerRepository.findAllBySemesterIdAndStartDateAndEndDateAndIdNotAndLectureId(
+                scheduler.getSemesterId(), newStartDate, newEndDate, scheduler.getId(), scheduler.getLecturerId()).isEmpty()) {
             throw new Exception("It is not possible to change teachers because this teacher has an exam scheduled conflict time");
         } else {
             scheduler.setLecturerId(newId);
@@ -167,16 +189,16 @@ public class SchedulerService implements SchedulerServiceInterface {
 
     @Override
     public SchedulerDetailDto get(int schedulerId) {
-        if(schedulerRepository.findById(schedulerId).isPresent()) {
+        if (schedulerRepository.findById(schedulerId).isPresent()) {
             Scheduler s = schedulerRepository.findById(schedulerId).get();
             Room room = roomRepository.findById(s.getRoomId()).get();
             String lecturerEmail = null;
-            if(s.getLecturerId() != null){
+            if (s.getLecturerId() != null) {
                 Lecturer lecturer = lecturerRepository.findById(s.getLecturerId()).get();
                 lecturerEmail = lecturer.getEmail();
             }
             String semesterName = null;
-            if(semesterRepository.findById(s.getSemesterId()).isPresent()){
+            if (semesterRepository.findById(s.getSemesterId()).isPresent()) {
                 semesterName = semesterRepository.findById(s.getSemesterId()).get().getName();
             }
             SchedulerDetailDto schedulerDetailDto = new SchedulerDetailDto();
@@ -345,8 +367,7 @@ public class SchedulerService implements SchedulerServiceInterface {
                             Room room = availableLabRooms.get(i);
                             studentsInLab.put(room.getId(), baseStudentsPerLab);
                         }
-                    }
-                    else {
+                    } else {
                         int labsWithBaseStudents = numberOfStudentBlackList % numberOfLabRoomNeed;
                         // Distribute the base number of students to rooms
                         for (int i = 0; i < numberOfLabRoomNeed; i++) {
@@ -373,8 +394,7 @@ public class SchedulerService implements SchedulerServiceInterface {
                             Room room = availableCommonRooms.get(i);
                             studentsInRoomCommon.put(room.getId(), baseStudentsPerRoom);
                         }
-                    }
-                    else {
+                    } else {
                         int roomsWithBaseStudents = numberOfStudentLegit % numberOfRoomCommonNeed;
                         for (int i = 0; i < numberOfRoomCommonNeed; i++) {
                             Room room = availableCommonRooms.get(i);
@@ -563,10 +583,10 @@ public class SchedulerService implements SchedulerServiceInterface {
             for (String subjectCode : subjectCodesArray) {
                 List<ExamCode> examCodes = examCodeRepository.findBySemesterIdAndSubjectCode(semesterId, subjectCode);
                 List<PlanExam> planExamsByCode = planExamRepository.findAllBySemesterIdAndSubjectCode(semesterId, subjectCode);
-                if(planExamsByCode.size() > examCodes.size()) {
+                if (planExamsByCode.size() > examCodes.size()) {
                     throw new Exception("Not enough exam code for " + planExamsByCode.size() + "slots of subject " + subjectCode);
                 }
-                String expectedTime = getTimeStringFromLocalDateTime(s.getStartDate())+"-"+getTimeStringFromLocalDateTime(s.getEndDate());
+                String expectedTime = getTimeStringFromLocalDateTime(s.getStartDate()) + "-" + getTimeStringFromLocalDateTime(s.getEndDate());
                 Date expectedDate = getDateFromLocalDateTime(s.getStartDate());
                 PlanExam planExam = planExamRepository.findBySemesterIdAndSubjectCodeAndExpectedDateAndExpectedTime(
                         semesterId, subjectCode, expectedDate, expectedTime);
@@ -737,60 +757,31 @@ public class SchedulerService implements SchedulerServiceInterface {
 
     @Override
     @Transactional
-    public void arrangeLecturer(int semesterId){
+    public void arrangeLecturer(int semesterId) {
         schedulerRepository.resetLecturerId(semesterId);
         List<Lecturer> allLecturers = lecturerRepository.findAllBySemesterId(semesterId);
-//        int totalSlots = (int) schedulerRepository.countAllBySemesterId(semesterId);
-//        List<Scheduler> schedulers = schedulerRepository.findAllBySemesterIdOrderByStartDate(semesterId);
-        List<Scheduler> schedulerWithSpecialSubject = schedulerRepository.findAllBySemesterIdAndSubjectCodeIn(semesterId, SUBJECT_CODE_SPECIAL);
 
-        List<Scheduler> schedulerWithNormalSubject = schedulerRepository.findAllBySemesterIdAndSubjectCodeNotIn(semesterId, SUBJECT_CODE_SPECIAL);
+        List<Scheduler> schedulers = schedulerRepository.findAllBySemesterIdOrderByStartDate(semesterId);
 
-        for (Scheduler scheduler : schedulerWithSpecialSubject) {
+        List<Scheduler> schedulersToSave = new ArrayList<>();
+
+        schedulers.forEach(scheduler -> {
             String[] subjectCodes = scheduler.getSubjectCode().split(",");
-            String subjectMatch = null;
+            String subjectMatch = Arrays.stream(subjectCodes)
+                    .filter(SUBJECT_CODE_SPECIAL::contains)
+                    .findFirst()
+                    .orElse(null);
 
-            // Find a subject code match in the scheduler
-            for (String code : subjectCodes) {
-                if (SUBJECT_CODE_SPECIAL.contains(code)) {
-                    subjectMatch = code;
-                    break;
-                }
-            }
-            for (Lecturer l: allLecturers ) {
-                if(isAvailableSlotExamOfLecturer(semesterId, l.getId()) && subjectMatch != null && Arrays.asList(l.getExamSubject().split(",")).contains(subjectMatch)
-                    && isNotHaveSlotExamOfLecturer(semesterId,l.getId(), scheduler)) {
-                    scheduler.setLecturerId(l.getId());
-                    schedulerRepository.save(scheduler);
-                    break;
-                }
-            }
-        }
-        for (Scheduler scheduler : schedulerWithNormalSubject) {
-            for (Lecturer l: allLecturers ) {
-                if(isAvailableSlotExamOfLecturer(semesterId, l.getId()) && isNotHaveSlotExamOfLecturer(semesterId,l.getId(), scheduler)) {
-                    scheduler.setLecturerId(l.getId());
-                    schedulerRepository.save(scheduler);
-                    break;
-                }
-            }
-        }
-    }
-
-    @Override
-    public void updateLecturer(int schedulerId, int lecturerId) throws Exception {
-        Scheduler scheduler = schedulerRepository.findById(schedulerId).get();
-        LocalDateTime startDate = scheduler.getStartDate();
-        LocalDateTime endDate = scheduler.getEndDate();
-        if(lecturerId != scheduler.getLecturerId()) {
-            if (!schedulerRepository.findAllBySemesterIdAndStartDateAndEndDateAndLectureId(
-                    scheduler.getSemesterId(), startDate, endDate, scheduler.getId(), lecturerId).isEmpty()) {
-                throw new Exception("It is not possible to change teachers because this teacher has an exam scheduled conflict time");
-            } else {
-                scheduler.setLecturerId(lecturerId);
-                schedulerRepository.save(scheduler);
-            }
-        }
+            allLecturers.stream()
+                    .filter(lecturer -> isAvailableSlotExamOfLecturer(semesterId, lecturer.getId()) && isNotHaveSlotExamOfLecturer(semesterId, lecturer.getId(), scheduler))
+                    .filter(lecturer -> subjectMatch == null || Arrays.asList(lecturer.getExamSubject().split(",")).contains(subjectMatch))
+                    .findFirst()
+                    .ifPresent(lecturer -> {
+                        scheduler.setLecturerId(lecturer.getId());
+                        schedulerRepository.save(scheduler);
+                    });
+        });
+        schedulerRepository.saveAll(schedulersToSave);
     }
 
     public boolean isAvailableSlotExamOfLecturer(int semesterId, int lecturerId) {
@@ -799,8 +790,25 @@ public class SchedulerService implements SchedulerServiceInterface {
         int slotExamNow = schedulerRepository.countAllBySemesterIdAndLecturerId(semesterId, lecturerId);
         return slotExamNow < slotMin;
     }
+
     public boolean isNotHaveSlotExamOfLecturer(int semesterId, int lecturerId, Scheduler scheduler) {
         List<Scheduler> schedulers = schedulerRepository.findBySemesterIdAndLecturerIdAvailable(semesterId, lecturerId, scheduler.getStartDate(), scheduler.getEndDate());
         return schedulers.isEmpty();
+    }
+
+    @Override
+    public void updateLecturer(int schedulerId, int lecturerId) throws Exception {
+        Scheduler scheduler = schedulerRepository.findById(schedulerId).get();
+        LocalDateTime startDate = scheduler.getStartDate();
+        LocalDateTime endDate = scheduler.getEndDate();
+        if (lecturerId != scheduler.getLecturerId()) {
+            if (!schedulerRepository.findAllBySemesterIdAndStartDateAndEndDateAndLectureId(
+                    scheduler.getSemesterId(), startDate, endDate, scheduler.getId(), lecturerId).isEmpty()) {
+                throw new Exception("It is not possible to change teachers because this teacher has an exam scheduled conflict time");
+            } else {
+                scheduler.setLecturerId(lecturerId);
+                schedulerRepository.save(scheduler);
+            }
+        }
     }
 }

@@ -43,10 +43,11 @@ public class SchedulerController {
             @RequestParam(name = "search", defaultValue = "") String search,
             @RequestParam(name = "start_date", defaultValue = "") String start_date,
             @RequestParam(name = "end_date", defaultValue = "") String end_date,
+            @RequestParam(name = "lecturer_id", defaultValue = "") String lecturer_id,
             @RequestParam(name = "page", required = false) Integer page,
             @RequestParam(name = "limit", required = false) Integer limit) {
         try {
-            List<Room> list = schedulerServiceInterface.list(search, start_date, end_date);
+            List<Room> list = schedulerServiceInterface.list(search, start_date, end_date, lecturer_id);
             if (list.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
                         new ResponseObject("NOT FOUND", "", null));
@@ -63,10 +64,11 @@ public class SchedulerController {
     @GetMapping(path = "/list-by-room")
     public ResponseEntity<ResponseObject> listByRoom(
             @RequestParam(name = "room_id") Integer roomId,
+            @RequestParam(name = "lecturer_id", defaultValue = "") String lecturerId,
             @RequestParam(name = "start_date", defaultValue = "") String start_date,
             @RequestParam(name = "end_date", defaultValue = "") String end_date) {
         try {
-            List<Scheduler> list = schedulerServiceInterface.listSchedulerByRoom(roomId, start_date, end_date);
+            List<Scheduler> list = schedulerServiceInterface.listSchedulerByRoom(roomId, start_date, end_date, lecturerId);
             if (list.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
                         new ResponseObject("NOT FOUND", "", null));
