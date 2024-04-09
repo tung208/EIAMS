@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Repository
 public interface StudentRepository extends JpaRepository<Student, Integer> {
@@ -37,4 +38,7 @@ public interface StudentRepository extends JpaRepository<Student, Integer> {
             "AND (:cmtnd = '' or s.cmtnd LIKE %:cmtnd% ) "
     )
     Page<Student> findByDynamic(String rollNumber, String memberCode, String fullName, String cmtnd, Pageable pageable);
+
+    @Query("SELECT e FROM Student e WHERE e.rollNumber IN :rollNumber")
+    List<Student> findAllByRollNumber(Set<String> rollNumber);
 }

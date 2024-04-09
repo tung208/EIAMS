@@ -6,15 +6,26 @@ import EIAMS.entities.Room;
 import EIAMS.entities.Scheduler;
 import EIAMS.entities.Student;
 import EIAMS.entities.responeObject.ResponseObject;
+import EIAMS.services.excel.ExcelExportDSExam;
 import EIAMS.services.interfaces.SchedulerServiceInterface;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+import java.util.zip.ZipOutputStream;
 
 @RestController
 @RequiredArgsConstructor
@@ -23,6 +34,9 @@ public class SchedulerController {
 
     @Autowired
     private SchedulerServiceInterface schedulerServiceInterface;
+
+    @Autowired
+    private ExcelExportDSExam excelExportDSExam;
 
     @GetMapping(path = "/index")
     public ResponseEntity<ResponseObject> list(
@@ -186,6 +200,36 @@ public class SchedulerController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
                     new ResponseObject("Fail", e.getMessage(), null));
+        }
+    }
+
+//    @PostMapping("/export-scheduler")
+//    public void exportToExcel(@RequestBody String listScheduler, HttpServletResponse response) throws IOException {response.setContentType("application/zip");
+//        System.out.println(listScheduler);
+//        response.setContentType("application/octet-stream");
+//        response.setHeader("Content-Disposition", "attachment; filename=scheduler.xlsx");
+//        excelExportDSExam.exportScheduler(response, listScheduler);
+//    }
+
+    @PostMapping("/export-scheduler")
+    public ResponseEntity<byte[]> exportToExcel(@RequestBody String listScheduler, HttpServletResponse response) throws IOException {response.setContentType("application/zip");
+        try {
+            Workbook workbook = excelExportDSExam.exportScheduler(response, listScheduler);
+            // Tạo ByteArrayOutputStream để lưu trữ dữ liệu của file Excel
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            workbook.write(baos);
+
+            // Thiết lập các header cho phản hồi
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+            headers.setContentDispositionFormData("filename", "Scheduler.xlsx");
+
+            // Trả về dữ liệu của file Excel
+            return new ResponseEntity<>(baos.toByteArray(), headers, HttpStatus.OK);
+
+        } catch (Exception e){
+            e.printStackTrace();
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }

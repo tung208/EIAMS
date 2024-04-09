@@ -18,4 +18,5 @@ public interface SchedulerServiceInterface {
     void updateLecturer(int schedulerId, int lecturerId) throws Exception;
     void swapLecturer(int schedulerId, int schedulerSwapId) throws Exception;
     SchedulerDetailDto get(int schedulerId);
+
 }
