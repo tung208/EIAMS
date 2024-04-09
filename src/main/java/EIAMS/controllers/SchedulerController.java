@@ -1,5 +1,6 @@
 package EIAMS.controllers;
 
+import EIAMS.dtos.RoomScheduleDto;
 import EIAMS.dtos.SchedulerDetailDto;
 import EIAMS.dtos.StudentScheduleDto;
 import EIAMS.entities.Room;
@@ -47,7 +48,7 @@ public class SchedulerController {
             @RequestParam(name = "page", required = false) Integer page,
             @RequestParam(name = "limit", required = false) Integer limit) {
         try {
-            List<Room> list = schedulerServiceInterface.list(search, start_date, end_date, lecturer_id);
+            List<RoomScheduleDto> list = schedulerServiceInterface.list(search, start_date, end_date, lecturer_id);
             if (list.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
                         new ResponseObject("NOT FOUND", "", null));

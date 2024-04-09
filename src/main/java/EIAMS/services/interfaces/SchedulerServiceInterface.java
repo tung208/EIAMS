@@ -1,5 +1,6 @@
 package EIAMS.services.interfaces;
 
+import EIAMS.dtos.RoomScheduleDto;
 import EIAMS.dtos.SchedulerDetailDto;
 import EIAMS.dtos.StudentScheduleDto;
 import EIAMS.entities.Room;
@@ -11,7 +12,7 @@ public interface SchedulerServiceInterface {
     void arrangeStudent(int semesterId) throws Exception;
     void setExamCode(int semesterId) throws Exception;
     void arrangeLecturer(int semesterId);
-    List<Room> list(String search, String startDate, String endDate, String lecturerId);
+    List<RoomScheduleDto> list(String search, String startDate, String endDate, String lecturerId);
     List<Scheduler> listSchedulerByRoom(int roomId, String startDate, String endDate, String lecturerId);
     List<StudentScheduleDto> getListStudentInARoom(Integer schedulerId, String search);
     List<SchedulerDetailDto> getListSchedulerBySubjectCode(Integer semesterId, String subjectCode);
