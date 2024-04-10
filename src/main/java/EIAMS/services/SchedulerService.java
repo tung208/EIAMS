@@ -51,7 +51,7 @@ public class SchedulerService implements SchedulerServiceInterface {
         } else {
             LocalDateTime endDateSearch = LocalDateTime.parse(endDate, formatter);
             LocalDateTime startDateSearch = LocalDateTime.parse(startDate, formatter);
-            if (lecturerId.isBlank()) {
+            if (lecturerId == null || lecturerId.isBlank()) {
                 results = schedulerRepository.findAllRoomByDate(startDateSearch, endDateSearch);
             } else {
                 results = schedulerRepository.findAllRoomByDateAndLecturerId(startDateSearch, endDateSearch, Integer.valueOf(lecturerId));
