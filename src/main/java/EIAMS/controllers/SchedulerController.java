@@ -180,7 +180,7 @@ public class SchedulerController {
     }
     @PostMapping(path = "update-lecturer")
     public ResponseEntity<ResponseObject> updateLecture(@RequestParam(name = "scheduler_id") Integer schedulerId,
-                                                        @RequestBody() Integer lecturerId) {
+                                                        @RequestParam(name = "lecturer_id") Integer lecturerId) {
         try {
             schedulerServiceInterface.updateLecturer(schedulerId,lecturerId);
             return ResponseEntity.status(HttpStatus.OK).body(

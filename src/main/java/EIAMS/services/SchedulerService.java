@@ -810,14 +810,13 @@ public class SchedulerService implements SchedulerServiceInterface {
         Scheduler scheduler = schedulerRepository.findById(schedulerId).get();
         LocalDateTime startDate = scheduler.getStartDate();
         LocalDateTime endDate = scheduler.getEndDate();
-        if (lecturerId != scheduler.getLecturerId()) {
-            if (!schedulerRepository.findAllBySemesterIdAndStartDateAndEndDateAndLectureId(
-                    scheduler.getSemesterId(), startDate, endDate, scheduler.getId(), lecturerId).isEmpty()) {
-                throw new Exception("It is not possible to change teachers because this teacher has an exam scheduled conflict time");
-            } else {
-                scheduler.setLecturerId(lecturerId);
-                schedulerRepository.save(scheduler);
-            }
+        if (!schedulerRepository.findAllBySemesterIdAndStartDateAndEndDateAndLectureId(
+                scheduler.getSemesterId(), startDate, endDate, scheduler.getId(), lecturerId).isEmpty()) {
+            throw new Exception("It is not possible to change teachers because this teacher has an exam scheduled conflict time");
+        }
+        if (scheduler.getLecturerId() == null || lecturerId != scheduler.getLecturerId()) {
+            scheduler.setLecturerId(lecturerId);
+            schedulerRepository.save(scheduler);
         }
     }
 }
