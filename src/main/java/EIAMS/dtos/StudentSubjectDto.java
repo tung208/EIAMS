@@ -9,7 +9,6 @@ import lombok.NonNull;
 @AllArgsConstructor
 @Builder
 public class StudentSubjectDto {
-    @NonNull
     Integer id;
 
     @NonNull
@@ -17,8 +16,11 @@ public class StudentSubjectDto {
 
     @NonNull
     String subjectCode;
+
     String groupName;
-    String blackList;
+
+    @NonNull
+    int blackList;
 
     @NonNull
     Integer semesterId;

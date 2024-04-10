@@ -2,6 +2,7 @@ package EIAMS.dtos;
 
 import lombok.*;
 
+import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
 
 /**
@@ -11,15 +12,20 @@ import java.io.Serializable;
 @AllArgsConstructor
 @Builder
 public class StudentDto {
-    @NonNull
+
     Integer id;
     String subjectCode;
+
     @NonNull
     String rollNumber;
+
     @NonNull
     String memberCode;
+
     String fullName;
+
     @NonNull
+    @NotBlank
     String cmtnd;
     Integer semesterId;
     String blackList;

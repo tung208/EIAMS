@@ -44,7 +44,6 @@ public class StudentService implements StudentServiceInterface {
 
     private final StudentRepository studentRepository;
     private final StudentSubjectRepository studentSubjectRepository;
-    private final SemesterRepository semesterRepository;
     private final Pagination pagination;
     private static final Logger logger = LoggerFactory.getLogger(StudentService.class);
 
@@ -74,7 +73,13 @@ public class StudentService implements StudentServiceInterface {
     }
 
     @Override
-    public void create(Student student) {
+    public void create(StudentDto studentDto) {
+        Student student = Student.builder()
+                .rollNumber(studentDto.getRollNumber())
+                .memberCode(studentDto.getMemberCode())
+                .fullName(studentDto.getFullName())
+                .cmtnd(studentDto.getCmtnd())
+                .build();
         studentRepository.save(student);
     }
 
@@ -234,11 +239,6 @@ public class StudentService implements StudentServiceInterface {
                     safeTrim(element.getBlackList(),1),
                     semester_id
             );
-//            System.out.println(safeTrim(element.getRollNumber(),1)+" "+
-//                    safeTrim(element.getBlackList(),1)+" "+
-//                    semester_id+" "+
-//                    studentSubjectList.size()
-//                    );
             if (studentSubjectList.size() != 0){
                 for (StudentSubject item: studentSubjectList){
                     item.setBlackList(1);
@@ -259,12 +259,40 @@ public class StudentService implements StudentServiceInterface {
     }
 
     @Override
-    public void updateStudentSubject(StudentSubjectDto studentSubjectDto) {
-        Optional<StudentSubject> ss = studentSubjectRepository.findById(studentSubjectDto.getId());
-        if (ss.isPresent()) {
+    public void updateStudentSubject(int id, StudentSubjectDto studentSubjectDto) {
+        Optional<StudentSubject> ss = studentSubjectRepository.findById(id);
+        Optional<Student> student = studentRepository.findByRollNumber(studentSubjectDto.getRollNumber());
+        if (ss.isPresent() && student.isPresent()) {
             StudentSubject studentSubject = StudentSubject.builder()
-
+                    .semesterId(studentSubjectDto.getSemesterId())
+                    .rollNumber(studentSubjectDto.getRollNumber())
+                    .subjectCode(studentSubjectDto.getSubjectCode())
+                    .groupName(studentSubjectDto.getGroupName())
+                    .blackList(studentSubjectDto.getBlackList())
                         .build();
+            studentSubjectRepository.save(studentSubject);
+        }
+    }
+
+    @Override
+    public void deleteStudentSubject(int id) {
+        studentSubjectRepository.deleteById(id);
+    }
+
+    @Override
+    public void createStudentSubject(StudentSubjectDto studentSubjectDto){
+        Optional<Student> student = studentRepository.findByRollNumber(studentSubjectDto.getRollNumber());
+        if (student.isPresent()) {
+            StudentSubject studentSubject = StudentSubject.builder()
+                    .semesterId(studentSubjectDto.getSemesterId())
+                    .rollNumber(studentSubjectDto.getRollNumber())
+                    .subjectCode(studentSubjectDto.getSubjectCode())
+                    .groupName(studentSubjectDto.getGroupName())
+                    .blackList(studentSubjectDto.getBlackList())
+                    .build();
+        } else {
+            // Trả ra exception
+
         }
     }
 }
