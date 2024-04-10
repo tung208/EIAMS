@@ -18,10 +18,10 @@ public class Semester {
     @Column(name = "id", nullable = false)
     private Integer id;
 
-    @Column(name = "name", nullable = false, length = 64)
+    @Column(name = "name", nullable = false, length = 64, unique = true)
     private String name;
 
-    @Column(name = "code", nullable = false, length = 64)
+    @Column(name = "code", nullable = false, length = 64, unique = true)
     private String code;
 
     @Column(name = "from_date")
