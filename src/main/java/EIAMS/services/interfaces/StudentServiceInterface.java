@@ -17,7 +17,7 @@ public interface StudentServiceInterface {
      Page<Student> list(String search, String memberCode, Integer page, Integer limit);
 
      List<Student> list();
-     void create(Student student);
+     void create(StudentDto student);
      void update(StudentDto studentDto);
      Optional<Student> getStudentDetail(int id);
      void delete(int id);
@@ -33,5 +33,9 @@ public interface StudentServiceInterface {
 
      Page<StudentSubject> searchStudentSubject(Integer page, Integer limit, Integer semesterId, String rollNumber, String subjectCode, String groupName, Integer backList);
 
-     void updateStudentSubject(StudentSubjectDto studentSubjectDto);
+     void updateStudentSubject(int id, StudentSubjectDto studentSubjectDto);
+
+     void deleteStudentSubject(int id);
+
+     void createStudentSubject(StudentSubjectDto studentSubjectDto);
 }

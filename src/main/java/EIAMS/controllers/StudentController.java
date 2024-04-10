@@ -1,6 +1,8 @@
 package EIAMS.controllers;
 
 import EIAMS.dtos.StudentDto;
+import EIAMS.dtos.StudentSubjectDto;
+import EIAMS.dtos.SubjectDto;
 import EIAMS.entities.StudentSubject;
 import EIAMS.entities.responeObject.PageResponse;
 import EIAMS.entities.responeObject.ResponseObject;
@@ -62,13 +64,12 @@ public class StudentController {
                 new ResponseObject("OK", "Import Success", ""));
     }
 
-//    @CrossOrigin(origins = "http://localhost:7000/")
-    @PutMapping("/update")
+    @PutMapping("/{id}")
     public void updateStudent(@RequestBody StudentDto studentDto) {
         studentService.update(studentDto);
     }
 
-    @DeleteMapping("/delete/{id}")
+    @DeleteMapping("/{id}")
     public void deleteStudent(@PathVariable int id) {
         studentService.delete(id);
     }
@@ -88,10 +89,24 @@ public class StudentController {
         return new PageResponse<>(page.getNumber() + 1, page.getTotalPages(), page.getSize(), page.getContent());
     }
 
-    @PutMapping("/subject")
-    public ResponseEntity<ResponseObject> updateStudentSubject() {
-
+    @PutMapping("/subject/{id}")
+    public ResponseEntity<ResponseObject> updateStudentSubject(@PathVariable int id, @RequestBody StudentSubjectDto studentSubjectDto) {
+        studentService.updateStudentSubject(id, studentSubjectDto);
         return ResponseEntity.status(HttpStatus.OK).body(
                 new ResponseObject("OK", "Update Success", ""));
+    }
+
+    @DeleteMapping("/subject/{id}")
+    public ResponseEntity<ResponseObject> deleteStudentSubject(@PathVariable int id) {
+        studentService.deleteStudentSubject(id);
+        return ResponseEntity.status(HttpStatus.OK).body(
+                new ResponseObject("OK", "Delete Success", ""));
+    }
+
+    @PostMapping()
+    public ResponseEntity<ResponseObject> createStudent(@RequestBody StudentDto studentDto) {
+        studentService.create(studentDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(
+                new ResponseObject("OK", "Create Success", ""));
     }
 }
