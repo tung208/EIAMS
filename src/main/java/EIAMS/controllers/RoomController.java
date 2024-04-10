@@ -42,7 +42,7 @@ public class RoomController {
         return new PageResponse<>(page.getNumber() + 1, page.getTotalPages(), page.getSize(), page.getContent());
     }
 
-    @PostMapping
+    @PostMapping()
     public ResponseEntity<ResponseObject> create(@RequestBody RoomDto roomDto){
         Room room = roomService.create(roomDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(
