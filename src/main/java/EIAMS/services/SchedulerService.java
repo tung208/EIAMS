@@ -179,7 +179,9 @@ public class SchedulerService implements SchedulerServiceInterface {
         LocalDateTime newStartDate = schedulerSwap.getStartDate();
         LocalDateTime newEndDate = schedulerSwap.getEndDate();
         if (!schedulerRepository.findAllBySemesterIdAndStartDateAndEndDateAndIdNotAndLectureId(
-                scheduler.getSemesterId(), newStartDate, newEndDate, scheduler.getId(), scheduler.getLecturerId()).isEmpty()) {
+                scheduler.getSemesterId(), newStartDate, newEndDate, scheduler.getId(), scheduler.getLecturerId()).isEmpty()
+        || !schedulerRepository.findAllBySemesterIdAndStartDateAndEndDateAndIdNotAndLectureId(
+                scheduler.getSemesterId(), scheduler.getStartDate(), scheduler.getEndDate(), schedulerSwap.getId(), schedulerSwap.getLecturerId()).isEmpty()) {
             throw new Exception("It is not possible to change teachers because this teacher has an exam scheduled conflict time");
         } else {
             scheduler.setLecturerId(newId);
