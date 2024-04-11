@@ -338,17 +338,17 @@ public class SchedulerService implements SchedulerServiceInterface {
                 int numberOfStudentLegit = allLegit.size();
 
                 int numberOfLabRoomNeed = numberOfStudentBlackList / quantityLabRoom;
-                // Gia su lab co 28 ng. chap nhan 14 ng thi xep 1 phong. Neu ko thi xep phong thuong
-                if ((numberOfStudentBlackList % quantityLabRoom) > (quantityLabRoom / 2)) {
-                    numberOfLabRoomNeed++;
-                } else {
-                    numberOfStudentLegit += numberOfStudentBlackList % quantityLabRoom;
-                    numberOfStudentBlackList -= numberOfStudentBlackList % quantityLabRoom;
-                    for (int i = 0; i < (numberOfStudentBlackList % quantityLabRoom); i++) {
-                        StudentSubject studentToMove = allBlackList.remove(0);
-                        allLegit.add(studentToMove);
-                    }
-                }
+//                // Gia su lab co 28 ng. chap nhan 14 ng thi xep 1 phong. Neu ko thi xep phong thuong
+//                if ((numberOfStudentBlackList % quantityLabRoom) > (quantityLabRoom / 2)) {
+//                    numberOfLabRoomNeed++;
+//                } else {
+//                    numberOfStudentLegit += numberOfStudentBlackList % quantityLabRoom;
+//                    numberOfStudentBlackList -= numberOfStudentBlackList % quantityLabRoom;
+//                    for (int i = 0; i < (numberOfStudentBlackList % quantityLabRoom); i++) {
+//                        StudentSubject studentToMove = allBlackList.remove(0);
+//                        allLegit.add(studentToMove);
+//                    }
+//                }
                 int numberOfRoomCommonNeed = numberOfStudentLegit / quantityNormalRoom;
                 if (numberOfStudentLegit % quantityNormalRoom != 0) {
                     numberOfRoomCommonNeed++;
@@ -475,17 +475,17 @@ public class SchedulerService implements SchedulerServiceInterface {
             int numberOfStudentBlackList = allStudentBlackListPerSlot.size();
             int numberOfStudentLegit = allStudentLegitPerSlot.size();
             int numberOfLabRoomNeed = numberOfStudentBlackList / quantityLabRoom;
-            // Gia su lab co 28 ng. chap nhan 14 ng thi xep 1 phong. Neu ko thi xep phong thuong
-            if ((numberOfStudentBlackList % quantityLabRoom) > (quantityLabRoom / 2)) {
-                numberOfLabRoomNeed++;
-            } else {
-                numberOfStudentLegit += numberOfStudentBlackList % quantityLabRoom;
-                numberOfStudentBlackList -= numberOfStudentBlackList % quantityLabRoom;
-                for (int i = 0; i < (numberOfStudentBlackList % quantityLabRoom); i++) {
-                    StudentSubject studentToMove = allStudentBlackListPerSlot.remove(0);
-                    allStudentLegitPerSlot.add(studentToMove);
-                }
-            }
+//            // Gia su lab co 28 ng. chap nhan 14 ng thi xep 1 phong. Neu ko thi xep phong thuong
+//            if ((numberOfStudentBlackList % quantityLabRoom) > (quantityLabRoom / 2)) {
+//                numberOfLabRoomNeed++;
+//            } else {
+//                numberOfStudentLegit += numberOfStudentBlackList % quantityLabRoom;
+//                numberOfStudentBlackList -= numberOfStudentBlackList % quantityLabRoom;
+//                for (int i = 0; i < (numberOfStudentBlackList % quantityLabRoom); i++) {
+//                    StudentSubject studentToMove = allStudentBlackListPerSlot.remove(0);
+//                    allStudentLegitPerSlot.add(studentToMove);
+//                }
+//            }
             int numberOfRoomCommonNeed = numberOfStudentLegit / quantityNormalRoom;
             if (numberOfStudentLegit % quantityNormalRoom != 0) {
                 numberOfRoomCommonNeed++;
