@@ -9,7 +9,7 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Table(name = "student", schema = "eiams", indexes = {
+@Table(name = "student", schema = "schedule", indexes = {
         @Index(name = "roll_number", columnList = "roll_number", unique = true),
         @Index(name = "member_code", columnList = "member_code", unique = true),
         @Index(name = "CMTND", columnList = "CMTND", unique = true)

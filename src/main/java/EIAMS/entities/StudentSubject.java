@@ -10,7 +10,7 @@ import org.hibernate.annotations.ColumnDefault;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Table(name = "studentsubject", schema = "eiams",
+@Table(name = "studentsubject", schema = "schedule",
         indexes = {
         @Index(name = "semester_index1", columnList = "semester_id")
 }

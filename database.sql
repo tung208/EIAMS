@@ -73,7 +73,8 @@ CREATE TABLE `Scheduler` (
   `exam_code_id` longtext,
   `student_id` longtext,
   `start_date` datetime,
-  `end_date` datetime
+  `end_date` datetime,
+  `type` varchar(255)
 );
 
 CREATE TABLE `ExamCode` (

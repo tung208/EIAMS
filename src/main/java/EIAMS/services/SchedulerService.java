@@ -716,6 +716,7 @@ public class SchedulerService implements SchedulerServiceInterface {
             scheduler.setStudentId(studentIds);
             scheduler.setStartDate(getStartDateFromPlanExam(planExam));
             scheduler.setEndDate(getEndDateFromPlanExam(planExam));
+            scheduler.setType(planExam.getTypeExam());
             schedulerRepository.save(scheduler);
 
         }
