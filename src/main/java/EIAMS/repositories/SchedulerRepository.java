@@ -67,6 +67,7 @@ public interface SchedulerRepository extends JpaRepository<Scheduler, Integer> {
     @Query("""
              select DISTINCT s.roomId, function('date', s.startDate) from Scheduler s
             where function('date', s.startDate) >= function('date', ?1) and function('date', s.endDate) <= function('date', ?2)
+            order by s.startDate asc
             """)
     List<Object[]> findAllRoomByDate(LocalDateTime startDate, LocalDateTime endDate);
 

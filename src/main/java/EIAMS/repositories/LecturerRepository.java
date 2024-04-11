@@ -37,5 +37,6 @@ public interface LecturerRepository extends JpaRepository<Lecturer,Integer> {
     @Query("SELECT l FROM Lecturer l WHERE l.examSubject like concat('%', ?2, '%') and l.id NOT IN (SELECT s.lecturerId FROM Scheduler s WHERE s.semesterId = ?1 AND s.lecturerId is not null GROUP BY s.lecturerId HAVING COUNT(s.lecturerId) >= l.totalSlot)")
     List<Lecturer> findLecturersWithAvailableSlotsAndExamSubjectContains(Integer semesterId, String examSubject);
 
+    int countAllBySemesterId(Integer semesterId);
 }
 

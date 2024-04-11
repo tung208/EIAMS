@@ -22,6 +22,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import static EIAMS.constants.DBTableUtils.SUBJECT_CODE_SPECIAL;
@@ -752,8 +753,15 @@ public class SchedulerService implements SchedulerServiceInterface {
 
     @Override
     @Transactional
-    public void arrangeLecturer(int semesterId) {
+    public void arrangeLecturer(int semesterId) throws Exception {
         schedulerRepository.resetLecturerId(semesterId);
+        int numberOfScheduler = (int) schedulerRepository.countAllBySemesterId(semesterId);
+        if(numberOfScheduler == 0) {
+            throw new Exception("We don't have any scheduler to arrange lecturer");
+        }
+        int numberOfLecturer= lecturerRepository.countAllBySemesterId(semesterId);
+        int numberSlotPerLecturer = numberOfScheduler / numberOfLecturer;
+        AtomicInteger remainderSlots = new AtomicInteger(numberOfScheduler % numberOfLecturer);
         List<Scheduler> schedulersToSave = new ArrayList<>();
         List<Scheduler> schedulerWithSpecialSubject = schedulerRepository.findAllBySemesterIdAndSubjectCodeIn(semesterId, SUBJECT_CODE_SPECIAL);
         List<Scheduler> schedulerWithNormalSubject = schedulerRepository.findAllBySemesterIdAndSubjectCodeNotIn(semesterId, SUBJECT_CODE_SPECIAL);
@@ -763,6 +771,10 @@ public class SchedulerService implements SchedulerServiceInterface {
             LecturerToArrangeDto lecturerToArrangeDto = new LecturerToArrangeDto();
             lecturerToArrangeDto.setLecturer(lecturer);
             lecturerToArrangeDto.setCountSlotArrange(lecturer.getTotalSlot());
+            if(lecturer.getTotalSlot() > numberSlotPerLecturer && remainderSlots.get() != 0) {
+                lecturer.setTotalSlot(lecturer.getTotalSlot() + 1);
+                remainderSlots.set(remainderSlots.get() - 1);
+            }
             lecturerToArrange.add(lecturerToArrangeDto);
         });
 
