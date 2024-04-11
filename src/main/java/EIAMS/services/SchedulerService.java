@@ -54,6 +54,8 @@ public class SchedulerService implements SchedulerServiceInterface {
             LocalDateTime startDateSearch = LocalDateTime.parse(startDate, formatter);
             if (lecturerId == null || lecturerId.isBlank()) {
                 results = schedulerRepository.findAllRoomByDate(startDateSearch, endDateSearch);
+            } else if (lecturerId.equals("-1")) {
+                results = schedulerRepository.findAllRoomByDateAndLecturerIdIsNull(startDateSearch, endDateSearch);
             } else {
                 results = schedulerRepository.findAllRoomByDateAndLecturerId(startDateSearch, endDateSearch, Integer.valueOf(lecturerId));
             }
@@ -181,7 +183,7 @@ public class SchedulerService implements SchedulerServiceInterface {
         LocalDateTime newEndDate = schedulerSwap.getEndDate();
         if (!schedulerRepository.findAllBySemesterIdAndStartDateAndEndDateAndIdNotAndLectureId(
                 scheduler.getSemesterId(), newStartDate, newEndDate, scheduler.getId(), scheduler.getLecturerId()).isEmpty()
-        || !schedulerRepository.findAllBySemesterIdAndStartDateAndEndDateAndIdNotAndLectureId(
+                || !schedulerRepository.findAllBySemesterIdAndStartDateAndEndDateAndIdNotAndLectureId(
                 scheduler.getSemesterId(), scheduler.getStartDate(), scheduler.getEndDate(), schedulerSwap.getId(), schedulerSwap.getLecturerId()).isEmpty()) {
             throw new Exception("It is not possible to change teachers because this teacher has an exam scheduled conflict time");
         } else {
@@ -756,10 +758,10 @@ public class SchedulerService implements SchedulerServiceInterface {
     public void arrangeLecturer(int semesterId) throws Exception {
         schedulerRepository.resetLecturerId(semesterId);
         int numberOfScheduler = (int) schedulerRepository.countAllBySemesterId(semesterId);
-        if(numberOfScheduler == 0) {
+        if (numberOfScheduler == 0) {
             throw new Exception("We don't have any scheduler to arrange lecturer");
         }
-        int numberOfLecturer= lecturerRepository.countAllBySemesterId(semesterId);
+        int numberOfLecturer = lecturerRepository.countAllBySemesterId(semesterId);
         int numberSlotPerLecturer = numberOfScheduler / numberOfLecturer;
         AtomicInteger remainderSlots = new AtomicInteger(numberOfScheduler % numberOfLecturer);
         List<Scheduler> schedulersToSave = new ArrayList<>();
@@ -771,7 +773,7 @@ public class SchedulerService implements SchedulerServiceInterface {
             LecturerToArrangeDto lecturerToArrangeDto = new LecturerToArrangeDto();
             lecturerToArrangeDto.setLecturer(lecturer);
             lecturerToArrangeDto.setCountSlotArrange(lecturer.getTotalSlot());
-            if(lecturer.getTotalSlot() > numberSlotPerLecturer && remainderSlots.get() != 0) {
+            if (lecturer.getTotalSlot() > numberSlotPerLecturer && remainderSlots.get() != 0) {
                 lecturer.setTotalSlot(lecturer.getTotalSlot() + 1);
                 remainderSlots.set(remainderSlots.get() - 1);
             }
