@@ -6,7 +6,6 @@ import EIAMS.dtos.RoomScheduleDto;
 import EIAMS.dtos.SchedulerDetailDto;
 import EIAMS.dtos.StudentScheduleDto;
 import EIAMS.entities.*;
-import EIAMS.helper.Pagination;
 import EIAMS.repositories.*;
 import EIAMS.services.interfaces.SchedulerServiceInterface;
 import lombok.RequiredArgsConstructor;
@@ -35,12 +34,10 @@ public class SchedulerService implements SchedulerServiceInterface {
     private final SemesterRepository semesterRepository;
     private final RoomRepository roomRepository;
     private final SubjectRepository subjectRepository;
-    private final SlotRepository slotRepository;
     private final SchedulerRepository schedulerRepository;
     private final PlanExamRepository planExamRepository;
     private final ExamCodeRepository examCodeRepository;
     private final LecturerRepository lecturerRepository;
-    private final Pagination pagination;
 
     @Override
     public List<RoomScheduleDto> list(String search, String startDate, String endDate, String lecturerId) {
@@ -61,28 +58,6 @@ public class SchedulerService implements SchedulerServiceInterface {
             }
         }
 
-//        // Group subject codes by time range and eliminate duplicates
-//        for (Object result : results) {
-//            if (result instanceof Object[]) {
-//                Object[] row = (Object[]) result;
-//                String startTime = row[1].toString();
-//                String endTime = row[2].toString();
-//                String timeRangeKey = startTime + "_" + endTime;
-//                String[] subjectCodes = row[0].toString().split(",");
-//                Set<String> uniqueSubjectCodes = subjectCodesByTimeRange.computeIfAbsent(timeRangeKey, k -> new HashSet<>());
-//                uniqueSubjectCodes.addAll(Arrays.asList(subjectCodes));
-//            }
-//        }
-//
-//        // Convert map entries to List<List<String>> for response
-//        List<List<String>> response = new ArrayList<>();
-//        for (Map.Entry<String, Set<String>> entry : subjectCodesByTimeRange.entrySet()) {
-//            List<String> entryList = new ArrayList<>();
-//            entryList.add(String.join(",", entry.getValue()));
-//            entryList.add(entry.getKey().split("_")[0]); // Start time
-//            entryList.add(entry.getKey().split("_")[1]); // End time
-//            response.add(entryList);
-//        }
         List<RoomScheduleDto> roomScheduleDtos = new ArrayList<>();
         for (Object[] o : results) {
             RoomScheduleDto dto = new RoomScheduleDto();
@@ -370,11 +345,11 @@ public class SchedulerService implements SchedulerServiceInterface {
                             "We have only " + availableCommonRooms.size() + " normal rooms." +
                             "We need at least " + numberOfRoomCommonNeed + " rooms.");
                 }
-                if (numberOfLabRoomNeed > availableLabRooms.size()) {
-                    throw new Exception("Not enough lab room for " + planExam.getSubjectCode() + " with " + numberOfStudentBlackList + " student." +
-                            "We have only " + availableLabRooms.size() + " lab rooms." +
-                            "We need at least " + numberOfLabRoomNeed + " lab rooms");
-                }
+//                if (numberOfLabRoomNeed > availableLabRooms.size()) {
+//                    throw new Exception("Not enough lab room for " + planExam.getSubjectCode() + " with " + numberOfStudentBlackList + " student." +
+//                            "We have only " + availableLabRooms.size() + " lab rooms." +
+//                            "We need at least " + numberOfLabRoomNeed + " lab rooms");
+//                }
                 // Initialize a map to hold the number of students in each room
                 if (numberOfLabRoomNeed > 0) {
                     Map<Integer, Integer> studentsInLab = new HashMap<>();
@@ -517,11 +492,11 @@ public class SchedulerService implements SchedulerServiceInterface {
                         "We have only " + availableCommonRooms.size() + " normal rooms." +
                         "We need at least " + numberOfRoomCommonNeed + " rooms.");
             }
-            if (numberOfLabRoomNeed > availableLabRooms.size()) {
-                throw new Exception("Not enough lab room for " + planExam.getSubjectCode() + " with " + numberOfStudentBlackList + " student." +
-                        "We have only " + availableLabRooms.size() + " lab rooms." +
-                        "We need at least " + numberOfLabRoomNeed + " lab rooms");
-            }
+//            if (numberOfLabRoomNeed > availableLabRooms.size()) {
+//                throw new Exception("Not enough lab room for " + planExam.getSubjectCode() + " with " + numberOfStudentBlackList + " student." +
+//                        "We have only " + availableLabRooms.size() + " lab rooms." +
+//                        "We need at least " + numberOfLabRoomNeed + " lab rooms");
+//            }
 
             if (numberOfLabRoomNeed > 0) {
                 Map<Integer, Integer> studentsInLab = new HashMap<>();
