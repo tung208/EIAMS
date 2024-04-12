@@ -6,6 +6,7 @@ import EIAMS.entities.Room;
 import EIAMS.entities.Semester;
 import EIAMS.entities.responeObject.PageResponse;
 import EIAMS.entities.responeObject.ResponseObject;
+import EIAMS.exception.EntityNotFoundException;
 import EIAMS.services.RoomService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,7 +51,7 @@ public class RoomController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ResponseObject> update(@PathVariable int id, @RequestBody RoomDto roomDto){
+    public ResponseEntity<ResponseObject> update(@PathVariable int id, @RequestBody RoomDto roomDto) throws EntityNotFoundException {
         roomService.update(id, roomDto);
         return ResponseEntity.status(HttpStatus.OK).body(
                 new ResponseObject("OK", "Update Success", ""));
