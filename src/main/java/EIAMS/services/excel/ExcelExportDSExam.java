@@ -319,8 +319,7 @@ public class ExcelExportDSExam {
         cell.setCellStyle(style);
     }
 
-    void writeDataLines(List<ExportSchedulerDto> exportSchedulerDtos
-                        ) {
+    void writeDataLines(List<ExportSchedulerDto> exportSchedulerDtos) {
         int rowCount = this.rowIndex;
 
         CellStyle style = workbook.createCellStyle();
@@ -380,8 +379,10 @@ public class ExcelExportDSExam {
         styleRow1.setWrapText(true);
 
         this.rowIndex ++;
-        sheet.addMergedRegion(CellRangeAddress.valueOf("E"+this.rowIndex+":H"+this.rowIndex));
+        int mer = this.rowIndex + 1;
+        sheet.addMergedRegion(CellRangeAddress.valueOf("E" + mer+ ":H"+mer));
         Row row = sheet.createRow(this.rowIndex);
+//        System.out.println("Mer 1: "+"E"+this.rowIndex+1+":H"+this.rowIndex+1);
         row.setHeightInPoints((float) (1.5 * sheet.getDefaultRowHeightInPoints()));
         createCell(row, 4, "Tổng số/ Total:  ____ / ____", styleRow1);
 
@@ -396,8 +397,10 @@ public class ExcelExportDSExam {
         styleRow2.setWrapText(true);
 
         this.rowIndex ++;
-        sheet.addMergedRegion(CellRangeAddress.valueOf("E"+this.rowIndex+":H"+this.rowIndex));
+        mer = this.rowIndex + 1;
+        sheet.addMergedRegion(CellRangeAddress.valueOf("E" + mer + ":H" + mer));
         row = sheet.createRow(this.rowIndex);
+//        System.out.println("Mer 2: "+"E"+this.rowIndex+1+":H"+this.rowIndex+1);
         row.setHeightInPoints((float) (1.5 * sheet.getDefaultRowHeightInPoints()));
         createCell(row, 4, "Giám thị coi thi/ Proctor", styleRow2);
     }
