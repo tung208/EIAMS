@@ -21,7 +21,7 @@ public class Semester {
     @Column(name = "name", nullable = false, length = 64, unique = true)
     private String name;
 
-    @Column(name = "code", nullable = false, length = 64, unique = true)
+    @Column(name = "code", nullable = false, length = 64)
     private String code;
 
     @Column(name = "from_date")

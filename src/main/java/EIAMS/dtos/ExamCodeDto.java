@@ -1,5 +1,6 @@
 package EIAMS.dtos;
 
+import jakarta.annotation.Nonnull;
 import lombok.*;
 
 import java.io.Serializable;
@@ -14,7 +15,7 @@ import java.io.Serializable;
 @Getter
 public class ExamCodeDto {
     Integer id;
-    @NonNull
+    @Nonnull
     String subjectCode;
 
     @NonNull

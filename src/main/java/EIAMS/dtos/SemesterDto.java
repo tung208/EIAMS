@@ -1,10 +1,9 @@
 package EIAMS.dtos;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.Value;
+import jakarta.validation.constraints.NotEmpty;
+import lombok.*;
 
+import jakarta.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.sql.Date;
 
@@ -13,11 +12,21 @@ import java.sql.Date;
  */
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 @Builder
 public class SemesterDto {
-    String name;
+
+    @NotEmpty(message = "Name is not empty")
+    private String name;
+
+    @NotEmpty(message = "Code is not empty")
     String code;
+
+    @NotNull
     String from_date;
+
+    @NonNull
     String to_date;
+
     Integer creatorId;
 }

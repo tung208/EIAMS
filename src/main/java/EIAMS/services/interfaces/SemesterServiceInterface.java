@@ -15,6 +15,4 @@ public interface SemesterServiceInterface {
     void update(int id, Semester semester);
     void delete(int id);
 
-    void exportListSemester(List<Semester> students, String filePath);
-    void importListSemester(MultipartFile file);
 }

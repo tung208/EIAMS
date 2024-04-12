@@ -1,9 +1,9 @@
 package EIAMS.dtos;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NonNull;
 
 @Data
 @AllArgsConstructor
@@ -11,17 +11,17 @@ import lombok.NonNull;
 public class StudentSubjectDto {
     Integer id;
 
-    @NonNull
+    @NotNull
     String rollNumber;
 
-    @NonNull
+    @NotNull
     String subjectCode;
 
     String groupName;
 
-    @NonNull
+    @NotNull
     int blackList;
 
-    @NonNull
+    @NotNull
     Integer semesterId;
 }

@@ -5,10 +5,13 @@ import EIAMS.entities.Semester;
 import EIAMS.entities.responeObject.PageResponse;
 import EIAMS.entities.responeObject.ResponseObject;
 import EIAMS.services.SemesterService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -29,14 +32,12 @@ public class SemesterController {
     }
 
     @PostMapping()
-    public ResponseEntity<ResponseObject> postSemester(@RequestBody SemesterDto semesterDto){
+    public ResponseEntity<ResponseObject> postSemester(@RequestBody @Valid SemesterDto semesterDto){
         Semester semester = semesterService.create(semesterDto);
-        if (semester == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-                    new ResponseObject("Fail", "Can't Create Semester !",null));
-        } else {
-            return ResponseEntity.status(HttpStatus.OK).body(
-                    new ResponseObject("OK", "Create Semester Successfully!", semester));
-        }
+        return ResponseEntity.status(HttpStatus.OK).body(
+                new ResponseObject("OK", "Create Semester Successfully!", "semester"));
+
     }
+
+
 }
