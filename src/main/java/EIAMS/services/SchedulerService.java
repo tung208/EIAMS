@@ -22,6 +22,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import static EIAMS.constants.DBTableUtils.SUBJECT_CODE_SPECIAL;
@@ -53,6 +54,8 @@ public class SchedulerService implements SchedulerServiceInterface {
             LocalDateTime startDateSearch = LocalDateTime.parse(startDate, formatter);
             if (lecturerId == null || lecturerId.isBlank()) {
                 results = schedulerRepository.findAllRoomByDate(startDateSearch, endDateSearch);
+            } else if (lecturerId.equals("-1")) {
+                results = schedulerRepository.findAllRoomByDateAndLecturerIdIsNull(startDateSearch, endDateSearch);
             } else {
                 results = schedulerRepository.findAllRoomByDateAndLecturerId(startDateSearch, endDateSearch, Integer.valueOf(lecturerId));
             }
@@ -180,7 +183,7 @@ public class SchedulerService implements SchedulerServiceInterface {
         LocalDateTime newEndDate = schedulerSwap.getEndDate();
         if (!schedulerRepository.findAllBySemesterIdAndStartDateAndEndDateAndIdNotAndLectureId(
                 scheduler.getSemesterId(), newStartDate, newEndDate, scheduler.getId(), scheduler.getLecturerId()).isEmpty()
-        || !schedulerRepository.findAllBySemesterIdAndStartDateAndEndDateAndIdNotAndLectureId(
+                || !schedulerRepository.findAllBySemesterIdAndStartDateAndEndDateAndIdNotAndLectureId(
                 scheduler.getSemesterId(), scheduler.getStartDate(), scheduler.getEndDate(), schedulerSwap.getId(), schedulerSwap.getLecturerId()).isEmpty()) {
             throw new Exception("It is not possible to change teachers because this teacher has an exam scheduled conflict time");
         } else {
@@ -271,8 +274,8 @@ public class SchedulerService implements SchedulerServiceInterface {
             if (subject == null) {
                 continue;
             }
-            List<StudentSubject> listBlackList = studentSubjectRepository.findAllBySemesterIdAndSubjectCodeAndBlackList(semesterId, code, 1);
-            List<StudentSubject> listLegit = studentSubjectRepository.findAllBySemesterIdAndSubjectCodeAndBlackList(semesterId, code, null);
+            List<StudentSubject> listBlackList = studentSubjectRepository.findAllBySemesterIdAndSubjectCodeAndBlackList(semesterId, code);
+            List<StudentSubject> listLegit = studentSubjectRepository.findAllBySemesterIdAndSubjectCodeAndNotBlackList(semesterId, code);
             List<StudentSubject> allStudentBySubjectCode = studentSubjectRepository.findAllBySemesterIdAndSubjectCode(semesterId, code);
 
             if (allStudentBySubjectCode.isEmpty()) {
@@ -331,19 +334,31 @@ public class SchedulerService implements SchedulerServiceInterface {
                         }
                     }
                 }
+                int numberOfAvailableLabRooms = availableLabRooms.size();
                 int numberOfStudentBlackList = allBlackList.size();
                 int numberOfStudentLegit = allLegit.size();
 
                 int numberOfLabRoomNeed = numberOfStudentBlackList / quantityLabRoom;
-                // Gia su lab co 28 ng. chap nhan 14 ng thi xep 1 phong. Neu ko thi xep phong thuong
-                if ((numberOfStudentBlackList % quantityLabRoom) > (quantityLabRoom / 2)) {
+
+                if ((numberOfStudentBlackList % quantityLabRoom) != 0) {
                     numberOfLabRoomNeed++;
-                } else {
-                    numberOfStudentLegit += numberOfStudentBlackList % quantityLabRoom;
-                    numberOfStudentBlackList -= numberOfStudentBlackList % quantityLabRoom;
-                    for (int i = 0; i < (numberOfStudentBlackList % quantityLabRoom); i++) {
+                }
+                if (numberOfLabRoomNeed > numberOfAvailableLabRooms) {
+                    numberOfLabRoomNeed = numberOfAvailableLabRooms;
+                    int numberOfStudentBlackListToNormalRoom = numberOfStudentBlackList - (numberOfAvailableLabRooms * quantityLabRoom);
+                    numberOfStudentLegit += numberOfStudentBlackListToNormalRoom;
+                    numberOfStudentBlackList -= numberOfStudentBlackListToNormalRoom;
+                    for (int i = 0; i < numberOfStudentBlackListToNormalRoom; i++) {
                         StudentSubject studentToMove = allBlackList.remove(0);
                         allLegit.add(studentToMove);
+                    }
+                } else if (numberOfStudentBlackList % quantityLabRoom != 0) {
+                    int numberOfStudentLegitToLabRoom = quantityLabRoom - (numberOfStudentBlackList % quantityLabRoom);
+                    numberOfStudentLegit -= numberOfStudentLegitToLabRoom;
+                    numberOfStudentBlackList += numberOfStudentLegitToLabRoom;
+                    for (int i = 0; i < numberOfStudentLegitToLabRoom; i++) {
+                        StudentSubject studentToMove = allLegit.remove(0);
+                        allBlackList.add(studentToMove);
                     }
                 }
                 int numberOfRoomCommonNeed = numberOfStudentLegit / quantityNormalRoom;
@@ -467,20 +482,30 @@ public class SchedulerService implements SchedulerServiceInterface {
                     .collect(Collectors.toList());
             List<Room> availableCommonRooms = getAvailableRoom(planExam, roomCommon);
             List<Room> availableLabRooms = getAvailableRoom(planExam, labs);
-
+            int numberOfAvailableLabRooms = availableLabRooms.size();
 
             int numberOfStudentBlackList = allStudentBlackListPerSlot.size();
             int numberOfStudentLegit = allStudentLegitPerSlot.size();
             int numberOfLabRoomNeed = numberOfStudentBlackList / quantityLabRoom;
-            // Gia su lab co 28 ng. chap nhan 14 ng thi xep 1 phong. Neu ko thi xep phong thuong
-            if ((numberOfStudentBlackList % quantityLabRoom) > (quantityLabRoom / 2)) {
+            if ((numberOfStudentBlackList % quantityLabRoom) != 0) {
                 numberOfLabRoomNeed++;
-            } else {
-                numberOfStudentLegit += numberOfStudentBlackList % quantityLabRoom;
-                numberOfStudentBlackList -= numberOfStudentBlackList % quantityLabRoom;
-                for (int i = 0; i < (numberOfStudentBlackList % quantityLabRoom); i++) {
+            }
+            if (numberOfLabRoomNeed > numberOfAvailableLabRooms) {
+                numberOfLabRoomNeed = numberOfAvailableLabRooms;
+                int numberOfStudentBlackListToNormalRoom = numberOfStudentBlackList - (numberOfAvailableLabRooms * quantityLabRoom);
+                numberOfStudentLegit += numberOfStudentBlackListToNormalRoom;
+                numberOfStudentBlackList -= numberOfStudentBlackListToNormalRoom;
+                for (int i = 0; i < numberOfStudentBlackListToNormalRoom; i++) {
                     StudentSubject studentToMove = allStudentBlackListPerSlot.remove(0);
                     allStudentLegitPerSlot.add(studentToMove);
+                }
+            } else if (numberOfStudentBlackList % quantityLabRoom != 0) {
+                int numberOfStudentLegitToLabRoom = quantityLabRoom - (numberOfStudentBlackList % quantityLabRoom);
+                numberOfStudentLegit -= numberOfStudentLegitToLabRoom;
+                numberOfStudentBlackList += numberOfStudentLegitToLabRoom;
+                for (int i = 0; i < numberOfStudentLegitToLabRoom; i++) {
+                    StudentSubject studentToMove = allStudentLegitPerSlot.remove(0);
+                    allStudentBlackListPerSlot.add(studentToMove);
                 }
             }
             int numberOfRoomCommonNeed = numberOfStudentLegit / quantityNormalRoom;
@@ -713,6 +738,7 @@ public class SchedulerService implements SchedulerServiceInterface {
             scheduler.setStudentId(studentIds);
             scheduler.setStartDate(getStartDateFromPlanExam(planExam));
             scheduler.setEndDate(getEndDateFromPlanExam(planExam));
+            scheduler.setType(planExam.getTypeExam());
             schedulerRepository.save(scheduler);
 
         }
@@ -752,8 +778,15 @@ public class SchedulerService implements SchedulerServiceInterface {
 
     @Override
     @Transactional
-    public void arrangeLecturer(int semesterId) {
+    public void arrangeLecturer(int semesterId) throws Exception {
         schedulerRepository.resetLecturerId(semesterId);
+        int numberOfScheduler = (int) schedulerRepository.countAllBySemesterId(semesterId);
+        if (numberOfScheduler == 0) {
+            throw new Exception("We don't have any scheduler to arrange lecturer");
+        }
+        int numberOfLecturer = lecturerRepository.countAllBySemesterId(semesterId);
+        int numberSlotPerLecturer = numberOfScheduler / numberOfLecturer;
+        AtomicInteger remainderSlots = new AtomicInteger(numberOfScheduler % numberOfLecturer);
         List<Scheduler> schedulersToSave = new ArrayList<>();
         List<Scheduler> schedulerWithSpecialSubject = schedulerRepository.findAllBySemesterIdAndSubjectCodeIn(semesterId, SUBJECT_CODE_SPECIAL);
         List<Scheduler> schedulerWithNormalSubject = schedulerRepository.findAllBySemesterIdAndSubjectCodeNotIn(semesterId, SUBJECT_CODE_SPECIAL);
@@ -763,6 +796,10 @@ public class SchedulerService implements SchedulerServiceInterface {
             LecturerToArrangeDto lecturerToArrangeDto = new LecturerToArrangeDto();
             lecturerToArrangeDto.setLecturer(lecturer);
             lecturerToArrangeDto.setCountSlotArrange(lecturer.getTotalSlot());
+            if (lecturer.getTotalSlot() > numberSlotPerLecturer && remainderSlots.get() != 0) {
+                lecturer.setTotalSlot(lecturer.getTotalSlot() + 1);
+                remainderSlots.set(remainderSlots.get() - 1);
+            }
             lecturerToArrange.add(lecturerToArrangeDto);
         });
 

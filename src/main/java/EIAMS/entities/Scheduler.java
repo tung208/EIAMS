@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Table(name = "scheduler", schema = "eiams")
+@Table(name = "scheduler", schema = "schedule")
 public class Scheduler {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -48,4 +48,6 @@ public class Scheduler {
     @Column(name = "lecturer_id")
     private Integer lecturerId;
 
+    @Column(name = "type")
+    private String type;
 }

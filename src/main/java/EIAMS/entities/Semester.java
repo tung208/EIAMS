@@ -11,7 +11,7 @@ import java.util.Date;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Table(name = "semester", schema = "eiams")
+@Table(name = "semester", schema = "schedule")
 public class Semester {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
