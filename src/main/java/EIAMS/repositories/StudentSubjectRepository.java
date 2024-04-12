@@ -17,7 +17,10 @@ public interface StudentSubjectRepository extends JpaRepository<StudentSubject, 
     void deleteBySemesterId(int suid);
     @Query("SELECT s FROM StudentSubject s WHERE s.rollNumber = :rollNumber AND s.groupName = :groupName AND s.semesterId = :semesterId")
     List<StudentSubject> findByRollNumberAndGroupNameAndSemesterId(String rollNumber, String groupName, int semesterId);
-    List<StudentSubject> findAllBySemesterIdAndSubjectCodeAndBlackList(Integer semesterId, String subjectCode,Integer blackList);
+    @Query("select s from StudentSubject s where s.semesterId = ?1 and s.subjectCode = ?2 and s.blackList = 1")
+    List<StudentSubject> findAllBySemesterIdAndSubjectCodeAndBlackList(Integer semesterId, String subjectCode);
+    @Query("select s from StudentSubject s where s.semesterId = ?1 and s.subjectCode = ?2 and (s.blackList is null or s.blackList = 0) ")
+    List<StudentSubject> findAllBySemesterIdAndSubjectCodeAndNotBlackList(Integer semesterId, String subjectCode);
     List<StudentSubject> findAllBySemesterIdAndSubjectCode(Integer semesterId, String subjectCode);
     List<StudentSubject> findAllBySemesterIdAndSubjectCodeIn(Integer semesterId, Collection<String> subjectCode);
     List<StudentSubject> findAllBySemesterIdAndIdIn(Integer semesterId, Collection<Integer> id);
