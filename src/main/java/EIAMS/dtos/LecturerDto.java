@@ -1,8 +1,8 @@
 package EIAMS.dtos;
 
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
-
-import javax.validation.constraints.Email;
 
 @Data
 @AllArgsConstructor
@@ -11,14 +11,14 @@ import javax.validation.constraints.Email;
 @Getter
 public class LecturerDto {
 
-    @NonNull
+    @NotNull(message = "SemesterId not null")
     Integer semesterId;
 
     String codeName;
 
     String examSubject;
 
-    @NonNull
+    @NotNull(message = "Email not null")
     @Email(message = "Invalid Email")
     String email;
 

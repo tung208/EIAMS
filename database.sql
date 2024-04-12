@@ -28,7 +28,7 @@ CREATE TABLE `Room` (
 CREATE TABLE `Semester` (
   `id` int(11) PRIMARY KEY AUTO_INCREMENT,
   `name` varchar(64) UNIQUE NOT NULL,
-  `code` varchar(64) UNIQUE NOT NULL,
+  `code` varchar(64) NOT NULL,
   `from_date` date,
   `to_date` date,
   `creator_id` int(11) NOT NULL

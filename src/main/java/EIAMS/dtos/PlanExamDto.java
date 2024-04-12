@@ -1,11 +1,12 @@
 package EIAMS.dtos;
 
 
+import jakarta.annotation.Nonnull;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NonNull;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.sql.Date;
@@ -15,23 +16,23 @@ import java.sql.Date;
 @Builder
 public class PlanExamDto {
 
-    @NonNull
+    @NotNull (message = "Semester_id not null value")
     @NotBlank
     int semesterId;
 
-    @NonNull
+    @NotNull (message = "expectedDate not null value")
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     Date expectedDate;
 
-    @NonNull
+    @NotNull (message = "expectedTime not null value")
     @NotBlank
     String expectedTime;
 
-    @NonNull
+    @NotNull (message = "typeExam not null value")
     @NotBlank
     String typeExam;
 
-    @NonNull
+    @NotNull (message = "subjectCode not null value")
     @NotBlank
     String subjectCode;
 }

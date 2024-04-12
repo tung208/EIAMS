@@ -53,10 +53,6 @@ public class SemesterService implements SemesterServiceInterface {
     @Override
     public Semester create(SemesterDto semesterDto) {
         Semester semester = SemesterMapping.toEntity(semesterDto);
-        System.out.println(semester);
-        if (semester == null) {
-            return null;
-        }
         return semesterRepository.save(semester);
     }
 
@@ -76,74 +72,5 @@ public class SemesterService implements SemesterServiceInterface {
         semesterRepository.deleteById(id);
     }
 
-    @Override
-    public void exportListSemester(List<Semester> semesters, String filePath) {
-        try (CSVWriter csvWriter = new CSVWriter(new FileWriter(filePath))) {
-            // Writing header
-            String[] header = {"ID", "Name", "Creator Email"};
-            csvWriter.writeNext(header);
 
-            // Writing data
-            for (Semester semester : semesters) {
-                String[] data = {
-                        String.valueOf(semester.getId()),
-                        semester.getName(),
-                        accountRepository.findById(semester.getCreatorId()).get().getEmail(),
-                };
-                csvWriter.writeNext(data);
-            }
-            System.out.println("CSV file exported successfully!");
-        } catch (IOException e) {
-            logger.error(e.getMessage());
-        }
-    }
-
-    @Override
-    public void importListSemester(MultipartFile file) {
-        Map<Integer, Semester> csvDataMap = new HashMap<>();
-        List<Semester> newSemesters = new ArrayList<>();
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(file.getInputStream()))) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                String[] data = line.split(",");
-                Integer id = data[0] != null ? Integer.parseInt(data[0]) : null;
-                String name = StringUtils.hasText(data[2]) ? data[2] : null;
-                String creatorEmail = StringUtils.hasText(data[2]) ? data[2] : null;
-
-                if (id != null && name != null && creatorEmail != null) {
-                    Semester semester = new Semester();
-                    semester.setId(id);
-                    semester.setName(name);
-                    Optional<Account> account = accountRepository.getAccountByEmail(creatorEmail);
-                    account.ifPresent(value -> semester.setCreatorId(value.getId()));
-                    csvDataMap.put(id, semester);
-                } else if (id == null && name != null && creatorEmail != null) {
-                    Semester semester = new Semester();
-                    semester.setName(name);
-                    Optional<Account> account = accountRepository.getAccountByEmail(creatorEmail);
-                    account.ifPresent(value -> semester.setCreatorId(value.getId()));
-                    newSemesters.add(semester);
-                } else {
-                    // Handle the case where any required field is missing or invalid
-                    System.out.println("Skipping invalid data: " + line);
-                }
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        List<Semester> existSemesters = semesterRepository.findAll();
-        for (Semester existSemester : existSemesters) {
-            int id = existSemester.getId();
-            if (csvDataMap.containsKey(id)) {
-                //TODO: update exist account and delete not exist
-                Semester semesterUpdate = csvDataMap.get(id);
-                existSemester.setName(semesterUpdate.getName());
-                existSemester.setCreatorId(semesterUpdate.getCreatorId());
-                semesterRepository.save(semesterUpdate);
-            }else {
-                semesterRepository.delete(existSemester);
-            }
-        }
-        semesterRepository.saveAll(newSemesters);
-    }
 }

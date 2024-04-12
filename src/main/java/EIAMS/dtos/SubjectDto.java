@@ -1,5 +1,6 @@
 package EIAMS.dtos;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.io.Serializable;
@@ -13,9 +14,9 @@ import java.io.Serializable;
 public class SubjectDto {
     Integer id;
 
-    @NonNull
+    @NotNull
     Integer semesterId;
-    @NonNull
+    @NotNull
     String subjectCode;
     String oldSubjectCode;
     String shortName;

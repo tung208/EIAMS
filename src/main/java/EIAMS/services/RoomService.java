@@ -3,6 +3,7 @@ package EIAMS.services;
 import EIAMS.dtos.RoomDto;
 import EIAMS.entities.Room;
 import EIAMS.entities.csvRepresentation.RoomRepresentation;
+import EIAMS.exception.EntityNotFoundException;
 import EIAMS.repositories.RoomRepository;
 import EIAMS.services.excel.ExcelRoom;
 import EIAMS.services.interfaces.RoomServiceInterface;
@@ -98,7 +99,7 @@ public class RoomService implements RoomServiceInterface {
     }
 
     @Override
-    public void update(int id, RoomDto roomDto) {
+    public void update(int id, RoomDto roomDto) throws EntityNotFoundException{
         Optional<Room> room = roomRepository.findById(id);
         if(room.isPresent()){
             Room r = Room.builder()
@@ -109,7 +110,7 @@ public class RoomService implements RoomServiceInterface {
                     .quantityStudent(roomDto.getQuantityStudent())
                     .build();
             roomRepository.save(r);
-        }
+        } else throw new EntityNotFoundException("Room not exist");
     }
 
     @Override

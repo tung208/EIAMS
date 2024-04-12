@@ -1,8 +1,9 @@
 package EIAMS.dtos;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
-import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
 
 /**
@@ -16,16 +17,16 @@ public class StudentDto {
     Integer id;
     String subjectCode;
 
-    @NonNull
+    @NotNull(message = "rollNumber not null value")
     String rollNumber;
 
-    @NonNull
+    @NotNull(message = "memberCode not null value")
     String memberCode;
 
     String fullName;
 
-    @NonNull
-    @NotBlank
+    @NotNull(message = "cmtnd not null value")
+    @NotBlank(message = "cmtnd not blank value")
     String cmtnd;
     Integer semesterId;
     String blackList;

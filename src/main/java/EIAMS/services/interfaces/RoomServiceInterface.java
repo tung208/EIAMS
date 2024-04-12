@@ -2,6 +2,7 @@ package EIAMS.services.interfaces;
 
 import EIAMS.dtos.RoomDto;
 import EIAMS.entities.Room;
+import EIAMS.exception.EntityNotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -13,6 +14,6 @@ public interface RoomServiceInterface {
 
     Room create(RoomDto roomDto);
 
-    void update(int id,RoomDto roomDto);
+    void update(int id,RoomDto roomDto) throws EntityNotFoundException;
     void delete(int id);
 }
