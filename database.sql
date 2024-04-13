@@ -122,7 +122,7 @@ CREATE TABLE `Lecturer` (
 
 CREATE TABLE `Status` (
   `id` int(11) PRIMARY KEY AUTO_INCREMENT,
-  `semester_id` int,
+  `semester_id` int unique ,
   `plan_exam` int,
   `subject` int,
   `room` int,

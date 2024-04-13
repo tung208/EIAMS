@@ -2,9 +2,11 @@ package EIAMS.controllers;
 
 import EIAMS.dtos.SemesterDto;
 import EIAMS.entities.Semester;
+import EIAMS.entities.Status;
 import EIAMS.entities.responeObject.PageResponse;
 import EIAMS.entities.responeObject.ResponseObject;
 import EIAMS.services.SemesterService;
+import EIAMS.services.StatusService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,6 +22,9 @@ public class SemesterController {
     @Autowired
     SemesterService semesterService;
 
+    @Autowired
+    StatusService statusService;
+
     @GetMapping()
     public PageResponse<Semester> getSemester(@RequestParam(defaultValue = "1") Integer pageNo,
                                               @RequestParam(defaultValue = "2") Integer pageSize,
@@ -34,6 +39,7 @@ public class SemesterController {
     @PostMapping()
     public ResponseEntity<ResponseObject> postSemester(@RequestBody @Valid SemesterDto semesterDto){
         Semester semester = semesterService.create(semesterDto);
+        statusService.create(semester.getId());
         return ResponseEntity.status(HttpStatus.OK).body(
                 new ResponseObject("OK", "Create Semester Successfully!", "semester"));
 

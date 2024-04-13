@@ -5,6 +5,8 @@ import EIAMS.entities.Semester;
 import EIAMS.entities.Subject;
 import EIAMS.entities.responeObject.PageResponse;
 import EIAMS.entities.responeObject.ResponseObject;
+import EIAMS.exception.EntityNotFoundException;
+import EIAMS.services.StatusService;
 import EIAMS.services.SubjectService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,9 +24,14 @@ import java.io.IOException;
 public class SubjectController {
     @Autowired
     SubjectService subjectService;
+
+    @Autowired
+    StatusService statusService;
+
     @PostMapping("/import")
-    public ResponseEntity<ResponseObject> importSubject(@RequestParam("file") MultipartFile file, @RequestParam("semester_id") int semesterId) throws IOException {
+    public ResponseEntity<ResponseObject> importSubject(@RequestParam("file") MultipartFile file, @RequestParam("semester_id") int semesterId) throws IOException, EntityNotFoundException {
         subjectService.uploadSubject(file,semesterId);
+        statusService.update(semesterId, 2 ,1);
         return ResponseEntity.status(HttpStatus.OK).body(
                 new ResponseObject("OK", "Import Success", ""));
     }

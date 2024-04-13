@@ -16,7 +16,7 @@ public class Status {
     @Column(name = "id", nullable = false)
     private Integer id;
 
-    @Column(name = "semester_id")
+    @Column(name = "semester_id", unique = true, nullable = false)
     private Integer semesterId;
 
     @Column(name = "plan_exam", columnDefinition = "integer default '0'")

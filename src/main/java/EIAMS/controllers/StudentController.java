@@ -7,6 +7,8 @@ import EIAMS.entities.StudentSubject;
 import EIAMS.entities.responeObject.PageResponse;
 import EIAMS.entities.responeObject.ResponseObject;
 import EIAMS.entities.Student;
+import EIAMS.exception.EntityNotFoundException;
+import EIAMS.services.StatusService;
 import EIAMS.services.StudentService;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +30,8 @@ public class StudentController {
     @Autowired
     private StudentService studentService;
 
+    @Autowired
+    StatusService statusService;
 
     @GetMapping()
     public PageResponse<Student> list(
@@ -44,22 +48,25 @@ public class StudentController {
     }
 
     @PostMapping("/import")
-    public ResponseEntity<ResponseObject> importStudents(@RequestParam("file") MultipartFile file,@RequestParam("semester_id") int semesterId) throws IOException {
+    public ResponseEntity<ResponseObject> importStudents(@RequestParam("file") MultipartFile file,@RequestParam("semester_id") int semesterId) throws IOException, EntityNotFoundException {
         studentService.uploadStudents(file,semesterId);
+        statusService.update(semesterId, 5,1);
         return ResponseEntity.status(HttpStatus.OK).body(
                 new ResponseObject("OK", "Import Success", ""));
     }
 
     @PostMapping("/import-profile")
-    public ResponseEntity<ResponseObject> importStudentProfile(@RequestParam("file") MultipartFile file,@RequestParam("semester_id") int semesterId) throws IOException {
+    public ResponseEntity<ResponseObject> importStudentProfile(@RequestParam("file") MultipartFile file,@RequestParam("semester_id") int semesterId) throws IOException, EntityNotFoundException {
         studentService.uploadCMND(file,semesterId);
+        statusService.update(semesterId, 5,2);
         return ResponseEntity.status(HttpStatus.OK).body(
                 new ResponseObject("OK", "Import Success", ""));
     }
 
     @PostMapping("/import-blacklist")
-    public ResponseEntity<ResponseObject> importBlackList(@RequestParam("file") MultipartFile file,@RequestParam("semester_id") int semesterId) throws IOException {
+    public ResponseEntity<ResponseObject> importBlackList(@RequestParam("file") MultipartFile file,@RequestParam("semester_id") int semesterId) throws IOException, EntityNotFoundException {
         studentService.uploadBlackList(file,semesterId);
+        statusService.update(semesterId, 5,3);
         return ResponseEntity.status(HttpStatus.OK).body(
                 new ResponseObject("OK", "Import Success", ""));
     }
