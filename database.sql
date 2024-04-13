@@ -120,6 +120,16 @@ CREATE TABLE `Lecturer` (
   `total_slot` int
 );
 
+CREATE TABLE `Status` (
+  `id` int(11) PRIMARY KEY AUTO_INCREMENT,
+  `semester_id` int,
+  `plan_exam` int,
+  `subject` int,
+  `room` int,
+  `lecturer` int,
+  `student` int
+);
+
 
 CREATE INDEX semester_index ON Subject(semester_id);
 CREATE INDEX semester_index1 ON StudentSubject(semester_id);
