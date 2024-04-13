@@ -85,7 +85,7 @@ public class ExamCodeService implements ExamCodeServiceInterface {
         ExamCode examCode = ExamCode.builder()
                 .semesterId(examCodeDto.getSemesterId())
                 .subjectCode(examCodeDto.getSubjectCode())
-                .examCode(examCodeDto.getSubjectCode())
+                .examCode(examCodeDto.getExamCode())
                 .exam(examCodeDto.getExam())
                 .type(examCodeDto.getType())
                 .build();
