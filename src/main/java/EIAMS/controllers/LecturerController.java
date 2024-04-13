@@ -5,7 +5,9 @@ import EIAMS.entities.ExamCode;
 import EIAMS.entities.Lecturer;
 import EIAMS.entities.responeObject.PageResponse;
 import EIAMS.entities.responeObject.ResponseObject;
+import EIAMS.exception.EntityNotFoundException;
 import EIAMS.services.LecturerService;
+import EIAMS.services.StatusService;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,9 +25,12 @@ public class LecturerController {
     @Autowired
     private LecturerService lecturerService;
 
+    @Autowired
+    StatusService statusService;
     @PostMapping("/import")
-    public ResponseEntity<ResponseObject> importLecturer(@RequestParam("file") MultipartFile file, @RequestParam("semester_id") int semesterId) throws IOException {
+    public ResponseEntity<ResponseObject> importLecturer(@RequestParam("file") MultipartFile file, @RequestParam("semester_id") int semesterId) throws IOException, EntityNotFoundException {
         lecturerService.uploadLecturer(file,semesterId);
+        statusService.update(semesterId,4,1);
         return ResponseEntity.status(HttpStatus.OK).body(
                 new ResponseObject("OK", "Import Success", ""));
     }

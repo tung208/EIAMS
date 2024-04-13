@@ -5,7 +5,9 @@ import EIAMS.entities.PlanExam;
 import EIAMS.entities.Semester;
 import EIAMS.entities.responeObject.PageResponse;
 import EIAMS.entities.responeObject.ResponseObject;
+import EIAMS.exception.EntityNotFoundException;
 import EIAMS.services.PlanExamService;
+import EIAMS.services.StatusService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -24,12 +26,15 @@ public class PlanExamController {
     @Autowired
     PlanExamService planExamService;
 
+    @Autowired
+    StatusService statusService;
+
     @PostMapping("/import")
     public ResponseEntity<ResponseObject> importPlanExam(@RequestParam("file") MultipartFile file,
                                                         @RequestParam("semester_id") int semesterId,
-                                                        @RequestParam("type") String type) throws IOException, ParseException {
-        System.out.println("import PlanExam");
+                                                        @RequestParam("type") String type) throws IOException, ParseException, EntityNotFoundException {
         planExamService.uploadPlanExam(file,semesterId,type);
+        statusService.update(semesterId, 1, 1);
         return ResponseEntity.status(HttpStatus.OK).body(
                 new ResponseObject("OK",
                         "Import Success",

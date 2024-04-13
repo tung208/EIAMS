@@ -4,10 +4,12 @@ package EIAMS.controllers;
 import EIAMS.dtos.RoomDto;
 import EIAMS.entities.Room;
 import EIAMS.entities.Semester;
+import EIAMS.entities.Status;
 import EIAMS.entities.responeObject.PageResponse;
 import EIAMS.entities.responeObject.ResponseObject;
 import EIAMS.exception.EntityNotFoundException;
 import EIAMS.services.RoomService;
+import EIAMS.services.StatusService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -25,9 +27,13 @@ public class RoomController {
     @Autowired
     RoomService roomService;
 
+    @Autowired
+    StatusService statusService;
+
     @PostMapping("/import")
-    public ResponseEntity<ResponseObject> importSubject(@RequestParam("file") MultipartFile file, @RequestParam("semester_id") int semesterId) throws IOException {
+    public ResponseEntity<ResponseObject> importSubject(@RequestParam("file") MultipartFile file, @RequestParam("semester_id") int semesterId) throws IOException, EntityNotFoundException {
         roomService.uploadRoom(file,semesterId);
+        statusService.update(semesterId, 3, 1);
         return ResponseEntity.status(HttpStatus.OK).body(
                 new ResponseObject("OK", "Import Success", "Import Success"));
     }
@@ -44,8 +50,9 @@ public class RoomController {
     }
 
     @PostMapping()
-    public ResponseEntity<ResponseObject> create(@RequestBody RoomDto roomDto){
+    public ResponseEntity<ResponseObject> create(@RequestBody RoomDto roomDto) throws EntityNotFoundException {
         Room room = roomService.create(roomDto);
+//        statusService.update(roomDto.getSemesterId(), 3, 1);
         return ResponseEntity.status(HttpStatus.CREATED).body(
                 new ResponseObject("OK", "Create Success", room));
     }
