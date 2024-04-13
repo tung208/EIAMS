@@ -7,6 +7,7 @@ import EIAMS.entities.Subject;
 import EIAMS.entities.csvRepresentation.DontMixRepresentation;
 import EIAMS.entities.csvRepresentation.NoLabRepresentation;
 import EIAMS.entities.csvRepresentation.SubjectCsvRepresentation;
+import EIAMS.exception.EntityNotFoundException;
 import EIAMS.repositories.SubjectRepository;
 import EIAMS.services.excel.ExcelDontMix;
 import EIAMS.services.excel.ExcelNoLab;
@@ -81,7 +82,7 @@ public class SubjectService implements SubjectServiceInterface {
                     .build();
             subjectList.add(subject);
         }
-        System.out.println(subjectList.size());
+
         subjectRepository.deleteBySemesterId(semester_id);
         for (int i = 0; i < subjectList.size(); i += sublistSize) {
             int endIndex = Math.min(i + sublistSize, subjectList.size());
@@ -133,7 +134,7 @@ public class SubjectService implements SubjectServiceInterface {
     }
 
     @Override
-    public void update(int id, SubjectDto subject){
+    public void update(int id, SubjectDto subject) throws EntityNotFoundException {
         Optional<Subject> s = subjectRepository.findById(subject.getId());
         if (s.isPresent()) {
             Subject subjectUpdate = Subject.builder()
@@ -148,7 +149,7 @@ public class SubjectService implements SubjectServiceInterface {
                     .replacedBy(subject.getReplacedBy())
                     .build();
             subjectRepository.save(subjectUpdate);
-        }
+        } else throw new EntityNotFoundException("Not found subject");
     }
 
     @Override
@@ -168,6 +169,7 @@ public class SubjectService implements SubjectServiceInterface {
                 .dontMix(subjectDto.getDontMix())
                 .replacedBy(subjectDto.getReplacedBy())
                 .build();
+        subjectRepository.save(subject);
         return subject;
     }
 

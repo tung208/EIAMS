@@ -62,7 +62,7 @@ public class SubjectController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ResponseObject> update(@PathVariable int id, @RequestBody SubjectDto subjectDto){
+    public ResponseEntity<ResponseObject> update(@PathVariable int id, @RequestBody SubjectDto subjectDto) throws EntityNotFoundException {
         subjectService.update(id, subjectDto);
         return ResponseEntity.status(HttpStatus.OK).body(
                 new ResponseObject("OK", "Update Success", ""));
