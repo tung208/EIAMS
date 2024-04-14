@@ -2,6 +2,10 @@ package EIAMS.entities;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
+import java.util.Collection;
 
 @Getter
 @Setter
@@ -10,7 +14,7 @@ import lombok.*;
 @NoArgsConstructor
 @Builder
 @Table(name = "account", schema = "schedule")
-public class Account {
+public class Account implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
@@ -25,8 +29,8 @@ public class Account {
     @Column(name = "password", nullable = false, length = 256)
     private String password;
 
-    @Column(name = "role", nullable = false, length = 64)
-    private String role;
+//    @Column(name = "role", nullable = false, length = 64)
+//    private String role;
 
     @Column(name = "since")
     private Integer since;
@@ -34,4 +38,45 @@ public class Account {
     @Column(name = "username", nullable = false, length = 64)
     private String username;
 
+    @Enumerated(EnumType.STRING)
+    private Role role;
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return null;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return false;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return false;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return false;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return false;
+    }
+
+    @Override
+    public String getPassword() {
+        return password;
+    }
+
+    @Override
+    public String getUsername() {
+        return email;
+    }
+
+    public String getRole() {
+        return role.toString();
+    }
 }

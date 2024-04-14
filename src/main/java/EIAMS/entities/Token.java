@@ -17,10 +17,10 @@ public class Token {
     private Integer id;
 
     @Column(name = "expired")
-    private Integer expired;
+    private boolean expired;
 
     @Column(name = "revoked")
-    private Integer revoked;
+    private boolean revoked;
 
     @Column(name = "token", length = 128)
     private String token;

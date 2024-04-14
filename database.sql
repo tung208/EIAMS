@@ -3,7 +3,7 @@ CREATE TABLE `Account` (
   `active` int(11) DEFAULT null,
   `email` varchar(64) NOT NULL,
   `password` varchar(256) NOT NULL,
-  `role` varchar(64) NOT NULL,
+  `role` enum('ADMIN','MANAGER','USER') DEFAULT NULL,
   `since` int(11) DEFAULT null,
   `username` varchar(64) NOT NULL
 );
