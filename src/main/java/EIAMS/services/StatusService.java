@@ -21,8 +21,7 @@ public class StatusService implements StatusServiceInterface {
     public void update(int semesterId, int update, int value) throws EntityNotFoundException {
         Optional<Status> status = statusRepository.findBySemesterId(semesterId);
         if(status.isPresent()){
-            Status status1 = new Status();
-            status1.setId(status.get().getId());
+            Status status1 = status.get();
             switch (update) {
                 case 1:
                     status1.setPlan_exam(value);

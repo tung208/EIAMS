@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static EIAMS.entities.Permission.;
+import static EIAMS.entities.Permission.*;
 
 @RequiredArgsConstructor
 public enum Role {
@@ -35,12 +35,6 @@ public enum Role {
                     MANAGER_CREATE
             )
     ),
-
-//    USER(
-//            Set.of(
-//                    USER_READ
-//            )
-//    )
 
     ;
 
