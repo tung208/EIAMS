@@ -109,7 +109,12 @@ public class StudentController {
         return ResponseEntity.status(HttpStatus.OK).body(
                 new ResponseObject("OK", "Delete Success", ""));
     }
-
+    @PostMapping("/subject")
+    public ResponseEntity<ResponseObject> createStudentSubject(@RequestBody StudentSubjectDto studentSubjectDto) throws EntityNotFoundException {
+        studentService.createStudentSubject(studentSubjectDto);
+        return ResponseEntity.status(HttpStatus.OK).body(
+                new ResponseObject("OK", "Update Success", ""));
+    }
     @PostMapping()
     public ResponseEntity<ResponseObject> createStudent(@RequestBody StudentDto studentDto) {
         studentService.create(studentDto);

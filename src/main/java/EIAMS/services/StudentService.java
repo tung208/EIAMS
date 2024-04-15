@@ -7,6 +7,7 @@ import EIAMS.entities.StudentSubject;
 import EIAMS.entities.csvRepresentation.BlackListRepresentation;
 import EIAMS.entities.csvRepresentation.CMNDCsvRepresentation;
 import EIAMS.entities.csvRepresentation.DSSVCsvRepresentation;
+import EIAMS.exception.EntityNotFoundException;
 import EIAMS.helper.Pagination;
 import EIAMS.repositories.SemesterRepository;
 import EIAMS.repositories.StudentRepository;
@@ -280,7 +281,7 @@ public class StudentService implements StudentServiceInterface {
     }
 
     @Override
-    public void createStudentSubject(StudentSubjectDto studentSubjectDto){
+    public void createStudentSubject(StudentSubjectDto studentSubjectDto) throws EntityNotFoundException {
         Optional<Student> student = studentRepository.findByRollNumber(studentSubjectDto.getRollNumber());
         if (student.isPresent()) {
             StudentSubject studentSubject = StudentSubject.builder()
@@ -292,7 +293,7 @@ public class StudentService implements StudentServiceInterface {
                     .build();
         } else {
             // Trả ra exception
-
+            throw new EntityNotFoundException("Not found student");
         }
     }
 }

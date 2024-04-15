@@ -25,7 +25,6 @@ public class ExamCodeController {
 
     @PostMapping("/import")
     public ResponseEntity<ResponseObject> importStudents(@RequestParam("file") MultipartFile file, @RequestParam("semester_id") int semesterId) throws IOException {
-        System.out.println("vao day");
         examCodeService.uploadExamCode(file,semesterId);
         return ResponseEntity.status(HttpStatus.OK).body(
                 new ResponseObject("OK", "Import Success", "Hello world"));
