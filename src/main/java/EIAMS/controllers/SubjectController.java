@@ -38,14 +38,16 @@ public class SubjectController {
     }
 
     @PostMapping("/import-nolab")
-    public ResponseEntity<ResponseObject> importSubjectNoLab(@RequestParam("file") MultipartFile file, @RequestParam("semester_id") int semesterId) throws IOException {
+    public ResponseEntity<ResponseObject> importSubjectNoLab(@RequestParam("file") MultipartFile file, @RequestParam("semester_id") int semesterId) throws IOException, EntityNotFoundException {
         subjectService.uploadSubjectNoLab(file,semesterId);
+        statusService.update(semesterId, 2 ,3);
         return ResponseEntity.status(HttpStatus.OK).body(
                 new ResponseObject("OK", "Import Success", ""));
     }
     @PostMapping("/import-dontmix")
-    public ResponseEntity<ResponseObject> importSubjectDontMix(@RequestParam("file") MultipartFile file, @RequestParam("semester_id") int semesterId) throws IOException {
+    public ResponseEntity<ResponseObject> importSubjectDontMix(@RequestParam("file") MultipartFile file, @RequestParam("semester_id") int semesterId) throws IOException, EntityNotFoundException {
         subjectService.uploadSubjectDontMix(file,semesterId);
+        statusService.update(semesterId, 2 ,2);
         return ResponseEntity.status(HttpStatus.OK).body(
                 new ResponseObject("OK", "Import Success", ""));
     }
