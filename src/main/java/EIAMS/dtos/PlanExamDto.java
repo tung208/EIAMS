@@ -17,8 +17,7 @@ import java.sql.Date;
 public class PlanExamDto {
 
     @NotNull (message = "Semester_id not null value")
-    @NotBlank
-    int semesterId;
+    Integer semesterId;
 
     @NotNull (message = "expectedDate not null value")
     @DateTimeFormat(pattern = "yyyy-MM-dd")

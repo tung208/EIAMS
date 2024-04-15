@@ -1,5 +1,6 @@
 package EIAMS.dtos;
 
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
@@ -14,8 +15,9 @@ import java.io.Serializable;
 public class SubjectDto {
     Integer id;
 
-    @NotNull
+    @NotNull (message = "Not null semesterId")
     Integer semesterId;
+
     @NotNull
     String subjectCode;
     String oldSubjectCode;

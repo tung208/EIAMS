@@ -8,6 +8,7 @@ import EIAMS.entities.responeObject.ResponseObject;
 import EIAMS.exception.EntityNotFoundException;
 import EIAMS.services.StatusService;
 import EIAMS.services.SubjectService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -76,7 +77,7 @@ public class SubjectController {
     }
 
     @PostMapping()
-    public ResponseEntity<ResponseObject> create(SubjectDto subjectDto){
+    public ResponseEntity<ResponseObject> create(@RequestBody @Valid SubjectDto subjectDto){
         Subject subject = subjectService.create(subjectDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(
                 new ResponseObject("OK", "Create Success", ""));

@@ -33,7 +33,7 @@ public class ApplicationExceptionHandler {
     public ResponseEntity<ResponseObject> handleAllException(Exception ex, WebRequest request) {
         // quá trình kiểm soat lỗi diễn ra ở đây
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-                new ResponseObject("NOT OK", "Action Fail", ""));
+                new ResponseObject("NOT OK", "Action Fail", ex.getMessage()));
     }
 
     @ExceptionHandler(EntityNotFoundException.class)
