@@ -117,4 +117,9 @@ public class RoomService implements RoomServiceInterface {
     public void delete(int id) {
         roomRepository.deleteById(id);
     }
+
+    @Override
+    public void deleteSemesterId(int id){
+        roomRepository.deleteBySemesterId(id);
+    }
 }

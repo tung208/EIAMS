@@ -8,4 +8,6 @@ public interface StatusServiceInterface {
     void update(int semesterId, int update, int value) throws EntityNotFoundException;
 
     void create(int semesterId);
+
+    void delete(int semesterId);
 }

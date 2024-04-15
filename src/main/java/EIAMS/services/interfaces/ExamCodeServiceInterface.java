@@ -17,4 +17,5 @@ public interface ExamCodeServiceInterface {
     void update(ExamCodeDto examCodeDto);
 
     void delete(Integer id);
+    void deleteSemesterId(int id);
 }

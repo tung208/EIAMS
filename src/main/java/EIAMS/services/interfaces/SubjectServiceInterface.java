@@ -19,4 +19,6 @@ public interface SubjectServiceInterface {
     void delete(int id);
 
     Subject create(SubjectDto subjectDto);
+
+    void deleteSemesterId(int id);
 }

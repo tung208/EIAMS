@@ -22,5 +22,6 @@ public class LecturerDto {
     @Email(message = "Invalid Email")
     String email;
 
+    @NotNull(message = "Total slot not null")
     Integer totalSlot;
 }

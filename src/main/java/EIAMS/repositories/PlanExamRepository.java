@@ -33,4 +33,7 @@ public interface PlanExamRepository extends JpaRepository<PlanExam, Integer> {
             + "AND UPPER(s.typeExam) = UPPER(:typeExam)"
             + "AND UPPER(s.subjectCode) = UPPER(:subjectCode)")
     List<PlanExam> findBySameObject(Integer semesterId, java.sql.Date expectedDate, String expectedTime,String typeExam, String subjectCode);
+
+    // Xóa các bản ghi dựa trên semesterId
+    void deleteBySemesterId(Integer semesterId);
 }

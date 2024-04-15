@@ -38,5 +38,6 @@ public interface LecturerRepository extends JpaRepository<Lecturer,Integer> {
     List<Lecturer> findLecturersWithAvailableSlotsAndExamSubjectContains(Integer semesterId, String examSubject);
 
     int countAllBySemesterId(Integer semesterId);
+
 }
 

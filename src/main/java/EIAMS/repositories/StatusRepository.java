@@ -7,4 +7,7 @@ import java.util.Optional;
 
 public interface StatusRepository extends JpaRepository<Status,Integer> {
     Optional<Status> findBySemesterId(Integer semesterId);
+
+    // Xóa các bản ghi dựa trên semesterId
+    void deleteBySemesterId(Integer semesterId);
 }

@@ -1,6 +1,7 @@
 package EIAMS.advice;
 
 import EIAMS.entities.responeObject.ResponseObject;
+import EIAMS.exception.EntityExistException;
 import EIAMS.exception.EntityNotFoundException;
 import EIAMS.exception.StudentNotFoundException;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -48,10 +49,19 @@ public class ApplicationExceptionHandler {
     public ResponseEntity<ResponseObject> handleDataException(DataIntegrityViolationException ex, WebRequest request) {
         // quá trình kiểm soat lỗi diễn ra ở đây
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-                new ResponseObject("Duplicate entry",
+                new ResponseObject("Duplicate",
                         ex.getMessage(),
                         request.getDescription(false)));
     }
+    @ExceptionHandler(EntityExistException.class)
+    public ResponseEntity<ResponseObject> handleExistException(EntityExistException ex, WebRequest request) {
+        // quá trình kiểm soat lỗi diễn ra ở đây
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                new ResponseObject("Exist",
+                        ex.getMessage(),
+                        request.getDescription(false)));
+    }
+
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(MethodArgumentNotValidException.class)

@@ -173,5 +173,8 @@ public class SubjectService implements SubjectServiceInterface {
         return subject;
     }
 
-
+    @Override
+    public void deleteSemesterId(int id){
+        subjectRepository.deleteBySemesterId(id);
+    }
 }

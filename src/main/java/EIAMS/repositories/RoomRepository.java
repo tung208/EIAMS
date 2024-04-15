@@ -25,4 +25,6 @@ public interface RoomRepository extends JpaRepository<Room, Integer> {
     @Query("select r from Room r where r.id in ?1 and upper(r.name) like upper(concat('%', ?2, '%'))")
     List<Room> findAllByIdInAndNameContainsIgnoreCase(Collection<Integer> id, String name);
 
+    // Xóa các bản ghi dựa trên semesterId
+    void deleteBySemesterId(Integer semesterId);
 }

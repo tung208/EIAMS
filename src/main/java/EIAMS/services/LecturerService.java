@@ -5,6 +5,8 @@ import EIAMS.entities.ExamCode;
 import EIAMS.entities.Lecturer;
 import EIAMS.entities.csvRepresentation.ExamCodeRepresentation;
 import EIAMS.entities.csvRepresentation.LecturerRepresentation;
+import EIAMS.exception.EntityExistException;
+import EIAMS.exception.EntityNotFoundException;
 import EIAMS.repositories.LecturerRepository;
 import EIAMS.services.excel.ExcelExamCode;
 import EIAMS.services.excel.ExcelLecturer;
@@ -24,6 +26,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -69,10 +72,10 @@ public class LecturerService implements LecturerServiceInterface {
     }
 
     @Override
-    public Lecturer create(LecturerDto lecturerDto) {
+    public Lecturer create(LecturerDto lecturerDto) throws EntityExistException {
         List<Lecturer> lecturerList = lecturerRepository.findBySemesterIdAndEmail(lecturerDto.getSemesterId(), lecturerDto.getEmail());
         if (lecturerList.size() > 0){
-            return null;
+            throw new EntityExistException("Exist lecturer");
         }
         int index = lecturerDto.getEmail().indexOf("@");
         String codeName = lecturerDto.getEmail().substring(0, index);
@@ -88,17 +91,29 @@ public class LecturerService implements LecturerServiceInterface {
     }
 
     @Override
-    public void update(int id, LecturerDto lecturerDto) {
-        int index = lecturerDto.getEmail().indexOf("@");
-        String codeName = lecturerDto.getEmail().substring(0, index);
-        Lecturer lecturer = Lecturer.builder()
-                .id(id)
-                .semesterId(lecturerDto.getSemesterId())
-                .email(lecturerDto.getEmail())
-                .examSubject(lecturerDto.getExamSubject())
-                .codeName(codeName)
-                .totalSlot(lecturerDto.getTotalSlot())
-                .build();
+    public void update(int id, LecturerDto lecturerDto) throws EntityNotFoundException, EntityExistException {
+        String codeName = lecturerDto.getCodeName();
+        if (lecturerDto.getCodeName().trim().equals("")){
+            int index = lecturerDto.getEmail().indexOf("@");
+            codeName = lecturerDto.getEmail().substring(0, index);
+        }
+
+        Optional<Lecturer> lecturer = lecturerRepository.findById(id);
+        if (lecturer.isPresent()){
+            List<Lecturer> lecturer1 = lecturerRepository.findBySemesterIdAndEmail(lecturerDto.getSemesterId(), lecturerDto.getEmail());
+            if(lecturer1.size() > 0){
+                throw new EntityExistException("Exist lecturer");
+            }
+            Lecturer lecturerUpdate = Lecturer.builder()
+                    .id(id)
+                    .semesterId(lecturerDto.getSemesterId())
+                    .email(lecturerDto.getEmail())
+                    .examSubject(lecturerDto.getExamSubject())
+                    .codeName(codeName)
+                    .totalSlot(lecturerDto.getTotalSlot())
+                    .build();
+            lecturerRepository.save(lecturerUpdate);
+        } else throw new EntityNotFoundException("Not found lecturer");
     }
 
     @Override

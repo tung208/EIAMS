@@ -3,6 +3,8 @@ package EIAMS.services.interfaces;
 import EIAMS.dtos.LecturerDto;
 import EIAMS.entities.ExamCode;
 import EIAMS.entities.Lecturer;
+import EIAMS.exception.EntityExistException;
+import EIAMS.exception.EntityNotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -13,8 +15,8 @@ public interface LecturerServiceInterface {
 
     Page<Lecturer> search(Integer page, Integer limit, Integer semesterId , String email, String examSubject, int totalSlot);
 
-    Lecturer create(LecturerDto lecturerDto);
+    Lecturer create(LecturerDto lecturerDto) throws EntityExistException;
 
-    void update(int id,LecturerDto lecturerDto);
+    void update(int id,LecturerDto lecturerDto) throws EntityNotFoundException, EntityExistException;
     void delete(int id);
 }
