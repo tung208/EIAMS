@@ -291,6 +291,7 @@ public class StudentService implements StudentServiceInterface {
                     .groupName(studentSubjectDto.getGroupName())
                     .blackList(studentSubjectDto.getBlackList())
                     .build();
+            studentSubjectRepository.save(studentSubject);
         } else {
             // Trả ra exception
             throw new EntityNotFoundException("Not found student");
