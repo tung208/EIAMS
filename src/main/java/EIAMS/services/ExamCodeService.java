@@ -99,7 +99,7 @@ public class ExamCodeService implements ExamCodeServiceInterface {
                 .id(examCodeDto.getId())
                 .semesterId(examCodeDto.getSemesterId())
                 .subjectCode(examCodeDto.getSubjectCode())
-                .examCode(examCodeDto.getSubjectCode())
+                .examCode(examCodeDto.getExamCode())
                 .exam(examCodeDto.getExam())
                 .type(examCodeDto.getType())
                 .build();
