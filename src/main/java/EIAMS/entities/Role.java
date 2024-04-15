@@ -49,4 +49,15 @@ public enum Role {
         authorities.add(new SimpleGrantedAuthority("ROLE_" + this.name()));
         return authorities;
     }
+
+    public static Role fromString(String value) {
+        if (value != null) {
+            for (Role role : Role.values()) {
+                if (value.equalsIgnoreCase(role.name())) {
+                    return role;
+                }
+            }
+        }
+        return null; // Hoặc một giá trị mặc định nếu cần
+    }
 }
