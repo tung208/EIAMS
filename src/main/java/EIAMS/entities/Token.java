@@ -17,12 +17,12 @@ public class Token {
     private Integer id;
 
     @Column(name = "expired")
-    private Integer expired;
+    private boolean expired;
 
     @Column(name = "revoked")
-    private Integer revoked;
+    private boolean revoked;
 
-    @Column(name = "token", length = 128)
+    @Column(name = "token", length = 1024)
     private String token;
 
     @Column(name = "token_type", length = 64)

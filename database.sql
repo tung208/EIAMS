@@ -3,7 +3,7 @@ CREATE TABLE `Account` (
   `active` int(11) DEFAULT null,
   `email` varchar(64) NOT NULL,
   `password` varchar(256) NOT NULL,
-  `role` varchar(64) NOT NULL,
+  `role` enum('ADMIN','MANAGER','USER') DEFAULT NULL,
   `since` int(11) DEFAULT null,
   `username` varchar(64) NOT NULL
 );
@@ -12,7 +12,7 @@ CREATE TABLE `Token` (
   `id` int(11) PRIMARY KEY AUTO_INCREMENT,
   `expired` int(5),
   `revoked` int(5),
-  `token` varchar(128),
+  `token` varchar(1024),
   `token_type` varchar(64),
   `account_id` int(11)
 );

@@ -21,7 +21,4 @@ public interface AccountServiceInterface {
 
     void delete(int id);
 
-    void exportListAccount(List<Account> accounts, String filePath);
-
-    void importFileCSV(MultipartFile file) throws IOException;
 }
