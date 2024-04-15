@@ -22,7 +22,7 @@ public class Token {
     @Column(name = "revoked")
     private boolean revoked;
 
-    @Column(name = "token", length = 128)
+    @Column(name = "token", length = 1024)
     private String token;
 
     @Column(name = "token_type", length = 64)

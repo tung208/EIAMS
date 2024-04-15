@@ -56,7 +56,7 @@ public class AccountService implements AccountServiceInterface {
             accountUpdate.setActive(account.getActive());
             accountUpdate.setEmail(account.getEmail());
             accountUpdate.setPassword(account.getPassword());
-            accountUpdate.setRole(account.getRole());
+//            accountUpdate.setRole(account.getRole());
             accountUpdate.setUsername(getUserName(account.getEmail()));
 
             accountRepository.save(accountUpdate);
@@ -65,82 +65,6 @@ public class AccountService implements AccountServiceInterface {
 
     @Override
     public void delete(int id) {
-
-    }
-
-    @Override
-    public void exportListAccount(List<Account> accounts, String filePath) {
-        try (CSVWriter csvWriter = new CSVWriter(new FileWriter(filePath))) {
-            // Writing header
-            String[] header = {"ID", "Active", "Email", "Role"};
-            csvWriter.writeNext(header);
-
-            // Writing data
-            for (Account account : accounts) {
-                String[] data = {
-                        String.valueOf(account.getId()),
-                        String.valueOf(account.getActive()),
-                        account.getEmail(),
-                        account.getRole()
-                };
-                csvWriter.writeNext(data);
-            }
-            System.out.println("CSV file exported successfully!");
-        } catch (IOException e) {
-            logger.error(e.getMessage());
-        }
-    }
-
-    @Override
-    public void importFileCSV(MultipartFile file) throws IOException {
-        Map<Integer, Account> csvDataMap = new HashMap<>();
-        List<Account> newAccount = new ArrayList<>();
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(file.getInputStream()))) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                String[] data = line.split(",");
-                Integer id = StringUtils.hasText(data[0]) ? Integer.parseInt(data[0]) : null;
-                Integer active = StringUtils.hasText(data[1]) ? Integer.parseInt(data[1]) : null;
-                String email = StringUtils.hasText(data[2]) ? data[2] : null;
-                String role = StringUtils.hasText(data[3]) ? data[3] : null;
-
-                if (id != null && active != null && email != null && role != null) {
-                    Account account = new Account();
-                    account.setId(id);
-                    account.setActive(active);
-                    account.setRole(role);
-                    account.setEmail(email);
-                    account.setUsername(getUserName(email));
-                    csvDataMap.put(id, account);
-                } else if (id == null && active != null && email != null && role != null) {
-                    Account account = new Account();
-                    account.setActive(active);
-                    account.setRole(role);
-                    account.setEmail(email);
-                    account.setUsername(getUserName(email));
-                    newAccount.add(account);
-                } else {
-                    // Handle the case where any required field is missing or invalid
-                    System.out.println("Skipping invalid data: " + line);
-                }
-            }
-        }
-        List<Account> existingAccounts = accountRepository.findAll();
-        for (Account existingAccount: existingAccounts){
-            int id = existingAccount.getId();
-            if (csvDataMap.containsKey(id)) {
-                //TODO: update exist account and delete not exist
-                Account accountUpdate = csvDataMap.get(id);
-                existingAccount.setRole(accountUpdate.getRole());
-                existingAccount.setActive(accountUpdate.getActive());
-                existingAccount.setEmail(accountUpdate.getEmail());
-                existingAccount.setUsername(accountUpdate.getUsername());
-                accountRepository.save(accountUpdate);
-            }else {
-                accountRepository.delete(existingAccount);
-            }
-        }
-        accountRepository.saveAll(newAccount);
 
     }
 

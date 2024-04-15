@@ -12,7 +12,7 @@ CREATE TABLE `Token` (
   `id` int(11) PRIMARY KEY AUTO_INCREMENT,
   `expired` int(5),
   `revoked` int(5),
-  `token` varchar(128),
+  `token` varchar(1024),
   `token_type` varchar(64),
   `account_id` int(11)
 );
