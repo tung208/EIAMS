@@ -5,6 +5,7 @@ import EIAMS.entities.ExamCode;
 import EIAMS.entities.Lecturer;
 import EIAMS.entities.responeObject.PageResponse;
 import EIAMS.entities.responeObject.ResponseObject;
+import EIAMS.exception.EntityExistException;
 import EIAMS.exception.EntityNotFoundException;
 import EIAMS.services.LecturerService;
 import EIAMS.services.StatusService;
@@ -49,7 +50,7 @@ public class LecturerController {
     }
 
     @PostMapping("")
-    public ResponseEntity<ResponseObject> create(@RequestBody LecturerDto lecturerDto){
+    public ResponseEntity<ResponseObject> create(@RequestBody LecturerDto lecturerDto) throws EntityExistException {
         Lecturer lecturer = lecturerService.create(lecturerDto);
         if (lecturer != null){
             return ResponseEntity.status(HttpStatus.CREATED).body(
@@ -60,7 +61,7 @@ public class LecturerController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ResponseObject> update(@PathVariable int id, @RequestBody LecturerDto lecturerDto){
+    public ResponseEntity<ResponseObject> update(@PathVariable int id, @RequestBody LecturerDto lecturerDto) throws EntityNotFoundException, EntityExistException {
         lecturerService.update(id, lecturerDto);
         return ResponseEntity.status(HttpStatus.OK).body(
                 new ResponseObject("OK", "Update Success", ""));

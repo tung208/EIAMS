@@ -41,7 +41,7 @@ public class SemesterController {
     SubjectService subjectService;
 
     @Autowired
-    StudentSubjectRepository subjectRepository;
+    StudentSubjectRepository studentSubjectRepository;
 
     @Autowired
     SchedulerRepository schedulerRepository;
@@ -85,7 +85,7 @@ public class SemesterController {
         planExamService.deleteSemesterId(id);
         examCodeService.deleteSemesterId(id);
         subjectService.deleteSemesterId(id);
-        subjectRepository.deleteBySemesterId(id);
+        studentSubjectRepository.deleteBySemesterId(id);
         schedulerRepository.deleteBySemesterId(id);
         lecturerRepository.deleteBySemesterId(id);
         return ResponseEntity.status(HttpStatus.OK).body(
