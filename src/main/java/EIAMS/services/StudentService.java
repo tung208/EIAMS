@@ -173,7 +173,6 @@ public class StudentService implements StudentServiceInterface {
             executor.execute(new SaveStudent(sublistStudent,semester_id,studentRepository,i));
         }
 
-        System.out.println("list student subject: " + studentSubjects.size());
         studentSubjectRepository.deleteBySemesterId(semester_id);
         for (int i = 0; i < studentSubjects.size(); i += sublistSize) {
             int endIndex = Math.min(i + sublistSize, studentSubjects.size());

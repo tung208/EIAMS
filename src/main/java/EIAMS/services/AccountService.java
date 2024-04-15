@@ -1,6 +1,7 @@
 package EIAMS.services;
 
 import EIAMS.entities.Account;
+import EIAMS.entities.Role;
 import EIAMS.helper.Pagination;
 import EIAMS.repositories.AccountRepository;
 import EIAMS.services.interfaces.AccountServiceInterface;
@@ -9,7 +10,9 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -68,6 +71,12 @@ public class AccountService implements AccountServiceInterface {
 
     }
 
+    @Override
+    public Page<Account> search(Integer page, Integer limit, int active, String email, Role role, String username) {
+        Pageable pageable = PageRequest.of(page - 1, limit, Sort.by("id").descending());
+        return accountRepository.findByDynamic(active, email,role, username, pageable);
+    }
+
     public String getUserName(String email) {
         if (email == null || email.isEmpty()) {
             return null;
@@ -79,4 +88,6 @@ public class AccountService implements AccountServiceInterface {
             return null;
         }
     }
+
+
 }
