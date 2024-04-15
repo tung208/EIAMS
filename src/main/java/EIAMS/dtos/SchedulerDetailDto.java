@@ -23,4 +23,5 @@ public class SchedulerDetailDto {
     LocalDateTime endDate;
     Integer lecturerId;
     String lecturerEmail;
+    String lecturerCodeName;
 }

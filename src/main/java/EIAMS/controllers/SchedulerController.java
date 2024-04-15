@@ -67,7 +67,7 @@ public class SchedulerController {
             @RequestParam(name = "start_date", defaultValue = "") String start_date,
             @RequestParam(name = "end_date", defaultValue = "") String end_date) {
         try {
-            List<Scheduler> list = schedulerServiceInterface.listSchedulerByRoom(roomId, start_date, end_date, lecturerId);
+            List<SchedulerDetailDto> list = schedulerServiceInterface.listSchedulerByRoom(roomId, start_date, end_date, lecturerId);
             if (list.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
                         new ResponseObject("NOT FOUND", "", null));

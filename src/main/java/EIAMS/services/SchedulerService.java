@@ -82,14 +82,64 @@ public class SchedulerService implements SchedulerServiceInterface {
     }
 
     @Override
-    public List<Scheduler> listSchedulerByRoom(int roomId, String startDate, String endDate, String lecturerId) {
+    public List<SchedulerDetailDto> listSchedulerByRoom(int roomId, String startDate, String endDate, String lecturerId) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         LocalDateTime endDateSearch = LocalDateTime.parse(endDate, formatter);
         LocalDateTime startDateSearch = LocalDateTime.parse(startDate, formatter);
         if (lecturerId.isBlank()) {
-            return schedulerRepository.findAllByRoomIdAndStartDateAfterAndEndDateBefore(roomId, startDateSearch, endDateSearch);
+            List<Scheduler> schedulers = schedulerRepository.findAllByRoomIdAndStartDateAfterAndEndDateBefore(roomId, startDateSearch, endDateSearch);
+            return schedulers.stream()
+                    .map(scheduler -> {
+                        String lecturerEmail = null;
+                        String lecturerCode = null;
+                        if (scheduler.getLecturerId() != null && lecturerRepository.findById(scheduler.getLecturerId()).isPresent()) {
+                            Lecturer l = lecturerRepository.findById(scheduler.getLecturerId()).get();
+                            lecturerEmail = l.getEmail();
+                            lecturerCode = l.getCodeName();
+                        }
+                        return SchedulerDetailDto.builder()
+                                .id(scheduler.getId())
+                                .semesterId(scheduler.getSemesterId())
+                                .semesterName(semesterRepository.findById(scheduler.getSemesterId()).get().getName())
+                                .lecturerId(scheduler.getLecturerId())
+                                .lecturerEmail(lecturerEmail)
+                                .lecturerCodeName(lecturerCode)
+                                .startDate(scheduler.getStartDate())
+                                .endDate(scheduler.getEndDate())
+                                .examCodeId(scheduler.getExamCodeId())
+                                .roomId(scheduler.getRoomId())
+                                .roomName(roomRepository.findById(scheduler.getRoomId()).get().getName())
+                                .studentId(scheduler.getStudentId())
+                                .build();
+                    })
+                    .collect(Collectors.toList());
         } else {
-            return schedulerRepository.findAllByRoomIdAndStartDateAfterAndEndDateBeforeAndLecturerId(roomId, startDateSearch, endDateSearch, Integer.valueOf(lecturerId));
+            List<Scheduler> schedulers = schedulerRepository.findAllByRoomIdAndStartDateAfterAndEndDateBeforeAndLecturerId(roomId, startDateSearch, endDateSearch, Integer.valueOf(lecturerId));
+            return schedulers.stream()
+                    .map(scheduler -> {
+                        String lecturerEmail = null;
+                        String lecturerCode = null;
+                        if (scheduler.getLecturerId() != null && lecturerRepository.findById(scheduler.getLecturerId()).isPresent()) {
+                            Lecturer l = lecturerRepository.findById(scheduler.getLecturerId()).get();
+                            lecturerEmail = l.getEmail();
+                            lecturerCode = l.getCodeName();
+                        }
+                        return SchedulerDetailDto.builder()
+                                .id(scheduler.getId())
+                                .semesterId(scheduler.getSemesterId())
+                                .semesterName(semesterRepository.findById(scheduler.getSemesterId()).get().getName())
+                                .lecturerId(scheduler.getLecturerId())
+                                .lecturerEmail(lecturerEmail)
+                                .lecturerCodeName(lecturerCode)
+                                .startDate(scheduler.getStartDate())
+                                .endDate(scheduler.getEndDate())
+                                .examCodeId(scheduler.getExamCodeId())
+                                .roomId(scheduler.getRoomId())
+                                .roomName(roomRepository.findById(scheduler.getRoomId()).get().getName())
+                                .studentId(scheduler.getStudentId())
+                                .build();
+                    })
+                    .collect(Collectors.toList());
         }
 
     }
@@ -128,8 +178,11 @@ public class SchedulerService implements SchedulerServiceInterface {
         return schedulers.stream()
                 .map(scheduler -> {
                     String lecturerEmail = null;
+                    String lecturerCode = null;
                     if (scheduler.getLecturerId() != null && lecturerRepository.findById(scheduler.getLecturerId()).isPresent()) {
-                        lecturerEmail = lecturerRepository.findById(scheduler.getLecturerId()).get().getEmail();
+                        Lecturer l = lecturerRepository.findById(scheduler.getLecturerId()).get();
+                        lecturerEmail = l.getEmail();
+                        lecturerCode = l.getCodeName();
                     }
                     return SchedulerDetailDto.builder()
                             .id(scheduler.getId())
@@ -137,6 +190,7 @@ public class SchedulerService implements SchedulerServiceInterface {
                             .semesterName(semesterRepository.findById(scheduler.getSemesterId()).get().getName())
                             .lecturerId(scheduler.getLecturerId())
                             .lecturerEmail(lecturerEmail)
+                            .lecturerCodeName(lecturerCode)
                             .startDate(scheduler.getStartDate())
                             .endDate(scheduler.getEndDate())
                             .examCodeId(scheduler.getExamCodeId())
