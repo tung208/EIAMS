@@ -110,4 +110,9 @@ public class ExamCodeService implements ExamCodeServiceInterface {
     public void delete(Integer id) {
         examCodeRepository.deleteById(id);
     }
+
+    @Override
+    public void deleteSemesterId(int id){
+        examCodeRepository.deleteBySemesterId(id);
+    }
 }

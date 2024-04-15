@@ -3,6 +3,7 @@ package EIAMS.services;
 import EIAMS.dtos.SemesterDto;
 import EIAMS.entities.Account;
 import EIAMS.entities.Semester;
+import EIAMS.exception.EntityNotFoundException;
 import EIAMS.helper.Pagination;
 import EIAMS.mapper.SemesterMapping;
 import EIAMS.repositories.AccountRepository;
@@ -57,14 +58,15 @@ public class SemesterService implements SemesterServiceInterface {
     }
 
     @Override
-    public void update(int id, Semester semester) {
+    public void update(int id, SemesterDto semesterDto) throws EntityNotFoundException {
         Optional<Semester> s = semesterRepository.findById(id);
         if (s.isPresent()) {
             Semester semesterUpdate = s.get();
-            semesterUpdate.setName(semester.getName());
-            semesterUpdate.setCreatorId(semester.getCreatorId());
+            semesterUpdate.setName(semesterDto.getName());
+            semesterUpdate.setCreatorId(semesterDto.getCreatorId());
+            semesterUpdate.setCode(semesterDto.getCode());
             semesterRepository.save(semesterUpdate);
-        }
+        } else throw new EntityNotFoundException("Not found semester");
     }
 
     @Override

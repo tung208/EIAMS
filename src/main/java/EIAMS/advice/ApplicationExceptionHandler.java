@@ -48,7 +48,7 @@ public class ApplicationExceptionHandler {
     public ResponseEntity<ResponseObject> handleDataException(DataIntegrityViolationException ex, WebRequest request) {
         // quá trình kiểm soat lỗi diễn ra ở đây
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-                new ResponseObject("Duplicate entry",
+                new ResponseObject("Duplicate",
                         ex.getMessage(),
                         request.getDescription(false)));
     }

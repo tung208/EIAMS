@@ -19,4 +19,6 @@ public interface PlanExamServiceInterface {
     void update(int id, PlanExamDto planExamDto ) throws EntityNotFoundException;
 
     void delete(int id);
+
+    void deleteSemesterId(int id);
 }

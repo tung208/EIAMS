@@ -142,4 +142,9 @@ public class PlanExamService implements PlanExamServiceInterface {
     public void delete(int id) {
         planExamRepository.deleteById(id);
     }
+
+    @Override
+    public void deleteSemesterId(int id){
+        planExamRepository.deleteBySemesterId(id);
+    }
 }

@@ -55,4 +55,10 @@ public class StatusService implements StatusServiceInterface {
                 .build();
         statusRepository.save(status);
     }
+
+    @Override
+    public void delete(int semesterId) {
+        statusRepository.deleteBySemesterId(semesterId);
+    }
+
 }

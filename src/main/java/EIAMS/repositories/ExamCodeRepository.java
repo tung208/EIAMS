@@ -27,4 +27,6 @@ public interface ExamCodeRepository extends JpaRepository<ExamCode, Integer> {
 
     List<ExamCode> findBySemesterIdAndSubjectCode(Integer semesterId, String subjectCode);
 
+    // Xóa các bản ghi dựa trên semesterId
+    void deleteBySemesterId(Integer semesterId);
 }

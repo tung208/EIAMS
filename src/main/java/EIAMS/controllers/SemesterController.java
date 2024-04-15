@@ -3,10 +3,14 @@ package EIAMS.controllers;
 import EIAMS.dtos.SemesterDto;
 import EIAMS.entities.Semester;
 import EIAMS.entities.Status;
+import EIAMS.entities.Subject;
 import EIAMS.entities.responeObject.PageResponse;
 import EIAMS.entities.responeObject.ResponseObject;
-import EIAMS.services.SemesterService;
-import EIAMS.services.StatusService;
+import EIAMS.exception.EntityNotFoundException;
+import EIAMS.repositories.LecturerRepository;
+import EIAMS.repositories.SchedulerRepository;
+import EIAMS.repositories.StudentSubjectRepository;
+import EIAMS.services.*;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,9 +25,29 @@ import org.springframework.web.bind.annotation.*;
 public class SemesterController {
     @Autowired
     SemesterService semesterService;
-
     @Autowired
     StatusService statusService;
+
+    @Autowired
+    RoomService roomService;
+
+    @Autowired
+    PlanExamService planExamService;
+
+    @Autowired
+    ExamCodeService examCodeService;
+
+    @Autowired
+    SubjectService subjectService;
+
+    @Autowired
+    StudentSubjectRepository subjectRepository;
+
+    @Autowired
+    SchedulerRepository schedulerRepository;
+
+    @Autowired
+    LecturerRepository lecturerRepository;
 
     @GetMapping()
     public PageResponse<Semester> getSemester(@RequestParam(defaultValue = "1") Integer pageNo,
@@ -45,5 +69,28 @@ public class SemesterController {
 
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<ResponseObject> updateSemester(@PathVariable int id, @RequestBody @Valid SemesterDto semesterDto) throws EntityNotFoundException {
+        semesterService.update(id, semesterDto);
+        return ResponseEntity.status(HttpStatus.OK).body(
+                new ResponseObject("OK", "Update Successfully!", "semester"));
+
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ResponseObject> deleteSemester(@PathVariable int id){
+        semesterService.delete(id);
+        statusService.delete(id);
+        roomService.deleteSemesterId(id);
+        planExamService.deleteSemesterId(id);
+        examCodeService.deleteSemesterId(id);
+        subjectService.deleteSemesterId(id);
+        subjectRepository.deleteBySemesterId(id);
+        schedulerRepository.deleteBySemesterId(id);
+        lecturerRepository.deleteBySemesterId(id);
+        return ResponseEntity.status(HttpStatus.OK).body(
+                new ResponseObject("OK", "Delete Successfully!", "semester"));
+
+    }
 
 }
