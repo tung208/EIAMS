@@ -4,6 +4,7 @@ import EIAMS.dtos.PlanExamDto;
 import EIAMS.entities.PlanExam;
 import EIAMS.entities.Semester;
 import EIAMS.entities.csvRepresentation.PlanExamRepresentation;
+import EIAMS.exception.EntityNotFoundException;
 import EIAMS.repositories.PlanExamRepository;
 import EIAMS.services.excel.ExcelPlanExam;
 import EIAMS.services.interfaces.PlanExamServiceInterface;
@@ -15,6 +16,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -25,6 +27,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -113,7 +116,7 @@ public class PlanExamService implements PlanExamServiceInterface {
     }
 
     @Override
-    public void update(int id, PlanExamDto planExamDto) {
+    public void update(int id, PlanExamDto planExamDto) throws EntityNotFoundException {
         List<PlanExam> planExamList = planExamRepository.findBySameObject(planExamDto.getSemesterId(),
                 planExamDto.getExpectedDate(), planExamDto.getExpectedTime(), planExamDto.getTypeExam(),
                 planExamDto.getSubjectCode());
@@ -121,15 +124,18 @@ public class PlanExamService implements PlanExamServiceInterface {
             // Ban ra exception
             return ;
         }
-        PlanExam planExam = PlanExam.builder()
-                .id(id)
-                .semesterId(planExamDto.getSemesterId())
-                .expectedDate(planExamDto.getExpectedDate())
-                .expectedTime(planExamDto.getExpectedTime())
-                .typeExam(planExamDto.getTypeExam())
-                .subjectCode(planExamDto.getSubjectCode())
-                .build();
-        planExamRepository.save(planExam);
+        Optional<PlanExam> planExam = planExamRepository.findById(id);
+        if (planExam.isPresent()) {
+            PlanExam planExamUpdate = PlanExam.builder()
+                    .id(id)
+                    .semesterId(planExamDto.getSemesterId())
+                    .expectedDate(planExamDto.getExpectedDate())
+                    .expectedTime(planExamDto.getExpectedTime())
+                    .typeExam(planExamDto.getTypeExam())
+                    .subjectCode(planExamDto.getSubjectCode())
+                    .build();
+            planExamRepository.save(planExamUpdate);
+        } else throw new EntityNotFoundException("Not found Plan Exam");
     }
 
     @Override

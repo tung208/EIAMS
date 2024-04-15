@@ -8,6 +8,7 @@ import EIAMS.entities.responeObject.ResponseObject;
 import EIAMS.exception.EntityNotFoundException;
 import EIAMS.services.PlanExamService;
 import EIAMS.services.StatusService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -62,7 +63,7 @@ public class PlanExamController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ResponseObject> upldatePlanExam(@PathVariable int id, @RequestBody PlanExamDto planExamDto){
+    public ResponseEntity<ResponseObject> upldatePlanExam(@PathVariable int id, @RequestBody @Valid PlanExamDto planExamDto) throws EntityNotFoundException {
         planExamService.update(id, planExamDto);
         return ResponseEntity.status(HttpStatus.OK).body(
                 new ResponseObject("OK",
