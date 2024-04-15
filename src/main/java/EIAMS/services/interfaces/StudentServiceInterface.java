@@ -5,6 +5,7 @@ import EIAMS.dtos.StudentSubjectDto;
 import EIAMS.entities.Semester;
 import EIAMS.entities.Student;
 import EIAMS.entities.StudentSubject;
+import EIAMS.exception.EntityNotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -37,5 +38,5 @@ public interface StudentServiceInterface {
 
      void deleteStudentSubject(int id);
 
-     void createStudentSubject(StudentSubjectDto studentSubjectDto);
+     void createStudentSubject(StudentSubjectDto studentSubjectDto) throws EntityNotFoundException;
 }
