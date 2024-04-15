@@ -10,4 +10,6 @@ public interface StatusServiceInterface {
     void create(int semesterId);
 
     void delete(int semesterId);
+
+    Status getBySemesterId(int semesterId) throws EntityNotFoundException;
 }
