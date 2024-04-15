@@ -61,4 +61,12 @@ public class StatusService implements StatusServiceInterface {
         statusRepository.deleteBySemesterId(semesterId);
     }
 
+    @Override
+    public Status getBySemesterId(int semesterId) throws EntityNotFoundException {
+        Optional<Status> status = statusRepository.findBySemesterId(semesterId);
+        if (status.isPresent()){
+            return status.get();
+        } else throw new EntityNotFoundException("Not fond status");
+    }
+
 }
