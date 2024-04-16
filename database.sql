@@ -1,11 +1,11 @@
 CREATE TABLE `Account` (
   `id` int(11) PRIMARY KEY AUTO_INCREMENT,
   `active` int(11) DEFAULT null,
-  `email` varchar(64) unique NOT NULL,
+  `email` varchar(64) UNIQUE NOT NULL,
   `password` varchar(256) NOT NULL,
   `role` enum('ADMIN','MANAGER','USER') DEFAULT NULL,
   `since` int(11) DEFAULT null,
-  `username` varchar(64) unique NOT NULL
+  `username` varchar(64) UNIQUE NOT NULL
 );
 
 CREATE TABLE `Token` (

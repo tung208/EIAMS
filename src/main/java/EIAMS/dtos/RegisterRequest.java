@@ -29,4 +29,8 @@ public class RegisterRequest {
     @NotNull
     @NotBlank()
     private Role role;
+
+    @NotNull
+    @NotBlank()
+    private int active;
 }
