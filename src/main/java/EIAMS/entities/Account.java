@@ -23,7 +23,7 @@ public class Account implements UserDetails {
     @Column(name = "active")
     private Integer active;
 
-    @Column(name = "email", nullable = false, length = 64)
+    @Column(name = "email", nullable = false, length = 128, unique = true)
     private String email;
 
     @Column(name = "password", nullable = false, length = 256)
@@ -35,7 +35,7 @@ public class Account implements UserDetails {
     @Column(name = "since")
     private Integer since;
 
-    @Column(name = "username", nullable = false, length = 64)
+    @Column(name = "username", nullable = false, length = 128, unique = true)
     private String username;
 
     @Enumerated(EnumType.STRING)

@@ -23,6 +23,10 @@ public class RegisterRequest {
     private String email;
 
     @NotNull
+    @NotBlank(message = "data not valid")
+    private String password;
+
+    @NotNull
     @NotBlank()
     private Role role;
 }
