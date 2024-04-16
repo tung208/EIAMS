@@ -101,7 +101,7 @@ public class LecturerService implements LecturerServiceInterface {
         Optional<Lecturer> lecturer = lecturerRepository.findById(id);
         if (lecturer.isPresent()){
             List<Lecturer> lecturer1 = lecturerRepository.findBySemesterIdAndEmail(lecturerDto.getSemesterId(), lecturerDto.getEmail());
-            if(lecturer1.size() > 0){
+            if(lecturer1.size() > 1){
                 throw new EntityExistException("Exist lecturer");
             }
             Lecturer lecturerUpdate = Lecturer.builder()
