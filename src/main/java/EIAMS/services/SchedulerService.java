@@ -63,19 +63,22 @@ public class SchedulerService implements SchedulerServiceInterface {
             RoomScheduleDto dto = new RoomScheduleDto();
             int roomId = (Integer) o[0];
             Room room = roomRepository.findById(roomId).get();
-            dto.setId(roomId);
-            dto.setName(room.getName());
-            dto.setQuantityStudent(room.getQuantityStudent());
-            dto.setSemesterId(room.getSemesterId());
-            dto.setType(room.getType());
+            String roomName = room.getName();
+            if (search == null || search.isEmpty() || roomName.toLowerCase().contains(search.toLowerCase())) {
+                dto.setId(roomId);
+                dto.setName(room.getName());
+                dto.setQuantityStudent(room.getQuantityStudent());
+                dto.setSemesterId(room.getSemesterId());
+                dto.setType(room.getType());
 
-            Date d = (Date) o[1];
-            Timestamp timestamp = new Timestamp(d.getTime());
+                Date d = (Date) o[1];
+                Timestamp timestamp = new Timestamp(d.getTime());
 
-            // Convert Timestamp to LocalDateTime
-            LocalDateTime localDateTime = timestamp.toLocalDateTime();
-            dto.setDate(localDateTime);
-            roomScheduleDtos.add(dto);
+                // Convert Timestamp to LocalDateTime
+                LocalDateTime localDateTime = timestamp.toLocalDateTime();
+                dto.setDate(localDateTime);
+                roomScheduleDtos.add(dto);
+            }
         }
 
         return roomScheduleDtos;
