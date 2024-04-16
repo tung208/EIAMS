@@ -45,10 +45,6 @@ public class AuthenticationService {
                 .active(request.getActive())
                 .build();
         var savedUser = accountRepository.save(user);
-//        var jwtToken = jwtService.generateToken(user);
-//        var refreshToken = jwtService.generateRefreshToken(user);
-
-//        saveUserToken(savedUser, jwtToken);
         return ResponseObject.builder()
                 .status("OK")
                 .message("Register successfully!")
@@ -57,7 +53,7 @@ public class AuthenticationService {
     }
 
     public ResponseObject authenticate(AuthenticationRequest request) {
-        System.out.println(request.getEmail()+ " " + request.getPassword());
+//        System.out.println(request.getEmail()+ " " + request.getPassword());
         Authentication authentication = new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword());
         try {
 //            authenticationManager.authenticate(
@@ -68,10 +64,9 @@ public class AuthenticationService {
 //            );
             Authentication authenticatedUser = authenticationManager.authenticate(authentication);
         } catch (AuthenticationException e){
-            e.printStackTrace();
             return ResponseObject.builder()
-                    .status("400")
-                    .message("Loi dang nhap")
+                    .status("Wrong email or password")
+                    .message("Login fail!")
                     .build();
         }
 
@@ -81,7 +76,7 @@ public class AuthenticationService {
         revokeAllUserTokens(user);
         saveUserToken(user, jwtToken);
         return ResponseObject.builder()
-                .status("200")
+                .status("Sucess")
                 .message("Login Successfully")
                 .data(AuthenticationResponse.builder()
                         .accessToken(jwtToken)

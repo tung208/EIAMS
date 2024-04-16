@@ -1,7 +1,10 @@
 package EIAMS.services;
 
+import EIAMS.dtos.AccountDto;
 import EIAMS.entities.Account;
 import EIAMS.entities.Role;
+import EIAMS.entities.responeObject.ResponseObject;
+import EIAMS.exception.EntityNotFoundException;
 import EIAMS.helper.Pagination;
 import EIAMS.repositories.AccountRepository;
 import EIAMS.services.interfaces.AccountServiceInterface;
@@ -13,6 +16,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -29,6 +33,7 @@ public class AccountService implements AccountServiceInterface {
     private final AccountRepository accountRepository;
     private final Pagination pagination;
     private static final Logger logger = LoggerFactory.getLogger(AccountService.class);
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public Page<Account> list(Integer page, Integer limit) {
@@ -89,5 +94,24 @@ public class AccountService implements AccountServiceInterface {
         }
     }
 
-
+    public ResponseObject updateUser(AccountDto account) throws EntityNotFoundException {
+        Optional<Account> accountOptional = accountRepository.findByEmail(account.getEmail());
+        if (!accountOptional.isPresent()){
+            throw new EntityNotFoundException("Not found accout");
+        }
+        var user = Account.builder()
+                .id(accountOptional.get().getId())
+                .username(accountOptional.get().getUsername())
+                .email(accountOptional.get().getEmail())
+                .password(passwordEncoder.encode(account.getPassword()))
+                .role(account.getRole())
+                .active(account.getActive())
+                .build();
+        accountRepository.save(user);
+        return ResponseObject.builder()
+                .status("OK")
+                .message("Update successfully!")
+                .data("")
+                .build();
+    }
 }

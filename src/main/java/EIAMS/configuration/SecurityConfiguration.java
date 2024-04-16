@@ -39,8 +39,6 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/api/v1/**"
-//                                "/api/v1/cus/test"
-
                         )
                         .permitAll()
                         .anyRequest()
