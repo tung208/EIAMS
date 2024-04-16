@@ -68,6 +68,7 @@ public class AuthenticationService {
 //            );
             Authentication authenticatedUser = authenticationManager.authenticate(authentication);
         } catch (AuthenticationException e){
+            e.printStackTrace();
             return ResponseObject.builder()
                     .status("400")
                     .message("Loi dang nhap")
