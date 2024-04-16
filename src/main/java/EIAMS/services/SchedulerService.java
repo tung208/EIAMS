@@ -40,7 +40,7 @@ public class SchedulerService implements SchedulerServiceInterface {
     private final LecturerRepository lecturerRepository;
 
     @Override
-    public List<RoomScheduleDto> list(String search, String startDate, String endDate, String lecturerId) {
+    public List<RoomScheduleDto> list(Integer semesterId, String search, String startDate, String endDate, String lecturerId) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
         List<Object[]> results;
@@ -50,11 +50,11 @@ public class SchedulerService implements SchedulerServiceInterface {
             LocalDateTime endDateSearch = LocalDateTime.parse(endDate, formatter);
             LocalDateTime startDateSearch = LocalDateTime.parse(startDate, formatter);
             if (lecturerId == null || lecturerId.isBlank()) {
-                results = schedulerRepository.findAllRoomByDate(startDateSearch, endDateSearch);
+                results = schedulerRepository.findAllRoomByDate(startDateSearch, endDateSearch, semesterId);
             } else if (lecturerId.equals("-1")) {
-                results = schedulerRepository.findAllRoomByDateAndLecturerIdIsNull(startDateSearch, endDateSearch);
+                results = schedulerRepository.findAllRoomByDateAndLecturerIdIsNull(startDateSearch, endDateSearch, semesterId);
             } else {
-                results = schedulerRepository.findAllRoomByDateAndLecturerId(startDateSearch, endDateSearch, Integer.valueOf(lecturerId));
+                results = schedulerRepository.findAllRoomByDateAndLecturerId(startDateSearch, endDateSearch, Integer.valueOf(lecturerId), semesterId);
             }
         }
 
@@ -85,12 +85,12 @@ public class SchedulerService implements SchedulerServiceInterface {
     }
 
     @Override
-    public List<SchedulerDetailDto> listSchedulerByRoom(int roomId, String startDate, String endDate, String lecturerId) {
+    public List<SchedulerDetailDto> listSchedulerByRoom(Integer semesterId, int roomId, String startDate, String endDate, String lecturerId) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         LocalDateTime endDateSearch = LocalDateTime.parse(endDate, formatter);
         LocalDateTime startDateSearch = LocalDateTime.parse(startDate, formatter);
         if (lecturerId.isBlank()) {
-            List<Scheduler> schedulers = schedulerRepository.findAllByRoomIdAndStartDateAfterAndEndDateBefore(roomId, startDateSearch, endDateSearch);
+            List<Scheduler> schedulers = schedulerRepository.findAllByRoomIdAndStartDateAfterAndEndDateBefore(roomId, startDateSearch, endDateSearch, semesterId);
             return schedulers.stream()
                     .map(scheduler -> {
                         String lecturerEmail = null;
@@ -117,7 +117,7 @@ public class SchedulerService implements SchedulerServiceInterface {
                     })
                     .collect(Collectors.toList());
         } else {
-            List<Scheduler> schedulers = schedulerRepository.findAllByRoomIdAndStartDateAfterAndEndDateBeforeAndLecturerId(roomId, startDateSearch, endDateSearch, Integer.valueOf(lecturerId));
+            List<Scheduler> schedulers = schedulerRepository.findAllBySemesterIdAndRoomIdAndStartDateAfterAndEndDateBeforeAndLecturerId(semesterId, roomId, startDateSearch, endDateSearch, Integer.valueOf(lecturerId));
             return schedulers.stream()
                     .map(scheduler -> {
                         String lecturerEmail = null;
