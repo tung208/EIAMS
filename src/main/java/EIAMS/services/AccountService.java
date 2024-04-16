@@ -72,11 +72,6 @@ public class AccountService implements AccountServiceInterface {
     }
 
     @Override
-    public void delete(int id) {
-
-    }
-
-    @Override
     public Page<Account> search(Integer page, Integer limit, int active, String email, Role role, String username) {
         Pageable pageable = PageRequest.of(page - 1, limit, Sort.by("id").descending());
         return accountRepository.findByDynamic(active, email,role, username, pageable);
@@ -92,6 +87,20 @@ public class AccountService implements AccountServiceInterface {
         } else {
             return null;
         }
+    }
+
+    @Override
+    public ResponseObject delete(int id) throws EntityNotFoundException {
+        Optional<Account> accountOptional = accountRepository.findById(id);
+        if (!accountOptional.isPresent()){
+            throw new EntityNotFoundException("Not found accout");
+        }
+        accountRepository.deleteById(id);
+        return ResponseObject.builder()
+                .status("OK")
+                .message("Delete successfully!")
+                .data("")
+                .build();
     }
 
     public ResponseObject updateUser(AccountDto account) throws EntityNotFoundException {
