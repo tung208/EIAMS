@@ -1,5 +1,9 @@
 package EIAMS.dtos;
 
+import EIAMS.entities.Role;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,10 +19,22 @@ import java.io.Serializable;
 @Builder
 public class AccountDto {
     Integer id;
+    @NotNull
     Integer active;
+
+    @NotNull
+    @Email(message = "Email khong hop le")
     String email;
+
+    @NotNull
+    @Size(min = 2, max = 64)
     String password;
-    String role;
+
+    @NotNull
+    Role role;
+
     Integer since;
+
+    @NotNull
     String username;
 }
