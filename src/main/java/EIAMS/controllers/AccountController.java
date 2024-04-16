@@ -39,4 +39,9 @@ public class AccountController {
     public ResponseEntity<ResponseObject> updateAccount(@RequestBody AccountDto accountDto) throws EntityNotFoundException {
         return ResponseEntity.ok(accountService.updateUser(accountDto));
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ResponseObject> updateAccount(@PathVariable int id) throws EntityNotFoundException {
+        return ResponseEntity.ok(accountService.delete(id));
+    }
 }
