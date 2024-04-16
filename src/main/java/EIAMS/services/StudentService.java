@@ -264,12 +264,13 @@ public class StudentService implements StudentServiceInterface {
         Optional<Student> student = studentRepository.findByRollNumber(studentSubjectDto.getRollNumber());
         if (ss.isPresent() && student.isPresent()) {
             StudentSubject studentSubject = StudentSubject.builder()
+                    .id(id)
                     .semesterId(studentSubjectDto.getSemesterId())
                     .rollNumber(studentSubjectDto.getRollNumber())
                     .subjectCode(studentSubjectDto.getSubjectCode())
                     .groupName(studentSubjectDto.getGroupName())
                     .blackList(studentSubjectDto.getBlackList())
-                        .build();
+                    .build();
             studentSubjectRepository.save(studentSubject);
         }
     }
