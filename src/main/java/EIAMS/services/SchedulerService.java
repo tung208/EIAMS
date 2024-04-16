@@ -813,10 +813,10 @@ public class SchedulerService implements SchedulerServiceInterface {
     public void arrangeLecturer(int semesterId) throws Exception {
         schedulerRepository.resetLecturerId(semesterId);
         int numberOfScheduler = (int) schedulerRepository.countAllBySemesterId(semesterId);
-        if (numberOfScheduler == 0) {
-            throw new Exception("We don't have any scheduler to arrange lecturer");
-        }
         int numberOfLecturer = lecturerRepository.countAllBySemesterId(semesterId);
+        if (numberOfScheduler == 0 || numberOfLecturer == 0) {
+            throw new Exception("We don't have any scheduler or teacher to arrange lecturer");
+        }
         int numberSlotPerLecturer = numberOfScheduler / numberOfLecturer;
         AtomicInteger remainderSlots = new AtomicInteger(numberOfScheduler % numberOfLecturer);
         List<Scheduler> schedulersToSave = new ArrayList<>();
