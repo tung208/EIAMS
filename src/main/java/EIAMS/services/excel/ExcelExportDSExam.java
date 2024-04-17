@@ -418,7 +418,7 @@ public class ExcelExportDSExam {
         HashSet <String> rollNumber = new HashSet<>();
 
         for (String s : strArray) {
-            idSchedulers.add(Integer.parseInt(s.trim()));
+            idSchedulers.add(Integer.parseInt(s.replaceAll("\"", "").trim()));
         }
 
         this.schedulers = schedulerRepository.findAllById(idSchedulers);
