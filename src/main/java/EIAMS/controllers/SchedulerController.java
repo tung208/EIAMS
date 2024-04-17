@@ -1,6 +1,7 @@
 package EIAMS.controllers;
 
 import EIAMS.dtos.RoomScheduleDto;
+import EIAMS.dtos.ScheduleToSwapDto;
 import EIAMS.dtos.SchedulerDetailDto;
 import EIAMS.dtos.StudentScheduleDto;
 import EIAMS.entities.Room;
@@ -70,6 +71,46 @@ public class SchedulerController {
             @RequestParam(name = "end_date", defaultValue = "") String end_date) {
         try {
             List<SchedulerDetailDto> list = schedulerServiceInterface.listSchedulerByRoom(semesterId, roomId, start_date, end_date, lecturerId);
+            if (list.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                        new ResponseObject("NOT FOUND", "", null));
+            } else {
+                return ResponseEntity.status(HttpStatus.OK).body(
+                        new ResponseObject("OK", "", list));
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    new ResponseObject("Fail", e.getMessage(), null));
+        }
+    }
+
+    @GetMapping(path = "/ids-by-time-range")
+    public ResponseEntity<ResponseObject> idsByTimeRange(
+            @RequestParam(name = "semester_id") Integer semesterId,
+            @RequestParam(name = "start_date", defaultValue = "") String start_date,
+            @RequestParam(name = "end_date", defaultValue = "") String end_date) {
+        try {
+            List<Integer> list = schedulerServiceInterface.getIdsByTimeRange(semesterId, start_date, end_date);
+            if (list.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                        new ResponseObject("NOT FOUND", "", null));
+            } else {
+                return ResponseEntity.status(HttpStatus.OK).body(
+                        new ResponseObject("OK", "", list));
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    new ResponseObject("Fail", e.getMessage(), null));
+        }
+    }
+
+    @GetMapping(path = "/list-by-time-range")
+    public ResponseEntity<ResponseObject> listByTimeRange(
+            @RequestParam(name = "semester_id") Integer semesterId,
+            @RequestParam(name = "start_date", defaultValue = "") String start_date,
+            @RequestParam(name = "end_date", defaultValue = "") String end_date) {
+        try {
+            List<ScheduleToSwapDto> list = schedulerServiceInterface.getListByTimeRange(semesterId, start_date, end_date);
             if (list.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
                         new ResponseObject("NOT FOUND", "", null));

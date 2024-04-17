@@ -1,10 +1,9 @@
 package EIAMS.services.interfaces;
 
 import EIAMS.dtos.RoomScheduleDto;
+import EIAMS.dtos.ScheduleToSwapDto;
 import EIAMS.dtos.SchedulerDetailDto;
 import EIAMS.dtos.StudentScheduleDto;
-import EIAMS.entities.Room;
-import EIAMS.entities.Scheduler;
 
 import java.util.List;
 
@@ -19,5 +18,7 @@ public interface SchedulerServiceInterface {
     void updateLecturer(int schedulerId, int lecturerId) throws Exception;
     void swapLecturer(int schedulerId, int schedulerSwapId) throws Exception;
     SchedulerDetailDto get(int schedulerId);
+    List<Integer> getIdsByTimeRange(Integer semesterId, String startDate, String endDate);
+    List<ScheduleToSwapDto> getListByTimeRange(Integer semesterId, String startDate, String endDate);
 
 }

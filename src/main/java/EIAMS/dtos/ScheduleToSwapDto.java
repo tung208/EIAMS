@@ -10,15 +10,12 @@ import java.time.LocalDateTime;
 @Builder
 @Setter
 @Getter
-public class SchedulerDetailDto {
+public class ScheduleToSwapDto {
     Integer id;
     Integer semesterId;
     String semesterName;
-    Integer slotId;
     Integer roomId;
     String roomName;
-    String examCodeId;
-    String studentId;
     String subjectCode;
     LocalDateTime startDate;
     LocalDateTime endDate;
