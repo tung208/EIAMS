@@ -62,6 +62,7 @@ public class SemesterService implements SemesterServiceInterface {
         Optional<Semester> s = semesterRepository.findById(id);
         if (s.isPresent()) {
             Semester semesterUpdate = s.get();
+            semesterUpdate.setId(id);
             semesterUpdate.setName(semesterDto.getName());
             semesterUpdate.setCreatorId(semesterDto.getCreatorId());
             semesterUpdate.setCode(semesterDto.getCode());
