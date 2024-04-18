@@ -907,7 +907,7 @@ public class SchedulerService implements SchedulerServiceInterface {
         }
         if (!schedulerRepository.findAllBySemesterIdAndStartDateAndEndDateAndLectureId(
                 scheduler.getSemesterId(), startDate, endDate, scheduler.getId(), lecturerId).isEmpty()) {
-            throw new Exception("It is not possible to change teachers because this teacher has an exam scheduled conflict time");
+            throw new Exception("It is not possible to change teachers because that teacher has conflict time");
         }
         if (scheduler.getLecturerId() == null || lecturerId != scheduler.getLecturerId()) {
             scheduler.setLecturerId(lecturerId);
