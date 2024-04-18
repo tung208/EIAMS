@@ -107,10 +107,11 @@ public class SchedulerController {
     @GetMapping(path = "/list-by-time-range")
     public ResponseEntity<ResponseObject> listByTimeRange(
             @RequestParam(name = "semester_id") Integer semesterId,
+            @RequestParam(name = "scheduler_id") Integer schedulerId,
             @RequestParam(name = "start_date", defaultValue = "") String start_date,
             @RequestParam(name = "end_date", defaultValue = "") String end_date) {
         try {
-            List<ScheduleToSwapDto> list = schedulerServiceInterface.getListByTimeRange(semesterId, start_date, end_date);
+            List<ScheduleToSwapDto> list = schedulerServiceInterface.getListByTimeRange(schedulerId, semesterId, start_date, end_date);
             if (list.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
                         new ResponseObject("NOT FOUND", "", null));

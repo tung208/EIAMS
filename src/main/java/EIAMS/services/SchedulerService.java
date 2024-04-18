@@ -931,7 +931,7 @@ public class SchedulerService implements SchedulerServiceInterface {
     }
 
     @Override
-    public List<ScheduleToSwapDto> getListByTimeRange(Integer semesterId, String startDate, String endDate) {
+    public List<ScheduleToSwapDto> getListByTimeRange(Integer id, Integer semesterId, String startDate, String endDate) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         List<Scheduler> result;
         if (startDate.isBlank() || endDate.isBlank()) {
@@ -939,7 +939,7 @@ public class SchedulerService implements SchedulerServiceInterface {
         }
         LocalDateTime endDateSearch = LocalDateTime.parse(endDate, formatter);
         LocalDateTime startDateSearch = LocalDateTime.parse(startDate, formatter);
-        result = schedulerRepository.findAllBySemesterIdAndStartDateAfterAndEndDateBefore(semesterId, startDateSearch, endDateSearch);
+        result = schedulerRepository.findAllBySemesterIdAndStartDateAfterAndEndDateBeforeAndIdNot(semesterId, startDateSearch, endDateSearch, id);
 
         return result.stream()
                 .map(scheduler -> {

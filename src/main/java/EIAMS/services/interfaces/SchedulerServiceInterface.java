@@ -19,6 +19,6 @@ public interface SchedulerServiceInterface {
     void swapLecturer(int schedulerId, int schedulerSwapId) throws Exception;
     SchedulerDetailDto get(int schedulerId);
     List<Integer> getIdsByTimeRange(Integer semesterId, String startDate, String endDate);
-    List<ScheduleToSwapDto> getListByTimeRange(Integer semesterId, String startDate, String endDate);
+    List<ScheduleToSwapDto> getListByTimeRange(Integer id, Integer semesterId, String startDate, String endDate);
 
 }
