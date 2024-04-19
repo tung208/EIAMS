@@ -36,4 +36,6 @@ public interface PlanExamRepository extends JpaRepository<PlanExam, Integer> {
 
     // Xóa các bản ghi dựa trên semesterId
     void deleteBySemesterId(Integer semesterId);
+
+    int countAllBySemesterId(Integer semesterId);
 }

@@ -14,6 +14,7 @@ import java.util.List;
 public interface RoomRepository extends JpaRepository<Room, Integer> {
     void deleteBySemesterId(int suid);
     List<Room> findAllByType(String type);
+    int countAllBySemesterId(Integer semesterId);
 
     List<Room> findAllBySemesterIdAndQuantityStudentGreaterThanAndNameContainingIgnoreCase(Integer semesterId, Integer quantityStudent, String name);
     List<Room> findAllBySemesterIdAndQuantityStudentGreaterThanAndNameNotContainingIgnoreCase(Integer semesterId, Integer quantityStudent, String name);

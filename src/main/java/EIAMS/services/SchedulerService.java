@@ -306,7 +306,10 @@ public class SchedulerService implements SchedulerServiceInterface {
     @Override
     @Transactional
     public void arrangeStudent(int semesterId) throws Exception {
-        if(semesterRepository.count() == 0 || roomRepository.count() == 0 || planExamRepository.count() == 0 || studentSubjectRepository.count() == 0 || subjectRepository.count() == 0) {
+        if (semesterRepository.count() == 0 || roomRepository.countAllBySemesterId(semesterId) == 0 ||
+                planExamRepository.countAllBySemesterId(semesterId) == 0 ||
+                studentSubjectRepository.countAllBySemesterId(semesterId) == 0 ||
+                subjectRepository.countAllBySemesterId(semesterId) == 0) {
             throw new Exception("Not have enough data to arrange students");
         }
         deleteBySemesterId(semesterId);

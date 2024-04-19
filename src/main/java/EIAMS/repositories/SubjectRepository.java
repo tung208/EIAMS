@@ -22,5 +22,6 @@ public interface SubjectRepository extends JpaRepository<Subject, Integer> {
             "AND (:name = '' or s.subjectName LIKE %:name%)" +
             "AND (:code = '' or s.subjectCode LIKE %:code%) " )
     Page<Subject> findByDynamic(Integer semesterId, String name, String code, Pageable pageable);
+    int countAllBySemesterId(int semesterId);
 
 }
