@@ -26,4 +26,6 @@ public interface AccountRepository extends JpaRepository<Account, Integer> {
             "AND (:username = '' or s.username LIKE %:username% ) "
     )
     Page<Account> findByDynamic(int active, String email,Role role,String username, Pageable pageable);
+
+    Optional<Account> findByEmailAndPassword(String email,String password);
 }

@@ -1,14 +1,8 @@
 package EIAMS.services.excel;
 
 import EIAMS.dtos.ExportSchedulerDto;
-import EIAMS.entities.Room;
-import EIAMS.entities.Scheduler;
-import EIAMS.entities.Student;
-import EIAMS.entities.StudentSubject;
-import EIAMS.repositories.RoomRepository;
-import EIAMS.repositories.SchedulerRepository;
-import EIAMS.repositories.StudentRepository;
-import EIAMS.repositories.StudentSubjectRepository;
+import EIAMS.entities.*;
+import EIAMS.repositories.*;
 import org.apache.poi.util.IOUtils;
 import org.apache.poi.xssf.usermodel.*;
 import org.springframework.core.io.Resource;
@@ -63,7 +57,10 @@ public class ExcelExportDSExam {
     private List<Scheduler> schedulers = new ArrayList<>();
     private List<Room> rooms = new ArrayList<>();
 
+    private int semesterId;
     private final ResourceLoader resourceLoader;
+    @Autowired
+    private SubjectRepository subjectRepository;
 
     public ExcelExportDSExam(ResourceLoader resourceLoader) {
         this.resourceLoader = resourceLoader;
@@ -73,12 +70,12 @@ public class ExcelExportDSExam {
         Hashtable<Integer,Room> mapRoom = new Hashtable<>();
         Hashtable<Integer,StudentSubject> mapStudentSubject = new Hashtable<>();
         Hashtable<String,Student> mapStudent = new Hashtable<>();
-
+        Hashtable<String, Subject> mapSubject = new Hashtable<>();
         // Prepare data
-        prepareData(listSchedulerId, mapRoom, mapStudentSubject, mapStudent);
+        prepareData(listSchedulerId, mapRoom, mapStudentSubject, mapStudent,mapSubject);
 
         // Write data
-        Workbook workbook = writeExcel(response, mapRoom, mapStudentSubject, mapStudent);
+        Workbook workbook = writeExcel(response, mapRoom, mapStudentSubject, mapStudent, mapSubject);
 
         return workbook;
     }
@@ -86,7 +83,8 @@ public class ExcelExportDSExam {
     Workbook writeExcel(HttpServletResponse response,
                     Hashtable<Integer,Room> mapRoom,
                         Hashtable<Integer, StudentSubject> mapStudentSubject,
-                        Hashtable<String, Student> mapStudent) throws IOException {
+                        Hashtable<String, Student> mapStudent,
+                        Hashtable<String, Subject> mapSubject) throws IOException {
 
         // Create Workbook
         workbook = new XSSFWorkbook();
@@ -104,13 +102,22 @@ public class ExcelExportDSExam {
 
             String nameOfSheet = mapRoom.get(element.getRoomId()).getName() + " " + startTime + "-" + endTime;
 
+            //Môn học
+            //Find subject
+            String[] strArraySubject = element.getSubjectCode().split(",");
+            StringBuilder course = new StringBuilder();
+            course.append("Môn/Course  \n");
+            for (String s : strArraySubject) {
+                course.append(s+"-"+mapSubject.get(s.trim().toUpperCase()).getSubjectName()+"\n");
+            }
+
             // Create sheet
             sheet = workbook.createSheet(nameOfSheet);
 
             this.rowIndex = 0;
 
             // Write header
-            writeHeaderLine(mapRoom.get(element.getRoomId()).getName(), startTime + "-" + endTime, date);
+            writeHeaderLine(mapRoom.get(element.getRoomId()).getName(), startTime + " - " + endTime, date, course);
 
             //Find student subject id
             List<Integer> idStudentSubject = new ArrayList<>();
@@ -149,9 +156,9 @@ public class ExcelExportDSExam {
     }
 
     // Write header with format
-    void writeHeaderLine(String roomName, String time, String date) throws IOException {
+    void writeHeaderLine(String roomName, String time, String date, StringBuilder course) throws IOException {
 
-        headerTitle(roomName, time, date);
+        headerTitle(roomName, time, date, course);
 
         //Header table
         CellStyle styleHeader = workbook.createCellStyle();
@@ -195,7 +202,7 @@ public class ExcelExportDSExam {
         createCell(row, COLUMN_INDEX_SUBJECT, "Môn", styleHeader);
     }
 
-    void headerTitle(String roomName, String time, String date) throws IOException {
+    void headerTitle(String roomName, String time, String date, StringBuilder course) throws IOException {
         //Add image to cell
         Resource resource = resourceLoader.getResource("file:src/main/resources/fpt.png");
         InputStream inputStreamImage = resource.getInputStream();
@@ -268,11 +275,16 @@ public class ExcelExportDSExam {
         styleRow4.setVerticalAlignment(VerticalAlignment.CENTER);
         styleRow4.setWrapText(true);
 
+        //Get number line
+        String[] lines = course.toString().split("\n");
+        int numberOfLines = lines.length + 1;
+
         this.rowIndex ++;
         sheet.addMergedRegion(CellRangeAddress.valueOf("A4:H4"));
         row = sheet.createRow(this.rowIndex);
-        row.setHeightInPoints((float) (2 * sheet.getDefaultRowHeightInPoints()));
-        createCell(row, 0, "Môn/Course:  (KRL112; KRL112; KRL112)", styleRow4);
+        row.setHeightInPoints((float) (numberOfLines * sheet.getDefaultRowHeightInPoints()));
+//        createCell(row, 0, course.toString().trim(), styleRow4);
+        createCell(row, 0, course.toString().substring(0, course.toString().length() - 1), styleRow4);
 
         // Row 5
         CellStyle styleRow5 = workbook.createCellStyle();
@@ -407,7 +419,8 @@ public class ExcelExportDSExam {
 
     void prepareData(String listSchedulerId, Hashtable<Integer,Room> mapRoom,
                      Hashtable<Integer, StudentSubject> mapStudentSubject,
-                     Hashtable<String, Student> mapStudent
+                     Hashtable<String, Student> mapStudent,
+                     Hashtable<String, Subject> mapSubject
     ){
         String[] strArray = listSchedulerId.split(",");
 
@@ -416,6 +429,7 @@ public class ExcelExportDSExam {
         HashSet <Integer> idRooms = new HashSet<>();
         HashSet <Integer> idStudentSubject = new HashSet<>();
         HashSet <String> rollNumber = new HashSet<>();
+        HashSet <String> subjectCode = new HashSet<>();
 
         for (String s : strArray) {
             idSchedulers.add(Integer.parseInt(s.replaceAll("\"", "").trim()));
@@ -424,12 +438,19 @@ public class ExcelExportDSExam {
         this.schedulers = schedulerRepository.findAllById(idSchedulers);
         // Find room
         for (Scheduler element : schedulers){
+            this.semesterId = element.getSemesterId();
             idRooms.add(element.getRoomId());
 
             //Find student subject id
             String[] strArrayStudentSubject = element.getStudentId().split(",");
             for (String s : strArrayStudentSubject) {
                 idStudentSubject.add(Integer.parseInt(s));
+            }
+
+            //Find subject
+            String[] strArraySubject = element.getSubjectCode().split(",");
+            for (String s : strArraySubject) {
+                subjectCode.add(s.trim().toUpperCase());
             }
         }
 
@@ -451,5 +472,14 @@ public class ExcelExportDSExam {
         for (Student element : students){
             mapStudent.put(element.getRollNumber(), element);
         }
+
+        // MapSubject
+        List<Subject> subjectList = subjectRepository.findBySemesterIdAndSubjectCodeIn(this.semesterId, subjectCode);
+        for (Subject element: subjectList){
+            mapSubject.put(element.getSubjectCode(), element);
+        }
+
+        System.out.println(mapSubject.size());
+
     }
 }

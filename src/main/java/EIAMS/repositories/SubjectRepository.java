@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
+import java.util.Set;
 
 public interface SubjectRepository extends JpaRepository<Subject, Integer> {
     void deleteBySemesterId(int suid);
@@ -24,4 +25,5 @@ public interface SubjectRepository extends JpaRepository<Subject, Integer> {
     Page<Subject> findByDynamic(Integer semesterId, String name, String code, Pageable pageable);
     int countAllBySemesterId(int semesterId);
 
+    List<Subject> findBySemesterIdAndSubjectCodeIn(Integer semesterId, Set<String> subjectCodes);
 }
