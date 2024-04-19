@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Table(name = "scheduler", schema = "schedule")
+@Table(name = "Scheduler", schema = "schedule")
 public class Scheduler {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
