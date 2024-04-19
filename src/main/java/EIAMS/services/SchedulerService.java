@@ -945,7 +945,8 @@ public class SchedulerService implements SchedulerServiceInterface {
         }
         LocalDateTime endDateSearch = LocalDateTime.parse(endDate, formatter);
         LocalDateTime startDateSearch = LocalDateTime.parse(startDate, formatter);
-        result = schedulerRepository.findAllBySemesterIdAndStartDateAfterAndEndDateBeforeAndIdNot(semesterId, startDateSearch, endDateSearch, id);
+        Scheduler s = schedulerRepository.findById(id).get();
+        result = schedulerRepository.findAllBySemesterIdAndStartDateAfterAndEndDateBeforeAndIdNot(semesterId, startDateSearch, endDateSearch, id, s.getLecturerId());
 
         return result.stream()
                 .map(scheduler -> {

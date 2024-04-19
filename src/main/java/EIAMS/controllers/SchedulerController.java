@@ -235,7 +235,7 @@ public class SchedulerController {
 
     @PostMapping(path = "swap-lecturer")
     public ResponseEntity<ResponseObject> swapLecture(@RequestParam(name = "scheduler_id") Integer schedulerId,
-                                                        @RequestBody() Integer schedulerSwapId) {
+                                                      @RequestParam(name = "scheduler_swap_id") Integer schedulerSwapId) {
         try {
             schedulerServiceInterface.swapLecturer(schedulerId,schedulerSwapId);
             return ResponseEntity.status(HttpStatus.OK).body(
