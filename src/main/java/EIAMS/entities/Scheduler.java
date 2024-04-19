@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Table(name = "scheduler", schema = "schedule")
+@Table(name = "Scheduler", schema = "schedule")
 public class Scheduler {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -36,7 +36,7 @@ public class Scheduler {
     private String examCodeId;
 
     @Lob
-    @Column(name = "student_id")
+    @Column(name = "student_id", columnDefinition = "TEXT")
     private String studentId;
 
     @Column(name = "start_date")

@@ -12,7 +12,7 @@ import java.util.Date;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Table(name = "planexam", schema = "schedule")
+@Table(name = "PlanExam", schema = "schedule")
 public class PlanExam {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

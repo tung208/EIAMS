@@ -1,12 +1,8 @@
 package EIAMS.services;
 
 import EIAMS.constants.DBTableUtils;
-import EIAMS.dtos.LecturerToArrangeDto;
-import EIAMS.dtos.RoomScheduleDto;
-import EIAMS.dtos.SchedulerDetailDto;
-import EIAMS.dtos.StudentScheduleDto;
+import EIAMS.dtos.*;
 import EIAMS.entities.*;
-import EIAMS.helper.Pagination;
 import EIAMS.repositories.*;
 import EIAMS.services.interfaces.SchedulerServiceInterface;
 import lombok.RequiredArgsConstructor;
@@ -35,15 +31,13 @@ public class SchedulerService implements SchedulerServiceInterface {
     private final SemesterRepository semesterRepository;
     private final RoomRepository roomRepository;
     private final SubjectRepository subjectRepository;
-    private final SlotRepository slotRepository;
     private final SchedulerRepository schedulerRepository;
     private final PlanExamRepository planExamRepository;
     private final ExamCodeRepository examCodeRepository;
     private final LecturerRepository lecturerRepository;
-    private final Pagination pagination;
 
     @Override
-    public List<RoomScheduleDto> list(String search, String startDate, String endDate, String lecturerId) {
+    public List<RoomScheduleDto> list(Integer semesterId, String search, String startDate, String endDate, String lecturerId) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
         List<Object[]> results;
@@ -53,68 +47,101 @@ public class SchedulerService implements SchedulerServiceInterface {
             LocalDateTime endDateSearch = LocalDateTime.parse(endDate, formatter);
             LocalDateTime startDateSearch = LocalDateTime.parse(startDate, formatter);
             if (lecturerId == null || lecturerId.isBlank()) {
-                results = schedulerRepository.findAllRoomByDate(startDateSearch, endDateSearch);
+                results = schedulerRepository.findAllRoomByDate(startDateSearch, endDateSearch, semesterId);
             } else if (lecturerId.equals("-1")) {
-                results = schedulerRepository.findAllRoomByDateAndLecturerIdIsNull(startDateSearch, endDateSearch);
+                results = schedulerRepository.findAllRoomByDateAndLecturerIdIsNull(startDateSearch, endDateSearch, semesterId);
             } else {
-                results = schedulerRepository.findAllRoomByDateAndLecturerId(startDateSearch, endDateSearch, Integer.valueOf(lecturerId));
+                results = schedulerRepository.findAllRoomByDateAndLecturerId(startDateSearch, endDateSearch, Integer.valueOf(lecturerId), semesterId);
             }
         }
 
-//        // Group subject codes by time range and eliminate duplicates
-//        for (Object result : results) {
-//            if (result instanceof Object[]) {
-//                Object[] row = (Object[]) result;
-//                String startTime = row[1].toString();
-//                String endTime = row[2].toString();
-//                String timeRangeKey = startTime + "_" + endTime;
-//                String[] subjectCodes = row[0].toString().split(",");
-//                Set<String> uniqueSubjectCodes = subjectCodesByTimeRange.computeIfAbsent(timeRangeKey, k -> new HashSet<>());
-//                uniqueSubjectCodes.addAll(Arrays.asList(subjectCodes));
-//            }
-//        }
-//
-//        // Convert map entries to List<List<String>> for response
-//        List<List<String>> response = new ArrayList<>();
-//        for (Map.Entry<String, Set<String>> entry : subjectCodesByTimeRange.entrySet()) {
-//            List<String> entryList = new ArrayList<>();
-//            entryList.add(String.join(",", entry.getValue()));
-//            entryList.add(entry.getKey().split("_")[0]); // Start time
-//            entryList.add(entry.getKey().split("_")[1]); // End time
-//            response.add(entryList);
-//        }
         List<RoomScheduleDto> roomScheduleDtos = new ArrayList<>();
         for (Object[] o : results) {
             RoomScheduleDto dto = new RoomScheduleDto();
             int roomId = (Integer) o[0];
             Room room = roomRepository.findById(roomId).get();
-            dto.setId(roomId);
-            dto.setName(room.getName());
-            dto.setQuantityStudent(room.getQuantityStudent());
-            dto.setSemesterId(room.getSemesterId());
-            dto.setType(room.getType());
+            String roomName = room.getName();
+            if (search == null || search.isEmpty() || roomName.toLowerCase().contains(search.toLowerCase())) {
+                dto.setId(roomId);
+                dto.setName(room.getName());
+                dto.setQuantityStudent(room.getQuantityStudent());
+                dto.setSemesterId(room.getSemesterId());
+                dto.setType(room.getType());
 
-            Date d = (Date) o[1];
-            Timestamp timestamp = new Timestamp(d.getTime());
+                Date d = (Date) o[1];
+                Timestamp timestamp = new Timestamp(d.getTime());
 
-            // Convert Timestamp to LocalDateTime
-            LocalDateTime localDateTime = timestamp.toLocalDateTime();
-            dto.setDate(localDateTime);
-            roomScheduleDtos.add(dto);
+                // Convert Timestamp to LocalDateTime
+                LocalDateTime localDateTime = timestamp.toLocalDateTime();
+                dto.setDate(localDateTime);
+                roomScheduleDtos.add(dto);
+            }
         }
 
         return roomScheduleDtos;
     }
 
     @Override
-    public List<Scheduler> listSchedulerByRoom(int roomId, String startDate, String endDate, String lecturerId) {
+    public List<SchedulerDetailDto> listSchedulerByRoom(Integer semesterId, int roomId, String startDate, String endDate, String lecturerId) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         LocalDateTime endDateSearch = LocalDateTime.parse(endDate, formatter);
         LocalDateTime startDateSearch = LocalDateTime.parse(startDate, formatter);
         if (lecturerId.isBlank()) {
-            return schedulerRepository.findAllByRoomIdAndStartDateAfterAndEndDateBefore(roomId, startDateSearch, endDateSearch);
+            List<Scheduler> schedulers = schedulerRepository.findAllByRoomIdAndStartDateAfterAndEndDateBefore(roomId, startDateSearch, endDateSearch, semesterId);
+            return schedulers.stream()
+                    .map(scheduler -> {
+                        String lecturerEmail = null;
+                        String lecturerCode = null;
+                        if (scheduler.getLecturerId() != null && lecturerRepository.findById(scheduler.getLecturerId()).isPresent()) {
+                            Lecturer l = lecturerRepository.findById(scheduler.getLecturerId()).get();
+                            lecturerEmail = l.getEmail();
+                            lecturerCode = l.getCodeName();
+                        }
+                        return SchedulerDetailDto.builder()
+                                .id(scheduler.getId())
+                                .semesterId(scheduler.getSemesterId())
+                                .semesterName(semesterRepository.findById(scheduler.getSemesterId()).get().getName())
+                                .lecturerId(scheduler.getLecturerId())
+                                .lecturerEmail(lecturerEmail)
+                                .lecturerCodeName(lecturerCode)
+                                .startDate(scheduler.getStartDate())
+                                .endDate(scheduler.getEndDate())
+                                .examCodeId(scheduler.getExamCodeId())
+                                .roomId(scheduler.getRoomId())
+                                .subjectCode(scheduler.getSubjectCode())
+                                .roomName(roomRepository.findById(scheduler.getRoomId()).get().getName())
+                                .studentId(scheduler.getStudentId())
+                                .build();
+                    })
+                    .collect(Collectors.toList());
         } else {
-            return schedulerRepository.findAllByRoomIdAndStartDateAfterAndEndDateBeforeAndLecturerId(roomId, startDateSearch, endDateSearch, Integer.valueOf(lecturerId));
+            List<Scheduler> schedulers = schedulerRepository.findAllBySemesterIdAndRoomIdAndStartDateAfterAndEndDateBeforeAndLecturerId(semesterId, roomId, startDateSearch, endDateSearch, Integer.valueOf(lecturerId));
+            return schedulers.stream()
+                    .map(scheduler -> {
+                        String lecturerEmail = null;
+                        String lecturerCode = null;
+                        if (scheduler.getLecturerId() != null && lecturerRepository.findById(scheduler.getLecturerId()).isPresent()) {
+                            Lecturer l = lecturerRepository.findById(scheduler.getLecturerId()).get();
+                            lecturerEmail = l.getEmail();
+                            lecturerCode = l.getCodeName();
+                        }
+                        return SchedulerDetailDto.builder()
+                                .id(scheduler.getId())
+                                .semesterId(scheduler.getSemesterId())
+                                .semesterName(semesterRepository.findById(scheduler.getSemesterId()).get().getName())
+                                .lecturerId(scheduler.getLecturerId())
+                                .lecturerEmail(lecturerEmail)
+                                .lecturerCodeName(lecturerCode)
+                                .startDate(scheduler.getStartDate())
+                                .endDate(scheduler.getEndDate())
+                                .examCodeId(scheduler.getExamCodeId())
+                                .subjectCode(scheduler.getSubjectCode())
+                                .roomId(scheduler.getRoomId())
+                                .roomName(roomRepository.findById(scheduler.getRoomId()).get().getName())
+                                .studentId(scheduler.getStudentId())
+                                .build();
+                    })
+                    .collect(Collectors.toList());
         }
 
     }
@@ -153,8 +180,11 @@ public class SchedulerService implements SchedulerServiceInterface {
         return schedulers.stream()
                 .map(scheduler -> {
                     String lecturerEmail = null;
+                    String lecturerCode = null;
                     if (scheduler.getLecturerId() != null && lecturerRepository.findById(scheduler.getLecturerId()).isPresent()) {
-                        lecturerEmail = lecturerRepository.findById(scheduler.getLecturerId()).get().getEmail();
+                        Lecturer l = lecturerRepository.findById(scheduler.getLecturerId()).get();
+                        lecturerEmail = l.getEmail();
+                        lecturerCode = l.getCodeName();
                     }
                     return SchedulerDetailDto.builder()
                             .id(scheduler.getId())
@@ -162,9 +192,11 @@ public class SchedulerService implements SchedulerServiceInterface {
                             .semesterName(semesterRepository.findById(scheduler.getSemesterId()).get().getName())
                             .lecturerId(scheduler.getLecturerId())
                             .lecturerEmail(lecturerEmail)
+                            .lecturerCodeName(lecturerCode)
                             .startDate(scheduler.getStartDate())
                             .endDate(scheduler.getEndDate())
                             .examCodeId(scheduler.getExamCodeId())
+                            .subjectCode(scheduler.getSubjectCode())
                             .roomId(scheduler.getRoomId())
                             .roomName(roomRepository.findById(scheduler.getRoomId()).get().getName())
                             .studentId(scheduler.getStudentId())
@@ -179,8 +211,23 @@ public class SchedulerService implements SchedulerServiceInterface {
         int oldId = scheduler.getLecturerId();
         Scheduler schedulerSwap = schedulerRepository.findById(schedulerSwapId).get();
         int newId = schedulerSwap.getLecturerId();
+        Lecturer newLecturer = lecturerRepository.findById(newId).get();
         LocalDateTime newStartDate = schedulerSwap.getStartDate();
         LocalDateTime newEndDate = schedulerSwap.getEndDate();
+        String[] subjectCodes = scheduler.getSubjectCode().split(",");
+        String subjectMatch = Arrays.stream(subjectCodes)
+                .filter(SUBJECT_CODE_SPECIAL::contains)
+                .findFirst()
+                .orElse("");
+        String[] subjectCodesSwap = newLecturer.getExamSubject().split(",");
+        String subjectSwapMatch = Arrays.stream(subjectCodesSwap)
+                .filter(SUBJECT_CODE_SPECIAL::contains)
+                .findFirst()
+                .orElse("");
+
+        if (!Arrays.asList(subjectCodes).contains(subjectSwapMatch) || !Arrays.asList(subjectCodesSwap).contains(subjectMatch)) {
+            throw new Exception("This is room have special subject. Need to choose a teacher who can proctor this subject ");
+        }
         if (!schedulerRepository.findAllBySemesterIdAndStartDateAndEndDateAndIdNotAndLectureId(
                 scheduler.getSemesterId(), newStartDate, newEndDate, scheduler.getId(), scheduler.getLecturerId()).isEmpty()
                 || !schedulerRepository.findAllBySemesterIdAndStartDateAndEndDateAndIdNotAndLectureId(
@@ -217,6 +264,7 @@ public class SchedulerService implements SchedulerServiceInterface {
             schedulerDetailDto.setRoomId(s.getRoomId());
             schedulerDetailDto.setStudentId(s.getStudentId());
             schedulerDetailDto.setRoomName(room.getName());
+            schedulerDetailDto.setSubjectCode(s.getSubjectCode());
             schedulerDetailDto.setLecturerEmail(lecturerEmail);
             schedulerDetailDto.setExamCodeId(s.getExamCodeId());
             schedulerDetailDto.setSlotId(s.getSlotId());
@@ -258,6 +306,12 @@ public class SchedulerService implements SchedulerServiceInterface {
     @Override
     @Transactional
     public void arrangeStudent(int semesterId) throws Exception {
+        if (semesterRepository.count() == 0 || roomRepository.countAllBySemesterId(semesterId) == 0 ||
+                planExamRepository.countAllBySemesterId(semesterId) == 0 ||
+                studentSubjectRepository.countAllBySemesterId(semesterId) == 0 ||
+                subjectRepository.countAllBySemesterId(semesterId) == 0) {
+            throw new Exception("Not have enough data to arrange students");
+        }
         deleteBySemesterId(semesterId);
         List<PlanExam> planExamList = planExamRepository.findAllBySemesterId(semesterId);
         List<Room> labs = roomRepository.findAllBySemesterIdAndQuantityStudentGreaterThanAndNameContainingIgnoreCase(semesterId, 1, "Lab");
@@ -370,11 +424,11 @@ public class SchedulerService implements SchedulerServiceInterface {
                             "We have only " + availableCommonRooms.size() + " normal rooms." +
                             "We need at least " + numberOfRoomCommonNeed + " rooms.");
                 }
-                if (numberOfLabRoomNeed > availableLabRooms.size()) {
-                    throw new Exception("Not enough lab room for " + planExam.getSubjectCode() + " with " + numberOfStudentBlackList + " student." +
-                            "We have only " + availableLabRooms.size() + " lab rooms." +
-                            "We need at least " + numberOfLabRoomNeed + " lab rooms");
-                }
+//                if (numberOfLabRoomNeed > availableLabRooms.size()) {
+//                    throw new Exception("Not enough lab room for " + planExam.getSubjectCode() + " with " + numberOfStudentBlackList + " student." +
+//                            "We have only " + availableLabRooms.size() + " lab rooms." +
+//                            "We need at least " + numberOfLabRoomNeed + " lab rooms");
+//                }
                 // Initialize a map to hold the number of students in each room
                 if (numberOfLabRoomNeed > 0) {
                     Map<Integer, Integer> studentsInLab = new HashMap<>();
@@ -517,11 +571,11 @@ public class SchedulerService implements SchedulerServiceInterface {
                         "We have only " + availableCommonRooms.size() + " normal rooms." +
                         "We need at least " + numberOfRoomCommonNeed + " rooms.");
             }
-            if (numberOfLabRoomNeed > availableLabRooms.size()) {
-                throw new Exception("Not enough lab room for " + planExam.getSubjectCode() + " with " + numberOfStudentBlackList + " student." +
-                        "We have only " + availableLabRooms.size() + " lab rooms." +
-                        "We need at least " + numberOfLabRoomNeed + " lab rooms");
-            }
+//            if (numberOfLabRoomNeed > availableLabRooms.size()) {
+//                throw new Exception("Not enough lab room for " + planExam.getSubjectCode() + " with " + numberOfStudentBlackList + " student." +
+//                        "We have only " + availableLabRooms.size() + " lab rooms." +
+//                        "We need at least " + numberOfLabRoomNeed + " lab rooms");
+//            }
 
             if (numberOfLabRoomNeed > 0) {
                 Map<Integer, Integer> studentsInLab = new HashMap<>();
@@ -781,10 +835,10 @@ public class SchedulerService implements SchedulerServiceInterface {
     public void arrangeLecturer(int semesterId) throws Exception {
         schedulerRepository.resetLecturerId(semesterId);
         int numberOfScheduler = (int) schedulerRepository.countAllBySemesterId(semesterId);
-        if (numberOfScheduler == 0) {
-            throw new Exception("We don't have any scheduler to arrange lecturer");
-        }
         int numberOfLecturer = lecturerRepository.countAllBySemesterId(semesterId);
+        if (numberOfScheduler == 0 || numberOfLecturer == 0) {
+            throw new Exception("We don't have any scheduler or teacher to arrange lecturer");
+        }
         int numberSlotPerLecturer = numberOfScheduler / numberOfLecturer;
         AtomicInteger remainderSlots = new AtomicInteger(numberOfScheduler % numberOfLecturer);
         List<Scheduler> schedulersToSave = new ArrayList<>();
@@ -847,15 +901,76 @@ public class SchedulerService implements SchedulerServiceInterface {
     @Override
     public void updateLecturer(int schedulerId, int lecturerId) throws Exception {
         Scheduler scheduler = schedulerRepository.findById(schedulerId).get();
+        String[] subjectCodes = scheduler.getSubjectCode().split(",");
+        String subjectMatch = Arrays.stream(subjectCodes)
+                .filter(SUBJECT_CODE_SPECIAL::contains)
+                .findFirst()
+                .orElse("");
         LocalDateTime startDate = scheduler.getStartDate();
         LocalDateTime endDate = scheduler.getEndDate();
+        if (Arrays.stream(lecturerRepository.findById(lecturerId).get().getExamSubject().split(",")).noneMatch(subject -> subject.contains(subjectMatch))) {
+            throw new Exception("This is room have special subject (" + subjectMatch + "). Need to choose a teacher who can proctor this subject ");
+        }
         if (!schedulerRepository.findAllBySemesterIdAndStartDateAndEndDateAndLectureId(
                 scheduler.getSemesterId(), startDate, endDate, scheduler.getId(), lecturerId).isEmpty()) {
-            throw new Exception("It is not possible to change teachers because this teacher has an exam scheduled conflict time");
+            throw new Exception("It is not possible to change teachers because that teacher has conflict time");
         }
         if (scheduler.getLecturerId() == null || lecturerId != scheduler.getLecturerId()) {
             scheduler.setLecturerId(lecturerId);
             schedulerRepository.save(scheduler);
         }
+    }
+
+    @Override
+    public List<Integer> getIdsByTimeRange(Integer semesterId, String startDate, String endDate) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        List<Integer> result;
+        if (startDate.isBlank() || endDate.isBlank()) {
+            throw new InvalidParameterException("Start date and end date cannot be empty");
+        } else {
+            LocalDateTime endDateSearch = LocalDateTime.parse(endDate, formatter);
+            LocalDateTime startDateSearch = LocalDateTime.parse(startDate, formatter);
+            result = schedulerRepository.findAllIdBySemesterIdAndStartDateAfterAndEndDateBefore(semesterId, startDateSearch, endDateSearch);
+        }
+
+        return result;
+    }
+
+    @Override
+    public List<ScheduleToSwapDto> getListByTimeRange(Integer id, Integer semesterId, String startDate, String endDate) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        List<Scheduler> result;
+        if (startDate.isBlank() || endDate.isBlank()) {
+            throw new InvalidParameterException("Start date and end date cannot be empty");
+        }
+        LocalDateTime endDateSearch = LocalDateTime.parse(endDate, formatter);
+        LocalDateTime startDateSearch = LocalDateTime.parse(startDate, formatter);
+        Scheduler s = schedulerRepository.findById(id).get();
+        result = schedulerRepository.findAllBySemesterIdAndStartDateAfterAndEndDateBeforeAndIdNot(semesterId, startDateSearch, endDateSearch, id, s.getLecturerId());
+
+        return result.stream()
+                .map(scheduler -> {
+                    String lecturerEmail = null;
+                    String lecturerCode = null;
+                    if (scheduler.getLecturerId() != null && lecturerRepository.findById(scheduler.getLecturerId()).isPresent()) {
+                        Lecturer l = lecturerRepository.findById(scheduler.getLecturerId()).get();
+                        lecturerEmail = l.getEmail();
+                        lecturerCode = l.getCodeName();
+                    }
+                    return ScheduleToSwapDto.builder()
+                            .id(scheduler.getId())
+                            .semesterId(scheduler.getSemesterId())
+                            .semesterName(semesterRepository.findById(scheduler.getSemesterId()).get().getName())
+                            .lecturerId(scheduler.getLecturerId())
+                            .lecturerEmail(lecturerEmail)
+                            .lecturerCodeName(lecturerCode)
+                            .startDate(scheduler.getStartDate())
+                            .endDate(scheduler.getEndDate())
+                            .roomId(scheduler.getRoomId())
+                            .roomName(roomRepository.findById(scheduler.getRoomId()).get().getName())
+                            .subjectCode(scheduler.getSubjectCode())
+                            .build();
+                })
+                .collect(Collectors.toList());
     }
 }

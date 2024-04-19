@@ -1,6 +1,7 @@
 package EIAMS.controllers;
 
 import EIAMS.dtos.RoomScheduleDto;
+import EIAMS.dtos.ScheduleToSwapDto;
 import EIAMS.dtos.SchedulerDetailDto;
 import EIAMS.dtos.StudentScheduleDto;
 import EIAMS.entities.Room;
@@ -41,12 +42,13 @@ public class SchedulerController {
 
     @GetMapping(path = "/index")
     public ResponseEntity<ResponseObject> list(
+            @RequestParam(name = "semester_id") Integer semesterId,
             @RequestParam(name = "search", defaultValue = "") String search,
             @RequestParam(name = "start_date", defaultValue = "") String start_date,
             @RequestParam(name = "end_date", defaultValue = "") String end_date,
             @RequestParam(name = "lecturer_id",required = false, defaultValue = "") String lecturer_id) {
         try {
-            List<RoomScheduleDto> list = schedulerServiceInterface.list(search, start_date, end_date, lecturer_id);
+            List<RoomScheduleDto> list = schedulerServiceInterface.list(semesterId, search, start_date, end_date, lecturer_id);
             if (list.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
                         new ResponseObject("NOT FOUND", "", null));
@@ -62,12 +64,54 @@ public class SchedulerController {
 
     @GetMapping(path = "/list-by-room")
     public ResponseEntity<ResponseObject> listByRoom(
+            @RequestParam(name = "semester_id") Integer semesterId,
             @RequestParam(name = "room_id") Integer roomId,
             @RequestParam(name = "lecturer_id", defaultValue = "") String lecturerId,
             @RequestParam(name = "start_date", defaultValue = "") String start_date,
             @RequestParam(name = "end_date", defaultValue = "") String end_date) {
         try {
-            List<Scheduler> list = schedulerServiceInterface.listSchedulerByRoom(roomId, start_date, end_date, lecturerId);
+            List<SchedulerDetailDto> list = schedulerServiceInterface.listSchedulerByRoom(semesterId, roomId, start_date, end_date, lecturerId);
+            if (list.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                        new ResponseObject("NOT FOUND", "", null));
+            } else {
+                return ResponseEntity.status(HttpStatus.OK).body(
+                        new ResponseObject("OK", "", list));
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    new ResponseObject("Fail", e.getMessage(), null));
+        }
+    }
+
+    @GetMapping(path = "/ids-by-time-range")
+    public ResponseEntity<ResponseObject> idsByTimeRange(
+            @RequestParam(name = "semester_id") Integer semesterId,
+            @RequestParam(name = "start_date", defaultValue = "") String start_date,
+            @RequestParam(name = "end_date", defaultValue = "") String end_date) {
+        try {
+            List<Integer> list = schedulerServiceInterface.getIdsByTimeRange(semesterId, start_date, end_date);
+            if (list.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                        new ResponseObject("NOT FOUND", "", null));
+            } else {
+                return ResponseEntity.status(HttpStatus.OK).body(
+                        new ResponseObject("OK", "", list));
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    new ResponseObject("Fail", e.getMessage(), null));
+        }
+    }
+
+    @GetMapping(path = "/list-by-time-range")
+    public ResponseEntity<ResponseObject> listByTimeRange(
+            @RequestParam(name = "semester_id") Integer semesterId,
+            @RequestParam(name = "scheduler_id") Integer schedulerId,
+            @RequestParam(name = "start_date", defaultValue = "") String start_date,
+            @RequestParam(name = "end_date", defaultValue = "") String end_date) {
+        try {
+            List<ScheduleToSwapDto> list = schedulerServiceInterface.getListByTimeRange(schedulerId, semesterId, start_date, end_date);
             if (list.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
                         new ResponseObject("NOT FOUND", "", null));
@@ -100,7 +144,7 @@ public class SchedulerController {
     }
 
     @GetMapping(path = "/arrange")
-    public ResponseEntity<ResponseObject> arrangeStudent(@RequestParam(name = "semester_id") Integer semesterId) throws Exception {
+    public ResponseEntity<ResponseObject> arrangeStudent(@RequestParam(name = "semester_id") Integer semesterId) {
         try {
             schedulerServiceInterface.arrangeStudent(semesterId);
             return ResponseEntity.status(HttpStatus.OK).body(
@@ -191,7 +235,7 @@ public class SchedulerController {
 
     @PostMapping(path = "swap-lecturer")
     public ResponseEntity<ResponseObject> swapLecture(@RequestParam(name = "scheduler_id") Integer schedulerId,
-                                                        @RequestBody() Integer schedulerSwapId) {
+                                                      @RequestParam(name = "scheduler_swap_id") Integer schedulerSwapId) {
         try {
             schedulerServiceInterface.swapLecturer(schedulerId,schedulerSwapId);
             return ResponseEntity.status(HttpStatus.OK).body(

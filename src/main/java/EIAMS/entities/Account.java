@@ -13,7 +13,7 @@ import java.util.Collection;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Table(name = "account", schema = "schedule")
+@Table(name = "Account", schema = "schedule")
 public class Account implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
