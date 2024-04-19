@@ -1,12 +1,10 @@
 package EIAMS.services;
 
-import EIAMS.dtos.AuthenticationRequest;
-import EIAMS.dtos.AuthenticationResponse;
-import EIAMS.dtos.RegisterRequest;
-import EIAMS.dtos.TokenType;
+import EIAMS.dtos.*;
 import EIAMS.entities.Account;
 import EIAMS.entities.Token;
 import EIAMS.entities.responeObject.ResponseObject;
+import EIAMS.exception.EntityNotFoundException;
 import EIAMS.repositories.AccountRepository;
 import EIAMS.repositories.TokenRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -21,10 +19,13 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.io.IOException;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -53,15 +54,8 @@ public class AuthenticationService {
     }
 
     public ResponseObject authenticate(AuthenticationRequest request) {
-//        System.out.println(request.getEmail()+ " " + request.getPassword());
         Authentication authentication = new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword());
         try {
-//            authenticationManager.authenticate(
-//                    new UsernamePasswordAuthenticationToken(
-//                            request.getEmail(),
-//                            request.getPassword()
-//                    )
-//            );
             Authentication authenticatedUser = authenticationManager.authenticate(authentication);
         } catch (AuthenticationException e){
             return ResponseObject.builder()
@@ -133,5 +127,26 @@ public class AuthenticationService {
                 new ObjectMapper().writeValue(response.getOutputStream(), authResponse);
             }
         }
+    }
+
+    public void changePass(ChangePassDto changePassDto) throws EntityNotFoundException {
+        // Lấy thông tin xác thực hiện tại
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication.isAuthenticated() && authentication.getPrincipal() instanceof UserDetails) {
+            // Lấy thông tin người dùng từ UserDetails
+            Account accountDetails = (Account) authentication.getPrincipal();
+            // Lấy username của người dùng
+            String username = accountDetails.getUsername();
+
+                Optional<Account> accountOptional = accountRepository.findByEmail(username);
+                if(accountOptional.isPresent()){
+                    // Kiểm tra xem old pass có trùng với pass hiện tại không
+                    if (passwordEncoder.matches(changePassDto.getOldPassword(), accountOptional.get().getPassword())) {
+                        Account account = accountOptional.get();
+                        account.setPassword(passwordEncoder.encode(changePassDto.getNewPassword()));
+                        accountRepository.save(account);
+                    } else throw new EntityNotFoundException("OldPassword incorect");
+                } else throw new EntityNotFoundException("OldPassword incorect in account");
+        } else throw new EntityNotFoundException("Not logged");
     }
 }
