@@ -26,4 +26,8 @@ public interface SubjectRepository extends JpaRepository<Subject, Integer> {
     int countAllBySemesterId(int semesterId);
 
     List<Subject> findBySemesterIdAndSubjectCodeIn(Integer semesterId, Set<String> subjectCodes);
+    @Query("select s from Subject s where s.semesterId = ?1 and s.dontMix = 1")
+    List<Subject> findBySemesterIdAndDontMix(Integer semesterId);
+    @Query("select s from Subject s where s.semesterId = ?1 and s.dontMix is null")
+    List<Subject> findBySemesterIdAndCanMix(Integer semesterId);
 }

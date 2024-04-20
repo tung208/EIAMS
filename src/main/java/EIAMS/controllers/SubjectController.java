@@ -1,7 +1,6 @@
 package EIAMS.controllers;
 
 import EIAMS.dtos.SubjectDto;
-import EIAMS.entities.Semester;
 import EIAMS.entities.Subject;
 import EIAMS.entities.responeObject.PageResponse;
 import EIAMS.entities.responeObject.ResponseObject;
@@ -18,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -31,23 +31,24 @@ public class SubjectController {
 
     @PostMapping("/import")
     public ResponseEntity<ResponseObject> importSubject(@RequestParam("file") MultipartFile file, @RequestParam("semester_id") int semesterId) throws IOException, EntityNotFoundException {
-        subjectService.uploadSubject(file,semesterId);
-        statusService.update(semesterId, 2 ,1);
+        subjectService.uploadSubject(file, semesterId);
+        statusService.update(semesterId, 2, 1);
         return ResponseEntity.status(HttpStatus.OK).body(
                 new ResponseObject("OK", "Import Success", ""));
     }
 
     @PostMapping("/import-nolab")
     public ResponseEntity<ResponseObject> importSubjectNoLab(@RequestParam("file") MultipartFile file, @RequestParam("semester_id") int semesterId) throws IOException, EntityNotFoundException {
-        subjectService.uploadSubjectNoLab(file,semesterId);
-        statusService.update(semesterId, 2 ,3);
+        subjectService.uploadSubjectNoLab(file, semesterId);
+        statusService.update(semesterId, 2, 3);
         return ResponseEntity.status(HttpStatus.OK).body(
                 new ResponseObject("OK", "Import Success", ""));
     }
+
     @PostMapping("/import-dontmix")
     public ResponseEntity<ResponseObject> importSubjectDontMix(@RequestParam("file") MultipartFile file, @RequestParam("semester_id") int semesterId) throws IOException, EntityNotFoundException {
-        subjectService.uploadSubjectDontMix(file,semesterId);
-        statusService.update(semesterId, 2 ,2);
+        subjectService.uploadSubjectDontMix(file, semesterId);
+        statusService.update(semesterId, 2, 2);
         return ResponseEntity.status(HttpStatus.OK).body(
                 new ResponseObject("OK", "Import Success", ""));
     }
@@ -59,9 +60,17 @@ public class SubjectController {
                                              @RequestParam(defaultValue = "") Integer semesterId,
                                              @RequestParam(defaultValue = "") String code,
                                              @RequestParam(defaultValue = "") String name
-    ){
-        Page<Subject> page =  subjectService.search(pageNo, pageSize, semesterId, code, name);
-        return new PageResponse<>(page.getNumber() + 1, page.getTotalPages(), page.getSize(), page.getTotalElements(),page.getContent());
+    ) {
+        Page<Subject> page = subjectService.search(pageNo, pageSize, semesterId, code, name);
+        return new PageResponse<>(page.getNumber() + 1, page.getTotalPages(), page.getSize(), page.getTotalElements(), page.getContent());
+    }
+
+    @GetMapping()
+    public ResponseEntity<ResponseObject> getSubjectDontMix(@RequestParam(name = "semester_id") Integer semesterId,
+                                                   @RequestParam(name = "dont_mix", defaultValue = "") String dontMix) {
+        List<Subject> list = subjectService.getSubjectDontMix(semesterId, dontMix);
+        return ResponseEntity.status(HttpStatus.OK).body(
+                new ResponseObject("OK", "found list", list));
     }
 
     @PutMapping("/{id}")
@@ -72,14 +81,14 @@ public class SubjectController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<ResponseObject> delete(@PathVariable int id){
+    public ResponseEntity<ResponseObject> delete(@PathVariable int id) {
         subjectService.delete(id);
         return ResponseEntity.status(HttpStatus.OK).body(
                 new ResponseObject("OK", "Delele Success", ""));
     }
 
     @PostMapping()
-    public ResponseEntity<ResponseObject> create(@RequestBody @Valid SubjectDto subjectDto){
+    public ResponseEntity<ResponseObject> create(@RequestBody @Valid SubjectDto subjectDto) {
         Subject subject = subjectService.create(subjectDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(
                 new ResponseObject("OK", "Create Success", ""));
