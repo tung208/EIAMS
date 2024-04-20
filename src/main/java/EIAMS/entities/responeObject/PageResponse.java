@@ -13,5 +13,6 @@ public class PageResponse <T>{
     private int currentPage;
     private int totalPages;
     private int size;
+    private long totalElement;
     private List<T> dataList;
 }

@@ -46,7 +46,7 @@ public class LecturerController {
                                               @RequestParam(defaultValue = "0") int totalSlot
     ){
         Page<Lecturer> page =  lecturerService.search(pageNo, pageSize, semesterId, email, examSubject, totalSlot);
-        return new PageResponse<>(page.getNumber() + 1, page.getTotalPages(), page.getSize(), page.getContent());
+        return new PageResponse<>(page.getNumber() + 1, page.getTotalPages(), page.getSize(), page.getTotalElements(),page.getContent());
     }
 
     @PostMapping("")
