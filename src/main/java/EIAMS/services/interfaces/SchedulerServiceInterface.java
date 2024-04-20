@@ -5,6 +5,7 @@ import EIAMS.dtos.ScheduleToSwapDto;
 import EIAMS.dtos.SchedulerDetailDto;
 import EIAMS.dtos.StudentScheduleDto;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface SchedulerServiceInterface {
@@ -20,5 +21,6 @@ public interface SchedulerServiceInterface {
     SchedulerDetailDto get(int schedulerId);
     List<Integer> getIdsByTimeRange(Integer semesterId, String startDate, String endDate);
     List<ScheduleToSwapDto> getListByTimeRange(Integer id, Integer semesterId, String startDate, String endDate);
-
+    void decreaseNumberOfRoomsPerSlot(Integer semesterId, String startDate, String endDate,String type, Integer numberDecrease, String subject, String isLab) throws Exception;
+    void increaseNumberOfRoomsPerSlot(Integer semesterId, String startDate, String endDate, String type, Integer numberDecrease, String subject) throws Exception;
 }

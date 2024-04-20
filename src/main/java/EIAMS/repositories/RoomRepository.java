@@ -28,4 +28,7 @@ public interface RoomRepository extends JpaRepository<Room, Integer> {
 
     // Xóa các bản ghi dựa trên semesterId
     void deleteBySemesterId(Integer semesterId);
+
+    @Query("select r.id from Room r where r.semesterId = ?1 and r.id not in ?2")
+    List<Integer> findAllBySemesterIdAndIdNotIn(Integer semesterId, Collection<Integer> id);
 }
