@@ -40,7 +40,7 @@ public class AccountController {
     ) {
         Role roleEnum = Role.fromString(role.toUpperCase());
         Page<Account> page = accountService.search(pageNo, pageSize, active, email, roleEnum, username );
-        return new PageResponse<>(page.getNumber() + 1, page.getTotalPages(), page.getSize(), page.getContent());
+        return new PageResponse<>(page.getNumber() + 1, page.getTotalPages(), page.getSize(),page.getTotalElements() ,page.getContent());
     }
 
     @PutMapping()

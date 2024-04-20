@@ -61,7 +61,7 @@ public class SubjectController {
                                              @RequestParam(defaultValue = "") String name
     ){
         Page<Subject> page =  subjectService.search(pageNo, pageSize, semesterId, code, name);
-        return new PageResponse<>(page.getNumber() + 1, page.getTotalPages(), page.getSize(), page.getContent());
+        return new PageResponse<>(page.getNumber() + 1, page.getTotalPages(), page.getSize(), page.getTotalElements(),page.getContent());
     }
 
     @PutMapping("/{id}")

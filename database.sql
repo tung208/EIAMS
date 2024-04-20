@@ -130,6 +130,16 @@ CREATE TABLE `Status` (
   `student` int
 );
 
+CREATE TABLE `ActionLog` (
+  `id` int(11) PRIMARY KEY AUTO_INCREMENT,
+  `semester_id` int,
+  `user_name` varchar(64),
+  `log_table` varchar(128),
+  `log_action` varchar(128),
+  `log_content` longtext,
+  `since` datetime
+);
+
 
 CREATE INDEX semester_index ON Subject(semester_id);
 CREATE INDEX semester_index1 ON StudentSubject(semester_id);

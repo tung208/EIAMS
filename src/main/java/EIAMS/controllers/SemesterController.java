@@ -58,7 +58,7 @@ public class SemesterController {
                                               @RequestParam(defaultValue = "") String code
                                       ){
         Page<Semester> page =  semesterService.search(pageNo, pageSize, name, code);
-        return new PageResponse<>(page.getNumber() + 1, page.getTotalPages(), page.getSize(), page.getContent());
+        return new PageResponse<>(page.getNumber() + 1, page.getTotalPages(), page.getSize(), page.getTotalElements() ,page.getContent());
     }
 
     @PostMapping()

@@ -50,7 +50,7 @@ public class PlanExamController {
                                               @RequestParam(defaultValue = "") String subjectCode
     ){
         Page<PlanExam> page =  planExamService.search(pageNo, pageSize, semesterId, subjectCode);
-        return new PageResponse<>(page.getNumber() + 1, page.getTotalPages(), page.getSize(), page.getContent());
+        return new PageResponse<>(page.getNumber() + 1, page.getTotalPages(), page.getSize(), page.getTotalElements(),page.getContent());
     }
 
     @PostMapping

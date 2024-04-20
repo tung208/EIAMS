@@ -44,7 +44,7 @@ public class StudentController {
             @RequestParam(defaultValue = "") String cmtnd
            ) {
         Page<Student> page = studentService.search( pageNo, pageSize, rollNumber, memberCode, fullName, cmtnd );
-        return new PageResponse<>(page.getNumber() + 1, page.getTotalPages(), page.getSize(), page.getContent());
+        return new PageResponse<>(page.getNumber() + 1, page.getTotalPages(), page.getSize(), page.getTotalElements(),page.getContent());
     }
 
     @PostMapping("/import")
@@ -93,7 +93,7 @@ public class StudentController {
             @RequestParam(defaultValue = "10") Integer blackList
     ) {
         Page<StudentSubject> page = studentService.searchStudentSubject(pageNo, pageSize,semesterId, rollNumber, subjectCode, groupName, blackList);
-        return new PageResponse<>(page.getNumber() + 1, page.getTotalPages(), page.getSize(), page.getContent());
+        return new PageResponse<>(page.getNumber() + 1, page.getTotalPages(), page.getSize(), page.getTotalElements(),page.getContent());
     }
 
     @PutMapping("/subject/{id}")

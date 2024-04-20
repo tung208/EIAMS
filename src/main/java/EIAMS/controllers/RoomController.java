@@ -46,7 +46,7 @@ public class RoomController {
                                           @RequestParam(defaultValue = "") String name
     ){
         Page<Room> page =  roomService.search(pageNo, pageSize, semesterId, name);
-        return new PageResponse<>(page.getNumber() + 1, page.getTotalPages(), page.getSize(), page.getContent());
+        return new PageResponse<>(page.getNumber() + 1, page.getTotalPages(), page.getSize(), page.getTotalElements(),page.getContent());
     }
 
     @PostMapping()
