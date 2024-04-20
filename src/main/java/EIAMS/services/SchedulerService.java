@@ -1033,6 +1033,11 @@ public class SchedulerService implements SchedulerServiceInterface {
                 }
                 String studentIdToAdd = studentIterator.next();
                 String updatedStudentId = scheduler.getStudentId() + "," + studentIdToAdd;
+                StudentSubject studentSubject = studentSubjectRepository.findById(Integer.valueOf(studentIdToAdd)).get();
+                if(!scheduler.getSubjectCode().contains(studentSubject.getSubjectCode())) {
+                    String subjectCodes = studentSubject.getSubjectCode() + "," + studentSubject.getSubjectCode();
+                    scheduler.setSubjectCode(subjectCodes);
+                }
                 scheduler.setStudentId(updatedStudentId);
                 schedulerRepository.save(scheduler);
             }
