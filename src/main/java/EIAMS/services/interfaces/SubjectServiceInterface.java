@@ -16,7 +16,7 @@ public interface SubjectServiceInterface {
     Page<Subject> search(Integer page, Integer limit, Integer semesterId , String name, String code);
 
     Subject update(int id, SubjectDto subjectDto) throws EntityNotFoundException;
-    void delete(int id);
+    Subject delete(int id) throws EntityNotFoundException;
 
     Subject create(SubjectDto subjectDto);
 

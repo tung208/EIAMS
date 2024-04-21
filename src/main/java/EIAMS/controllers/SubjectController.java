@@ -73,7 +73,7 @@ public class SubjectController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<ResponseObject> delete(@PathVariable int id){
+    public ResponseEntity<ResponseObject> delete(@PathVariable int id) throws EntityNotFoundException {
         subjectService.delete(id);
         return ResponseEntity.status(HttpStatus.OK).body(
                 new ResponseObject("OK", "Delele Success", ""));

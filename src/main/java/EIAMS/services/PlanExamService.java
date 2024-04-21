@@ -143,8 +143,13 @@ public class PlanExamService implements PlanExamServiceInterface {
     }
 
     @Override
-    public void delete(int id) {
+    public PlanExam delete(int id) throws EntityNotFoundException {
+        Optional<PlanExam> planExam = planExamRepository.findById(id);
+        if(!planExam.isPresent()){
+            throw new EntityNotFoundException("PlanExam Not Found");
+        }
         planExamRepository.deleteById(id);
+        return planExam.get();
     }
 
     @Override

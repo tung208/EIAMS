@@ -17,5 +17,5 @@ public interface LecturerServiceInterface {
     Lecturer create(LecturerDto lecturerDto) throws EntityExistException;
 
     Lecturer update(int id, LecturerDto lecturerDto) throws EntityNotFoundException, EntityExistException;
-    void delete(int id);
+    Lecturer delete(int id) throws EntityExistException;
 }

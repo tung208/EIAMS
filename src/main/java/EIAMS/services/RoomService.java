@@ -115,8 +115,13 @@ public class RoomService implements RoomServiceInterface {
     }
 
     @Override
-    public void delete(int id) {
+    public Room delete(int id) throws EntityNotFoundException {
+        Optional<Room> room = roomRepository.findById(id);
+        if(!room.isPresent()){
+            throw new EntityNotFoundException("Room Not Found");
+        }
         roomRepository.deleteById(id);
+        return room.get();
     }
 
     @Override

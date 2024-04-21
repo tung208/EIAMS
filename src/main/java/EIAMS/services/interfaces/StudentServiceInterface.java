@@ -19,7 +19,7 @@ public interface StudentServiceInterface {
      Student create(StudentDto student);
      Student update(StudentDto studentDto);
      Optional<Student> getStudentDetail(int id);
-     void delete(int id);
+     Student delete(int id) throws EntityNotFoundException;
 
      void saveCustomersToDatabase(MultipartFile file);
      Integer uploadStudents(MultipartFile file, int semester_id) throws IOException, InterruptedException;
@@ -34,7 +34,7 @@ public interface StudentServiceInterface {
 
      StudentSubject updateStudentSubject(int id, StudentSubjectDto studentSubjectDto);
 
-     void deleteStudentSubject(int id);
+     StudentSubject deleteStudentSubject(int id) throws EntityNotFoundException;
 
      StudentSubject createStudentSubject(StudentSubjectDto studentSubjectDto) throws EntityNotFoundException;
 }

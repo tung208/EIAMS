@@ -79,7 +79,7 @@ public class StudentController {
     }
 
     @DeleteMapping("/{id}")
-    public void deleteStudent(@PathVariable int id) {
+    public void deleteStudent(@PathVariable int id) throws EntityNotFoundException {
         studentService.delete(id);
     }
 
@@ -106,7 +106,7 @@ public class StudentController {
     }
 
     @DeleteMapping("/subject/{id}")
-    public ResponseEntity<ResponseObject> deleteStudentSubject(@PathVariable int id) {
+    public ResponseEntity<ResponseObject> deleteStudentSubject(@PathVariable int id) throws EntityNotFoundException {
         studentService.deleteStudentSubject(id);
         return ResponseEntity.status(HttpStatus.OK).body(
                 new ResponseObject("OK", "Delete Success", ""));

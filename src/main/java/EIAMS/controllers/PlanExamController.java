@@ -72,7 +72,7 @@ public class PlanExamController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<ResponseObject> deletePlanExam(@PathVariable int id){
+    public ResponseEntity<ResponseObject> deletePlanExam(@PathVariable int id) throws EntityNotFoundException {
         planExamService.delete((id));
         return ResponseEntity.status(HttpStatus.OK).body(
                 new ResponseObject("OK",

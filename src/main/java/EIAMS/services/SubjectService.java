@@ -151,8 +151,13 @@ public class SubjectService implements SubjectServiceInterface {
     }
 
     @Override
-    public void delete(int id){
+    public Subject delete(int id) throws EntityNotFoundException {
+        Optional<Subject> subject = subjectRepository.findById(id);
+        if (!subject.isPresent()){
+            throw new EntityNotFoundException("Subject not found");
+        }
         subjectRepository.deleteById(id);
+        return subject.get();
     }
 
     @Override
