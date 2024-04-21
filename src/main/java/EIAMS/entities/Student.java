@@ -32,4 +32,13 @@ public class Student {
     @Column(name = "CMTND", length = 64)
     private String cmtnd;
 
+    @Override
+    public String toString(){
+        return "Student{" +
+                ", rollNumber='" + rollNumber + '\'' +
+                ", memberCode='" + memberCode + '\'' +
+                ", fullName='" + fullName + '\'' +
+                ", cmtnd='" + cmtnd + '\'' +
+                '}';
+    }
 }

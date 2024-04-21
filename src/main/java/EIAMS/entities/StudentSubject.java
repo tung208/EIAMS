@@ -36,4 +36,13 @@ public class StudentSubject {
     @Column(name = "black_list", columnDefinition = "integer default 0")
     private Integer blackList;
 
+    @Override
+    public String toString(){
+        return "StudentSubject{" +
+                ", rollNumber='" + rollNumber + '\'' +
+                ", subjectCode='" + subjectCode + '\'' +
+                ", groupName='" + groupName + '\'' +
+                ", blackList='" + blackList + '\'' +
+                '}';
+    }
 }

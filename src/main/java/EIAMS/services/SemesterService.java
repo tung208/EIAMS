@@ -60,6 +60,8 @@ public class SemesterService implements SemesterServiceInterface {
             semesterUpdate.setName(semesterDto.getName());
             semesterUpdate.setCreatorId(semesterDto.getCreatorId());
             semesterUpdate.setCode(semesterDto.getCode());
+//            semesterUpdate.setFromDate(semesterDto.getFromDate());
+//            semesterUpdate.setToDate(semesterDto.getToDate());
             semesterRepository.save(semesterUpdate);
         } else throw new EntityNotFoundException("Not found semester");
         return s.get();

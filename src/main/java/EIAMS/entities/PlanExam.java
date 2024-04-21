@@ -37,4 +37,14 @@ public class PlanExam {
     @Column(name = "subject_code", length = 64)
     private String subjectCode;
 
+    @Override
+    public String toString(){
+        return "PlanExam{" +
+                ", subjectCode='" + subjectCode + '\'' +
+                ", totalStudent='" + totalStudent + '\'' +
+                ", expectedDate='" + expectedDate + '\'' +
+                ", expectedTime='" + expectedTime + '\'' +
+                ", typeExam='" + typeExam + '\'' +
+                '}';
+    }
 }
