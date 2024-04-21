@@ -28,4 +28,12 @@ public class Room {
     @Column(name = "semester_id")
     private Integer semesterId;
 
+    @Override
+    public String toString(){
+        return "Room{" +
+                ", name='" + name + '\'' +
+                ", type='" + type + '\'' +
+                ", quantityStudent='" + quantityStudent + '\'' +
+                '}';
+    }
 }

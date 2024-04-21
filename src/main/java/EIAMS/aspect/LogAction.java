@@ -38,12 +38,16 @@ public class LogAction {
         Date currentDate = getCurrentDate();
 
         Semester semester = (Semester) result;
+        String name = "";
+        if (!username.equals("")){
+            name = username.substring(0,username.indexOf('@'));
+        }
         ActionLog actionLog = ActionLog.builder()
                 .semesterId(semester.getId())
                 .userName(username)
                 .logTable(className)
                 .logAction("Create "+className)
-                .logContent(username.substring(0,username.indexOf('@')) + " " + methodName + " : " + result)
+                .logContent(name + " " + methodName + " : " + result)
                 .since(currentDate)
                 .build();
         actionLogRepository.save(actionLog);
@@ -62,12 +66,17 @@ public class LogAction {
 
         Object[] args = joinPoint.getArgs();
         Semester semester = (Semester) result;
+
+        String name = "";
+        if (!username.equals("")){
+            name = username.substring(0,username.indexOf('@'));
+        }
         ActionLog actionLog = ActionLog.builder()
                 .semesterId(semester.getId())
                 .userName(username)
                 .logTable(className)
                 .logAction("Update " + className)
-                .logContent(username.substring(0,username.indexOf('@')) + " " + methodName + " from " + result + " to " + args[1])
+                .logContent(name + " " + methodName + " from " + result + " to " + args[1])
                 .since(currentDate)
                 .build();
         actionLogRepository.save(actionLog);
@@ -93,13 +102,16 @@ public class LogAction {
         String username = getUser();
         Date currentDate = getCurrentDate();
         int semesterId = getSemesterId(args[0].toString());
-
+        String name = "";
+        if (!username.equals("")){
+            name = username.substring(0,username.indexOf('@'));
+        }
         ActionLog actionLog = ActionLog.builder()
                 .semesterId(semesterId)
                 .userName(username)
                 .logTable(className)
                 .logAction("Create "+className)
-                .logContent(username.substring(0,username.indexOf('@')) + " " + methodName + " : " + result)
+                .logContent(name + " " + methodName + " : " + result)
                 .since(currentDate)
                 .build();
         actionLogRepository.save(actionLog);
@@ -124,14 +136,17 @@ public class LogAction {
         }
         String username = getUser();
         Date currentDate = getCurrentDate();
-        int semesterId = getSemesterId(args[0].toString());
-
+        int semesterId = getSemesterId(args[1].toString());
+        String name = "";
+        if (!username.equals("")){
+            name = username.substring(0,username.indexOf('@'));
+        }
         ActionLog actionLog = ActionLog.builder()
                 .semesterId(semesterId)
                 .userName(username)
                 .logTable(className)
                 .logAction("Update "+className)
-                .logContent(username.substring(0,username.indexOf('@')) + " " + methodName + " from " + result + " to " + args[1])
+                .logContent(name + " " + methodName + " from " + result + " to " + args[1])
                 .since(currentDate)
                 .build();
         actionLogRepository.save(actionLog);
@@ -156,14 +171,17 @@ public class LogAction {
         }
         String username = getUser();
         Date currentDate = getCurrentDate();
-        int semesterId = getSemesterId(args[0].toString());
-
+        int semesterId = getSemesterId(result.toString());
+        String name = "";
+        if (!username.equals("")){
+            name = username.substring(0,username.indexOf('@'));
+        }
         ActionLog actionLog = ActionLog.builder()
                 .semesterId(semesterId)
                 .userName(username)
                 .logTable(className)
                 .logAction("Delete "+className)
-                .logContent(username.substring(0,username.indexOf('@')) + " " + methodName + " : " + result)
+                .logContent(name + " " + methodName + " : " + result)
                 .since(currentDate)
                 .build();
         actionLogRepository.save(actionLog);
@@ -189,13 +207,16 @@ public class LogAction {
         String username = getUser();
         Date currentDate = getCurrentDate();
         int semesterId = Integer.parseInt(args[1].toString());
-
+        String name = "";
+        if (!username.equals("")){
+            name = username.substring(0,username.indexOf('@'));
+        }
         ActionLog actionLog = ActionLog.builder()
                 .semesterId(semesterId)
                 .userName(username)
                 .logTable(className)
                 .logAction("Upload "+methodName)
-                .logContent(username.substring(0,username.indexOf('@')) + " " + methodName)
+                .logContent(name + " " + methodName)
                 .since(currentDate)
                 .build();
         actionLogRepository.save(actionLog);
@@ -242,6 +263,7 @@ public class LogAction {
     }
 
     public int getSemesterId(String str) {
+        System.out.println(str);
         Pattern pattern = Pattern.compile("semesterId=(\\d+)");
         Matcher matcher = pattern.matcher(str.toString());
 

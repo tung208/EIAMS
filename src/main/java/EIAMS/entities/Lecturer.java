@@ -31,4 +31,12 @@ public class Lecturer {
     @Column(name = "total_slot")
     private Integer totalSlot;
 
+    @Override
+    public String toString(){
+        return "Lecturer{" +
+                ", codeName='" + codeName + '\'' +
+                ", examSubject='" + examSubject + '\'' +
+                ", email='" + email + '\'' +
+                '}';
+    }
 }
