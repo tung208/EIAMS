@@ -35,6 +35,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.*;
 import java.util.*;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.Future;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -110,16 +111,16 @@ public class StudentService implements StudentServiceInterface {
     }
 
     @Override
-    public void saveCustomersToDatabase(MultipartFile file){
+    public void saveCustomersToDatabase(MultipartFile file) {
 
     }
 
     @Override
     @Transactional
-    public Integer uploadStudents(MultipartFile file, int semester_id) throws IOException {
+    public Integer uploadStudents(MultipartFile file, int semester_id) throws IOException, InterruptedException {
         List<DSSVCsvRepresentation> dssvCsvRepresentations = new ExcelDSSV().getDataFromExcel(file.getInputStream());
 
-        Map<String,Student> students = new HashMap<>();
+        Map<String, Student> students = new HashMap<>();
         List<StudentSubject> studentSubjects = new ArrayList<>();
 
         int corePoolSize = 10;
@@ -138,7 +139,7 @@ public class StudentService implements StudentServiceInterface {
         // Kích thước của danh sách con
         int sublistSize = 2000;
 
-        for (DSSVCsvRepresentation element: dssvCsvRepresentations) {
+        for (DSSVCsvRepresentation element : dssvCsvRepresentations) {
             try {
                 Student student = Student.builder()
                         .rollNumber(element.getRollNumber().toUpperCase().trim())
@@ -154,7 +155,7 @@ public class StudentService implements StudentServiceInterface {
                         .groupName(element.getGroupName().toUpperCase().trim())
                         .build();
                 studentSubjects.add(studentSubject);
-            } catch (Exception e){
+            } catch (Exception e) {
                 System.out.println(element.getRollNumber());
             }
         }
@@ -163,31 +164,70 @@ public class StudentService implements StudentServiceInterface {
         List<Student> listStudent = students.values().stream().collect(Collectors.toList());
         List<String> listKeyStudent = new ArrayList<>(students.keySet());
 
-        System.out.println("size of dssv: "+dssvCsvRepresentations.size());
+        System.out.println("size of dssv: " + dssvCsvRepresentations.size());
         System.out.println("list student: " + listStudent.size());
+        System.out.println("Create futures list");
+        List<Future<?>> futures = new ArrayList<>();
 
         studentRepository.deleteByRollNumbers(listKeyStudent);
         for (int i = 0; i < listStudent.size(); i += sublistSize) {
             int endIndex = Math.min(i + sublistSize, listStudent.size());
             List<Student> sublistStudent = listStudent.subList(i, endIndex);
-            executor.execute(new SaveStudent(sublistStudent,semester_id,studentRepository,i));
+            executor.execute(new SaveStudent(sublistStudent, semester_id, studentRepository, i));
+
+            // Tạo một nhiệm vụ SaveStudent
+//            SaveStudent saveStudentTask = new SaveStudent(sublistStudent, semester_id, studentRepository, i);
+//            Future<?> future = executor.submit(saveStudentTask);
+//            futures.add(future);
+            Thread.sleep(50);
         }
 
         studentSubjectRepository.deleteBySemesterId(semester_id);
         for (int i = 0; i < studentSubjects.size(); i += sublistSize) {
             int endIndex = Math.min(i + sublistSize, studentSubjects.size());
             List<StudentSubject> sublist = studentSubjects.subList(i, endIndex);
-            executor.execute(new SaveStudentSubject(sublist,studentSubjectRepository,i));
+            executor.execute(new SaveStudentSubject(sublist, studentSubjectRepository, i));
+
+            // Tạo một nhiệm vụ SaveSubjectStudent
+//            SaveStudentSubject saveStudentSubject = new SaveStudentSubject(sublist, studentSubjectRepository, i);
+//            Future<?> future = executor.submit(saveStudentSubject);
+//            futures.add(future);
+            Thread.sleep(50);
         }
 
+        // Không cho threadpool nhận thêm nhiệm vụ nào nữa
+//        executor.shutdown();
+        // Chờ tất cả các thread trong pool kết thúc hoặc hết thời gian timeout
+//        executor.awaitTermination(10, TimeUnit.SECONDS);
+//        Thread.sleep(5000);
+        // Kiểm tra xem tất cả các thread đã hoàn thành hay chưa
+//        if (executor.isTerminated()) {
+//            System.out.println("Tất cả các thread đã hoàn thành công việc của mình.");
+//        } else {
+////            executor.awaitTermination(5, TimeUnit.SECONDS);
+//            System.out.println("Vẫn còn thread đang chạy hoặc chờ đợi.");
+//        }
+        // Kiểm tra xem tất cả các Future đã hoàn thành chưa
+//        while (!futures.isEmpty()) {
+//            Iterator<Future<?>> iterator = futures.iterator();
+//            while (iterator.hasNext()) {
+//                Future<?> future = iterator.next();
+//                if (future.isDone()) {
+//                    iterator.remove(); // Loại bỏ Future đã hoàn thành khỏi danh sách
+//                }
+//            }
+//            Thread.sleep(2000); // Thời gian chờ giữa mỗi lần kiểm tra
+//            System.out.println("Await for 2 second");
+//        }
+        System.out.println("Done");
         return dssvCsvRepresentations.size();
     }
 
     @Override
     @Transactional
-    public Integer uploadCMND(MultipartFile file, int semester_id) throws IOException {
+    public Integer uploadCMND(MultipartFile file, int semester_id) throws IOException, InterruptedException {
         List<CMNDCsvRepresentation> cmndCsvRepresentations = new ExcelCMND().getDataFromExcel(file.getInputStream());
-        Map<String,Student> students = new HashMap<>();
+        Map<String, Student> students = new HashMap<>();
 
         int corePoolSize = 10;
         int maximumPoolSize = 15;
@@ -205,7 +245,7 @@ public class StudentService implements StudentServiceInterface {
         // Kích thước của danh sách con
         int sublistSize = 2000;
 
-        for (CMNDCsvRepresentation element: cmndCsvRepresentations) {
+        for (CMNDCsvRepresentation element : cmndCsvRepresentations) {
             Student student = Student.builder()
                     .rollNumber(element.getRollNumber().toUpperCase().trim())
                     .cmtnd(element.getCmtnd().trim())
@@ -218,9 +258,14 @@ public class StudentService implements StudentServiceInterface {
         for (int i = 0; i < listStudent.size(); i += sublistSize) {
             int endIndex = Math.min(i + sublistSize, listStudent.size());
             List<Student> sublistStudent = listStudent.subList(i, endIndex);
-            executor.execute(new SaveCMND(sublistStudent,studentRepository));
+            executor.execute(new SaveCMND(sublistStudent, studentRepository));
+            Thread.sleep(50);
         }
-
+//        while (!executor.isTerminated()) {
+//            // Chờ xử lý hết các request còn chờ trong Queue ...
+//            Thread.sleep(1500);
+//            System.out.println("Thread is executing");
+//        }
         return cmndCsvRepresentations.size();
     }
 
@@ -233,14 +278,14 @@ public class StudentService implements StudentServiceInterface {
         // Tạo một Pageable với limit là 1
         Pageable pageable = PageRequest.of(0, 1);
         int sublistSize = 500;
-        for (BlackListRepresentation element: blackListRepresentations) {
+        for (BlackListRepresentation element : blackListRepresentations) {
             List<StudentSubject> studentSubjectList = studentSubjectRepository.findByRollNumberAndGroupNameAndSemesterId(
-                    safeTrim(element.getRollNumber(),1),
-                    safeTrim(element.getBlackList(),1),
+                    safeTrim(element.getRollNumber(), 1),
+                    safeTrim(element.getBlackList(), 1),
                     semester_id
             );
-            if (studentSubjectList.size() != 0){
-                for (StudentSubject item: studentSubjectList){
+            if (studentSubjectList.size() != 0) {
+                for (StudentSubject item : studentSubjectList) {
                     item.setBlackList(1);
                     studentSubjectRepository.save(item);
                 }
@@ -250,8 +295,8 @@ public class StudentService implements StudentServiceInterface {
         return null;
     }
 
-    public static String safeTrim(String str,int mode) {
-        if (mode == 1){
+    public static String safeTrim(String str, int mode) {
+        if (mode == 1) {
             return str == null ? null : str.toUpperCase().trim();
         } else {
             return str == null ? null : str.trim();

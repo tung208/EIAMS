@@ -48,17 +48,19 @@ public class StudentController {
     }
 
     @PostMapping("/import")
-    public ResponseEntity<ResponseObject> importStudents(@RequestParam("file") MultipartFile file,@RequestParam("semester_id") int semesterId) throws IOException, EntityNotFoundException {
+    public ResponseEntity<ResponseObject> importStudents(@RequestParam("file") MultipartFile file,@RequestParam("semester_id") int semesterId) throws IOException, EntityNotFoundException, InterruptedException {
         studentService.uploadStudents(file,semesterId);
         statusService.update(semesterId, 5,1);
+        Thread.sleep(5000);
         return ResponseEntity.status(HttpStatus.OK).body(
                 new ResponseObject("OK", "Import Success", ""));
     }
 
     @PostMapping("/import-profile")
-    public ResponseEntity<ResponseObject> importStudentProfile(@RequestParam("file") MultipartFile file,@RequestParam("semester_id") int semesterId) throws IOException, EntityNotFoundException {
+    public ResponseEntity<ResponseObject> importStudentProfile(@RequestParam("file") MultipartFile file,@RequestParam("semester_id") int semesterId) throws IOException, EntityNotFoundException, InterruptedException {
         studentService.uploadCMND(file,semesterId);
         statusService.update(semesterId, 5,2);
+        Thread.sleep(5000);
         return ResponseEntity.status(HttpStatus.OK).body(
                 new ResponseObject("OK", "Import Success", ""));
     }
