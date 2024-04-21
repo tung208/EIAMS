@@ -6,6 +6,7 @@ import EIAMS.entities.Semester;
 import EIAMS.entities.csvRepresentation.PlanExamRepresentation;
 import EIAMS.exception.EntityNotFoundException;
 import EIAMS.repositories.PlanExamRepository;
+import EIAMS.repositories.StudentSubjectRepository;
 import EIAMS.services.excel.ExcelPlanExam;
 import EIAMS.services.interfaces.PlanExamServiceInterface;
 import EIAMS.services.thread.SavePlanExam;
@@ -37,6 +38,7 @@ import org.apache.poi.ss.usermodel.DateUtil;
 @RequiredArgsConstructor
 public class PlanExamService implements PlanExamServiceInterface {
     private final PlanExamRepository planExamRepository;
+    private final StudentSubjectRepository studentSubjectRepository;
     private static final Logger logger = LoggerFactory.getLogger(StudentService.class);
     @Override
     @Transactional
@@ -63,6 +65,7 @@ public class PlanExamService implements PlanExamServiceInterface {
         // Định dạng của chuỗi ngày
         SimpleDateFormat dateFormat = new SimpleDateFormat("d/M/yyyy");
         for (PlanExamRepresentation element: planExamRepresentations) {
+            int numberOfStudent = studentSubjectRepository.countAllBySubjectCode(element.getSubjectCode().toUpperCase());
             Date expectedDate = DateUtil.getJavaDate((Double.parseDouble(element.getExpectedDate())));
             PlanExam planExam = PlanExam.builder()
                     .semesterId(semester_id)
@@ -70,6 +73,7 @@ public class PlanExamService implements PlanExamServiceInterface {
                     .expectedDate(expectedDate)
                     .expectedTime(safeTrim(element.getExpectedTime(),1))
                     .typeExam(safeTrim(element.getTypeExam(),1))
+                    .totalStudent(numberOfStudent)
                     .build();
             planExamList.add(planExam);
         }

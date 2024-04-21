@@ -19,7 +19,7 @@ public class PlanExam {
     @Column(name = "id", nullable = false)
     private Integer id;
 
-    @Column(name = "semester_id", length = 64)
+    @Column(name = "semester_id")
     private Integer semesterId;
 
     @Column(name = "expected_date")
@@ -30,6 +30,9 @@ public class PlanExam {
 
     @Column(name = "type_exam")
     private String typeExam;
+
+    @Column(name = "total_student", columnDefinition = "INT DEFAULT 0", nullable = true)
+    private Integer totalStudent;
 
     @Column(name = "subject_code", length = 64)
     private String subjectCode;

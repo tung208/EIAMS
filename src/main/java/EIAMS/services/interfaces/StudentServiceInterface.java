@@ -24,9 +24,9 @@ public interface StudentServiceInterface {
      void delete(int id);
 
      void saveCustomersToDatabase(MultipartFile file);
-     Integer uploadStudents(MultipartFile file, int semester_id) throws IOException;
+     Integer uploadStudents(MultipartFile file, int semester_id) throws IOException, InterruptedException;
 
-     Integer uploadCMND(MultipartFile file, int semester_id) throws IOException;
+     Integer uploadCMND(MultipartFile file, int semester_id) throws IOException, InterruptedException;
 
      Integer uploadBlackList(MultipartFile file, int semester_id) throws IOException;
 

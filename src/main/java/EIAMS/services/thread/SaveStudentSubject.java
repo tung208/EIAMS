@@ -18,7 +18,6 @@ public class SaveStudentSubject implements Runnable{
         try{
             studentSubjectRepository.saveAll(studentSubjects);
         } catch (DataIntegrityViolationException e){
-//                e.printStackTrace();
         }
         System.out.println("Task student subject "+i+" executed by thread: " + Thread.currentThread().getName());
     }

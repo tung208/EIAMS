@@ -108,6 +108,7 @@ CREATE TABLE `PlanExam` (
   `expected_date` datetime,
   `expected_time` varchar(64),
   `type_exam` varchar(64),
+  `total_student` int DEFAULT '0' NULL,
   `subject_code` varchar(64)
 );
 
