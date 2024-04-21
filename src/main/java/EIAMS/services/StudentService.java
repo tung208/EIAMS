@@ -108,8 +108,13 @@ public class StudentService implements StudentServiceInterface {
     }
 
     @Override
-    public void delete(int id) {
+    public Student delete(int id) throws EntityNotFoundException {
+        Optional<Student> student = studentRepository.findById(id);
+        if (!student.isPresent()){
+            throw new EntityNotFoundException("Student Not Found");
+        }
         studentRepository.deleteById(id);
+        return student.get();
     }
 
     @Override
@@ -325,8 +330,13 @@ public class StudentService implements StudentServiceInterface {
     }
 
     @Override
-    public void deleteStudentSubject(int id) {
+    public StudentSubject deleteStudentSubject(int id) throws EntityNotFoundException {
+        Optional<StudentSubject> studentSubject = studentSubjectRepository.findById(id);
+        if (!studentSubject.isPresent()) {
+            throw new EntityNotFoundException("Student Subject Not Found");
+        }
         studentSubjectRepository.deleteById(id);
+        return studentSubject.get();
     }
 
     @Override

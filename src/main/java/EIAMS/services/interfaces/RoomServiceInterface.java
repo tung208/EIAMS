@@ -15,7 +15,7 @@ public interface RoomServiceInterface {
     Room create(RoomDto roomDto);
 
     Room update(int id, RoomDto roomDto) throws EntityNotFoundException;
-    void delete(int id);
+    Room delete(int id) throws EntityNotFoundException;
 
     void deleteSemesterId(int id);
 }

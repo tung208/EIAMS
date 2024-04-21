@@ -111,7 +111,12 @@ public class LecturerService implements LecturerServiceInterface {
     }
 
     @Override
-    public void delete(int id) {
+    public Lecturer delete(int id) throws EntityExistException {
+        Optional<Lecturer> lecturer = lecturerRepository.findById(id);
+        if (!lecturer.isPresent()) {
+            throw new EntityExistException("Lecturer not found");
+        }
         lecturerRepository.deleteById(id);
+        return lecturer.get();
     }
 }

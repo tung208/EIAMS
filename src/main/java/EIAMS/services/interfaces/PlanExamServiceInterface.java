@@ -8,7 +8,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.text.ParseException;
-import java.util.Optional;
 
 public interface PlanExamServiceInterface {
     Integer uploadPlanExam(MultipartFile file, int semester_id, String type) throws IOException, ParseException;
@@ -18,7 +17,7 @@ public interface PlanExamServiceInterface {
 
     PlanExam update(int id, PlanExamDto planExamDto ) throws EntityNotFoundException;
 
-    void delete(int id);
+    PlanExam delete(int id) throws EntityNotFoundException;
 
     void deleteSemesterId(int id);
 }

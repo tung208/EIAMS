@@ -68,7 +68,7 @@ public class LecturerController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<ResponseObject> delete(@PathVariable int id){
+    public ResponseEntity<ResponseObject> delete(@PathVariable int id) throws EntityExistException {
         lecturerService.delete(id);
         return ResponseEntity.status(HttpStatus.OK).body(
                 new ResponseObject("OK", "Delete Success", ""));

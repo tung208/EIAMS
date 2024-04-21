@@ -43,7 +43,7 @@ public class LogAction {
                 .userName(username)
                 .logTable(className)
                 .logAction("Create "+className)
-                .logContent(username + " " + methodName + " : " + result)
+                .logContent(username.substring(0,username.indexOf('@')) + " " + methodName + " : " + result)
                 .since(currentDate)
                 .build();
         actionLogRepository.save(actionLog);
@@ -67,7 +67,7 @@ public class LogAction {
                 .userName(username)
                 .logTable(className)
                 .logAction("Update " + className)
-                .logContent(username + " " + methodName + " from " + result + " to " + args[1])
+                .logContent(username.substring(0,username.indexOf('@')) + " " + methodName + " from " + result + " to " + args[1])
                 .since(currentDate)
                 .build();
         actionLogRepository.save(actionLog);
@@ -99,7 +99,7 @@ public class LogAction {
                 .userName(username)
                 .logTable(className)
                 .logAction("Create "+className)
-                .logContent(username + " " + methodName + " : " + result)
+                .logContent(username.substring(0,username.indexOf('@')) + " " + methodName + " : " + result)
                 .since(currentDate)
                 .build();
         actionLogRepository.save(actionLog);
@@ -131,42 +131,74 @@ public class LogAction {
                 .userName(username)
                 .logTable(className)
                 .logAction("Update "+className)
-                .logContent(username + " " + methodName + " from " + result + " to " + args[1])
+                .logContent(username.substring(0,username.indexOf('@')) + " " + methodName + " from " + result + " to " + args[1])
                 .since(currentDate)
                 .build();
         actionLogRepository.save(actionLog);
     }
 
-    @Pointcut("execution(* EIAMS.services.SemesterService.update(..))")
-    public void updateMethod() {}
-//    @After( "updateMethod()")
-    @After(
-            "execution(* EIAMS.services.RoomService.update(..)) ||"
-            +"execution(* EIAMS.services.PlanExamService.update(..))")
-    public void action1Create(JoinPoint joinPoint) {
-        String email = getUser();
-        System.out.println(email);
-        // Lấy thông tin về phương thức đang được thực thi
-//        String methodName = joinPoint.getSignature().getName();
-//        String className = joinPoint.getTarget().getClass().getName();
+    @AfterReturning(
+            pointcut = "execution(* EIAMS.services.StudentService.delete(..)) || "
+                    + "execution(* EIAMS.services.StudentService.deleteStudentSubject(..)) || "
+                    + "execution(* EIAMS.services.RoomService.delete(..)) || "
+                    + "execution(* EIAMS.services.SubjectService.delete(..)) || "
+                    + "execution(* EIAMS.services.PlanExamService.delete(..)) || "
+                    + "execution(* EIAMS.services.LecturerService.delete(..))",
+            returning = "result"
+    )
+    public void actionDeleteOthers(JoinPoint joinPoint,Object result) {
         Object[] args = joinPoint.getArgs();
-//        for (Object arg : args) {
-//            System.out.println("Argument: " + arg);
-//        }
-        Pattern pattern = Pattern.compile("semesterId=(\\d+)");
-        Matcher matcher = pattern.matcher(args[1].toString());
-
-        // Nếu tìm thấy match, lấy giá trị semesterId
-        if (matcher.find()) {
-            String semesterId = matcher.group(1);
-            System.out.println("semesterId: " + semesterId);
-        } else {
-            System.out.println("Không tìm thấy semesterId trong chuỗi.");
+        // Lấy thông tin lưu vào log
+        String className = getClassName(joinPoint.getTarget().getClass().getName());
+        String methodName = joinPoint.getSignature().getName();
+        if (methodName.equals("updateStudentSubject")){
+            className = "Student Subject";
         }
+        String username = getUser();
+        Date currentDate = getCurrentDate();
+        int semesterId = getSemesterId(args[0].toString());
 
-        // In ra thông tin về phương thức đang được thực thi
-//        System.out.println("Advice executed after " + className + " . " + methodName + " returns. " + result.toString());
-//        System.out.println("chay vao ham nay");
+        ActionLog actionLog = ActionLog.builder()
+                .semesterId(semesterId)
+                .userName(username)
+                .logTable(className)
+                .logAction("Delete "+className)
+                .logContent(username.substring(0,username.indexOf('@')) + " " + methodName + " : " + result)
+                .since(currentDate)
+                .build();
+        actionLogRepository.save(actionLog);
+    }
+
+    @AfterReturning(
+            pointcut = "execution(* EIAMS.services.StudentService.uploadStudents(..)) || "
+                    + "execution(* EIAMS.services.StudentService.uploadCMND(..)) || "
+                    + "execution(* EIAMS.services.StudentService.uploadBlackList(..)) || "
+                    + "execution(* EIAMS.services.RoomService.uploadRoom(..)) || "
+                    + "execution(* EIAMS.services.PlanExamService.uploadPlanExam(..)) || "
+                    + "execution(* EIAMS.services.SubjectService.uploadSubject(..)) || "
+                    + "execution(* EIAMS.services.SubjectService.uploadSubjectNoLab(..)) || "
+                    + "execution(* EIAMS.services.SubjectService.uploadSubjectDontMix(..)) || "
+                    + "execution(* EIAMS.services.LecturerService.uploadLecturer(..))",
+            returning = "result"
+    )
+    public void actionImportOthers(JoinPoint joinPoint,Object result) {
+        Object[] args = joinPoint.getArgs();
+        // Lấy thông tin lưu vào log
+        String className = getClassName(joinPoint.getTarget().getClass().getName());
+        String methodName = joinPoint.getSignature().getName();
+        String username = getUser();
+        Date currentDate = getCurrentDate();
+        int semesterId = Integer.parseInt(args[1].toString());
+
+        ActionLog actionLog = ActionLog.builder()
+                .semesterId(semesterId)
+                .userName(username)
+                .logTable(className)
+                .logAction("Upload "+methodName)
+                .logContent(username.substring(0,username.indexOf('@')) + " " + methodName)
+                .since(currentDate)
+                .build();
+        actionLogRepository.save(actionLog);
     }
 
     public String getUser(){

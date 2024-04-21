@@ -65,7 +65,7 @@ public class RoomController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<ResponseObject> delete(@PathVariable int id){
+    public ResponseEntity<ResponseObject> delete(@PathVariable int id) throws EntityNotFoundException {
         roomService.delete(id);
         return ResponseEntity.status(HttpStatus.OK).body(
                 new ResponseObject("OK", "Delete Success", ""));
