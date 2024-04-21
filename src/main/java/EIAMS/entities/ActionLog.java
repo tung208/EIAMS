@@ -3,7 +3,6 @@ package EIAMS.entities;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.awt.*;
 import java.util.Date;
 
 @Getter

@@ -99,7 +99,7 @@ public class RoomService implements RoomServiceInterface {
     }
 
     @Override
-    public void update(int id, RoomDto roomDto) throws EntityNotFoundException{
+    public Room update(int id, RoomDto roomDto) throws EntityNotFoundException{
         Optional<Room> room = roomRepository.findById(id);
         if(room.isPresent()){
             Room r = Room.builder()
@@ -110,6 +110,7 @@ public class RoomService implements RoomServiceInterface {
                     .quantityStudent(roomDto.getQuantityStudent())
                     .build();
             roomRepository.save(r);
+            return room.get();
         } else throw new EntityNotFoundException("Room not exist");
     }
 

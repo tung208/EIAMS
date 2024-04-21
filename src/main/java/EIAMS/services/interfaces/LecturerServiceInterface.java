@@ -1,7 +1,6 @@
 package EIAMS.services.interfaces;
 
 import EIAMS.dtos.LecturerDto;
-import EIAMS.entities.ExamCode;
 import EIAMS.entities.Lecturer;
 import EIAMS.exception.EntityExistException;
 import EIAMS.exception.EntityNotFoundException;
@@ -17,6 +16,6 @@ public interface LecturerServiceInterface {
 
     Lecturer create(LecturerDto lecturerDto) throws EntityExistException;
 
-    void update(int id,LecturerDto lecturerDto) throws EntityNotFoundException, EntityExistException;
+    Lecturer update(int id, LecturerDto lecturerDto) throws EntityNotFoundException, EntityExistException;
     void delete(int id);
 }

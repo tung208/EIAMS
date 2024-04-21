@@ -107,6 +107,20 @@
 			<version>0.11.5</version>
 		</dependency>
 
+<!--		aop-->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-aop</artifactId>
+<!--			<version>5.3.13</version>-->
+		</dependency>
+
+<!--		json -->
+<!--		<dependency>-->
+<!--			<groupId>com.fasterxml.jackson.core</groupId>-->
+<!--			<artifactId>jackson-databind</artifactId>-->
+<!--&lt;!&ndash;			<version>2.13.0</version>&ndash;&gt;-->
+<!--		</dependency>-->
+
 	</dependencies>
 
 	<build>

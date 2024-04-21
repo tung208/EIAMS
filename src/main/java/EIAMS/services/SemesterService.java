@@ -1,7 +1,6 @@
 package EIAMS.services;
 
 import EIAMS.dtos.SemesterDto;
-import EIAMS.entities.Account;
 import EIAMS.entities.Semester;
 import EIAMS.exception.EntityNotFoundException;
 import EIAMS.helper.Pagination;
@@ -9,7 +8,6 @@ import EIAMS.mapper.SemesterMapping;
 import EIAMS.repositories.AccountRepository;
 import EIAMS.repositories.SemesterRepository;
 import EIAMS.services.interfaces.SemesterServiceInterface;
-import com.opencsv.CSVWriter;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,11 +16,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.*;
-import java.text.ParseException;
 import java.util.*;
 
 @Service
@@ -58,7 +52,7 @@ public class SemesterService implements SemesterServiceInterface {
     }
 
     @Override
-    public void update(int id, SemesterDto semesterDto) throws EntityNotFoundException {
+    public Semester update(int id, SemesterDto semesterDto) throws EntityNotFoundException {
         Optional<Semester> s = semesterRepository.findById(id);
         if (s.isPresent()) {
             Semester semesterUpdate = s.get();
@@ -68,6 +62,7 @@ public class SemesterService implements SemesterServiceInterface {
             semesterUpdate.setCode(semesterDto.getCode());
             semesterRepository.save(semesterUpdate);
         } else throw new EntityNotFoundException("Not found semester");
+        return s.get();
     }
 
     @Override

@@ -2,7 +2,6 @@ package EIAMS.services;
 
 import EIAMS.dtos.PlanExamDto;
 import EIAMS.entities.PlanExam;
-import EIAMS.entities.Semester;
 import EIAMS.entities.csvRepresentation.PlanExamRepresentation;
 import EIAMS.exception.EntityNotFoundException;
 import EIAMS.repositories.PlanExamRepository;
@@ -17,7 +16,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -120,13 +118,13 @@ public class PlanExamService implements PlanExamServiceInterface {
     }
 
     @Override
-    public void update(int id, PlanExamDto planExamDto) throws EntityNotFoundException {
+    public PlanExam update(int id, PlanExamDto planExamDto) throws EntityNotFoundException {
         List<PlanExam> planExamList = planExamRepository.findBySameObject(planExamDto.getSemesterId(),
                 planExamDto.getExpectedDate(), planExamDto.getExpectedTime(), planExamDto.getTypeExam(),
                 planExamDto.getSubjectCode());
         if (planExamList.size() > 0){
             // Ban ra exception
-            return ;
+            return null;
         }
         Optional<PlanExam> planExam = planExamRepository.findById(id);
         if (planExam.isPresent()) {
@@ -137,8 +135,10 @@ public class PlanExamService implements PlanExamServiceInterface {
                     .expectedTime(planExamDto.getExpectedTime())
                     .typeExam(planExamDto.getTypeExam())
                     .subjectCode(planExamDto.getSubjectCode())
+                    .totalStudent(planExam.get().getTotalStudent())
                     .build();
             planExamRepository.save(planExamUpdate);
+            return planExam.get();
         } else throw new EntityNotFoundException("Not found Plan Exam");
     }
 

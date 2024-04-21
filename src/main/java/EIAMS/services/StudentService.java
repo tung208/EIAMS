@@ -9,7 +9,6 @@ import EIAMS.entities.csvRepresentation.CMNDCsvRepresentation;
 import EIAMS.entities.csvRepresentation.DSSVCsvRepresentation;
 import EIAMS.exception.EntityNotFoundException;
 import EIAMS.helper.Pagination;
-import EIAMS.repositories.SemesterRepository;
 import EIAMS.repositories.StudentRepository;
 import EIAMS.repositories.StudentSubjectRepository;
 import EIAMS.services.excel.ExcelBlackList;
@@ -75,7 +74,7 @@ public class StudentService implements StudentServiceInterface {
     }
 
     @Override
-    public void create(StudentDto studentDto) {
+    public Student create(StudentDto studentDto) {
         Student student = Student.builder()
                 .rollNumber(studentDto.getRollNumber())
                 .memberCode(studentDto.getMemberCode())
@@ -83,10 +82,11 @@ public class StudentService implements StudentServiceInterface {
                 .cmtnd(studentDto.getCmtnd())
                 .build();
         studentRepository.save(student);
+        return student;
     }
 
     @Override
-    public void update(StudentDto student) {
+    public Student update(StudentDto student) {
         Optional<Student> s = studentRepository.findById(student.getId());
         if (s.isPresent()) {
             Student studentUpdate = Student.builder()
@@ -97,7 +97,9 @@ public class StudentService implements StudentServiceInterface {
                     .cmtnd(student.getCmtnd())
                     .build();
             studentRepository.save(studentUpdate);
+            return s.get();
         }
+        return null;
     }
 
     @Override
@@ -304,7 +306,7 @@ public class StudentService implements StudentServiceInterface {
     }
 
     @Override
-    public void updateStudentSubject(int id, StudentSubjectDto studentSubjectDto) {
+    public StudentSubject updateStudentSubject(int id, StudentSubjectDto studentSubjectDto) {
         Optional<StudentSubject> ss = studentSubjectRepository.findById(id);
         Optional<Student> student = studentRepository.findByRollNumber(studentSubjectDto.getRollNumber());
         if (ss.isPresent() && student.isPresent()) {
@@ -317,7 +319,9 @@ public class StudentService implements StudentServiceInterface {
                     .blackList(studentSubjectDto.getBlackList())
                     .build();
             studentSubjectRepository.save(studentSubject);
+            return ss.get();
         }
+        return null;
     }
 
     @Override
@@ -326,7 +330,7 @@ public class StudentService implements StudentServiceInterface {
     }
 
     @Override
-    public void createStudentSubject(StudentSubjectDto studentSubjectDto) throws EntityNotFoundException {
+    public StudentSubject createStudentSubject(StudentSubjectDto studentSubjectDto) throws EntityNotFoundException {
         Optional<Student> student = studentRepository.findByRollNumber(studentSubjectDto.getRollNumber());
         if (student.isPresent()) {
             StudentSubject studentSubject = StudentSubject.builder()
@@ -337,6 +341,7 @@ public class StudentService implements StudentServiceInterface {
                     .blackList(studentSubjectDto.getBlackList())
                     .build();
             studentSubjectRepository.save(studentSubject);
+            return studentSubject;
         } else {
             // Trả ra exception
             throw new EntityNotFoundException("Not found student");

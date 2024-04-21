@@ -2,7 +2,6 @@ package EIAMS.services.interfaces;
 
 import EIAMS.dtos.StudentDto;
 import EIAMS.dtos.StudentSubjectDto;
-import EIAMS.entities.Semester;
 import EIAMS.entities.Student;
 import EIAMS.entities.StudentSubject;
 import EIAMS.exception.EntityNotFoundException;
@@ -12,14 +11,13 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 public interface StudentServiceInterface {
      Page<Student> list(String search, String memberCode, Integer page, Integer limit);
 
      List<Student> list();
-     void create(StudentDto student);
-     void update(StudentDto studentDto);
+     Student create(StudentDto student);
+     Student update(StudentDto studentDto);
      Optional<Student> getStudentDetail(int id);
      void delete(int id);
 
@@ -34,9 +32,9 @@ public interface StudentServiceInterface {
 
      Page<StudentSubject> searchStudentSubject(Integer page, Integer limit, Integer semesterId, String rollNumber, String subjectCode, String groupName, Integer backList);
 
-     void updateStudentSubject(int id, StudentSubjectDto studentSubjectDto);
+     StudentSubject updateStudentSubject(int id, StudentSubjectDto studentSubjectDto);
 
      void deleteStudentSubject(int id);
 
-     void createStudentSubject(StudentSubjectDto studentSubjectDto) throws EntityNotFoundException;
+     StudentSubject createStudentSubject(StudentSubjectDto studentSubjectDto) throws EntityNotFoundException;
 }
