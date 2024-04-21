@@ -4,9 +4,6 @@ import EIAMS.dtos.RoomScheduleDto;
 import EIAMS.dtos.ScheduleToSwapDto;
 import EIAMS.dtos.SchedulerDetailDto;
 import EIAMS.dtos.StudentScheduleDto;
-import EIAMS.entities.Room;
-import EIAMS.entities.Scheduler;
-import EIAMS.entities.Student;
 import EIAMS.entities.responeObject.ResponseObject;
 import EIAMS.services.excel.ExcelExportDSExam;
 import EIAMS.services.interfaces.SchedulerServiceInterface;
@@ -14,7 +11,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -23,11 +19,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
-import java.util.zip.ZipOutputStream;
 
 @RestController
 @RequiredArgsConstructor
@@ -46,7 +38,7 @@ public class SchedulerController {
             @RequestParam(name = "search", defaultValue = "") String search,
             @RequestParam(name = "start_date", defaultValue = "") String start_date,
             @RequestParam(name = "end_date", defaultValue = "") String end_date,
-            @RequestParam(name = "lecturer_id",required = false, defaultValue = "") String lecturer_id) {
+            @RequestParam(name = "lecturer_id", required = false, defaultValue = "") String lecturer_id) {
         try {
             List<RoomScheduleDto> list = schedulerServiceInterface.list(semesterId, search, start_date, end_date, lecturer_id);
             if (list.isEmpty()) {
@@ -127,7 +119,7 @@ public class SchedulerController {
 
     @GetMapping(path = "/get")
     public ResponseEntity<ResponseObject> getById(
-            @RequestParam(name = "id") Integer id){
+            @RequestParam(name = "id") Integer id) {
         try {
             SchedulerDetailDto s = schedulerServiceInterface.get(id);
             if (s == null) {
@@ -220,11 +212,12 @@ public class SchedulerController {
                     new ResponseObject("Fail", e.getMessage(), null));
         }
     }
+
     @PostMapping(path = "update-lecturer")
     public ResponseEntity<ResponseObject> updateLecture(@RequestParam(name = "scheduler_id") Integer schedulerId,
                                                         @RequestParam(name = "lecturer_id") Integer lecturerId) {
         try {
-            schedulerServiceInterface.updateLecturer(schedulerId,lecturerId);
+            schedulerServiceInterface.updateLecturer(schedulerId, lecturerId);
             return ResponseEntity.status(HttpStatus.OK).body(
                     new ResponseObject("OK", "Update Lecture Success", null));
         } catch (Exception e) {
@@ -237,7 +230,7 @@ public class SchedulerController {
     public ResponseEntity<ResponseObject> swapLecture(@RequestParam(name = "scheduler_id") Integer schedulerId,
                                                       @RequestParam(name = "scheduler_swap_id") Integer schedulerSwapId) {
         try {
-            schedulerServiceInterface.swapLecturer(schedulerId,schedulerSwapId);
+            schedulerServiceInterface.swapLecturer(schedulerId, schedulerSwapId);
             return ResponseEntity.status(HttpStatus.OK).body(
                     new ResponseObject("OK", "Update Lecture Success", null));
         } catch (Exception e) {
@@ -255,7 +248,8 @@ public class SchedulerController {
 //    }
 
     @PostMapping("/export-scheduler")
-    public ResponseEntity<byte[]> exportToExcel(@RequestBody String listScheduler, HttpServletResponse response) throws IOException {response.setContentType("application/zip");
+    public ResponseEntity<byte[]> exportToExcel(@RequestBody String listScheduler, HttpServletResponse response) throws IOException {
+        response.setContentType("application/zip");
         try {
             Workbook workbook = excelExportDSExam.exportScheduler(response, listScheduler);
             // Tạo ByteArrayOutputStream để lưu trữ dữ liệu của file Excel
@@ -270,9 +264,44 @@ public class SchedulerController {
             // Trả về dữ liệu của file Excel
             return new ResponseEntity<>(baos.toByteArray(), headers, HttpStatus.OK);
 
-        } catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping(path = "increase-room")
+    public ResponseEntity<ResponseObject> increaseRoom(@RequestParam(name = "semester_id") Integer semesterId,
+                                                       @RequestParam(name = "type") String type,
+                                                       @RequestParam(name = "start_time") String startTime,
+                                                       @RequestParam(name = "end_time") String endTime,
+                                                       @RequestParam(name = "number") Integer number,
+                                                       @RequestParam(name = "subject_code", defaultValue = "") String subjectCode) {
+        try {
+            schedulerServiceInterface.increaseNumberOfRoomsPerSlot(semesterId,startTime, endTime, type, number, subjectCode);
+            return ResponseEntity.status(HttpStatus.OK).body(
+                    new ResponseObject("OK", "Update Success", null));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    new ResponseObject("Fail", e.getMessage(), null));
+        }
+    }
+
+    @GetMapping(path = "decrease-room")
+    public ResponseEntity<ResponseObject> decreaseRoom(@RequestParam(name = "semester_id") Integer semesterId,
+                                                       @RequestParam(name = "type") String type,
+                                                       @RequestParam(name = "start_time") String startTime,
+                                                       @RequestParam(name = "end_time") String endTime,
+                                                       @RequestParam(name = "number") Integer number,
+                                                       @RequestParam(name = "subject_code", defaultValue = "") String subjectCode,
+                                                       @RequestParam(name = "is_lab", defaultValue = "") String isLab) {
+        try {
+            schedulerServiceInterface.decreaseNumberOfRoomsPerSlot(semesterId,startTime, endTime, type, number,subjectCode,isLab);
+            return ResponseEntity.status(HttpStatus.OK).body(
+                    new ResponseObject("OK", "Update Success", null));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    new ResponseObject("Fail", e.getMessage(), null));
         }
     }
 }

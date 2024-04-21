@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -53,7 +54,7 @@ public class SubjectController {
     }
 
     @GetMapping()
-    public PageResponse<Subject> getSemester(@RequestParam(defaultValue = "1") Integer pageNo,
+    public PageResponse<Subject> getSubject(@RequestParam(defaultValue = "1") Integer pageNo,
                                              @RequestParam(defaultValue = "2") Integer pageSize,
                                              @RequestParam(defaultValue = "id") String sortBy,
                                              @RequestParam(defaultValue = "") Integer semesterId,
@@ -83,5 +84,12 @@ public class SubjectController {
         Subject subject = subjectService.create(subjectDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(
                 new ResponseObject("OK", "Create Success", ""));
+    }
+    @GetMapping("list")
+    public ResponseEntity<ResponseObject> getSubjectDontMix(@RequestParam(name = "semester_id") Integer semesterId,
+                                                            @RequestParam(name = "dont_mix", defaultValue = "") String dontMix) {
+        List<Subject> list = subjectService.getSubjectDontMix(semesterId, dontMix);
+        return ResponseEntity.status(HttpStatus.OK).body(
+                new ResponseObject("OK", "found list", list));
     }
 }

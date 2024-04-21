@@ -973,4 +973,166 @@ public class SchedulerService implements SchedulerServiceInterface {
                 })
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public void decreaseNumberOfRoomsPerSlot(Integer semesterId, String startDate, String endDate, String type, Integer numberDecrease, String subject, String isLab) throws Exception {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        if (startDate.isBlank() || endDate.isBlank()) {
+            throw new InvalidParameterException("Start time and end time cannot be empty");
+        }
+        LocalDateTime endDateSearch = LocalDateTime.parse(endDate, formatter);
+        LocalDateTime startDateSearch = LocalDateTime.parse(startDate, formatter);
+        List<Integer> labs = roomRepository.findAllBySemesterIdAndQuantityStudentGreaterThanAndNameContainingIgnoreCase(semesterId, 1, "Lab")
+                .stream()
+                .map(Room::getId)
+                .toList();
+        List<Scheduler> schedulers;
+        if(Objects.equals(isLab, "true")) {
+            schedulers = schedulerRepository.findAllBySemesterIdAndStartDateAndEndDateAndTypeAndRoomIdIn(semesterId, startDateSearch, endDateSearch, type, labs);
+        } else {
+            schedulers = schedulerRepository.findAllBySemesterIdAndStartDateAndEndDateAndTypeAndRoomIdNotIn(semesterId, startDateSearch, endDateSearch, type, labs);
+        }
+        Map<Integer, Integer> roomStudentCount = new HashMap<>();
+        List<String> allStudentIds = new ArrayList<>();
+        if(!Objects.equals(subject, "")) {
+            for (Scheduler scheduler : schedulers) {
+                if(scheduler.getSubjectCode().equals(subject)) {
+                    int numberOfStudents = scheduler.getStudentId().split(",").length;
+                    roomStudentCount.put(scheduler.getId(), numberOfStudents);
+                }
+            }
+        } else {
+            for (Scheduler scheduler : schedulers) {
+                String subjectCodes = scheduler.getSubjectCode();
+                if(subjectCodes.split(",").length > 1 || subjectRepository.findBySemesterIdAndSubjectCode(semesterId, subjectCodes).getDontMix() == null) {
+                    int numberOfStudents = scheduler.getStudentId().split(",").length;
+                    roomStudentCount.put(scheduler.getId(), numberOfStudents);
+                }
+            }
+        }
+        if(roomStudentCount.isEmpty() || roomStudentCount.size() < numberDecrease){
+            throw new Exception("No valid data to decrease room");
+        }
+        List<Integer> schedulesWithSmallestCount = roomStudentCount.entrySet().stream()
+                .sorted(Map.Entry.comparingByValue())
+                .limit(numberDecrease)
+                .map(Map.Entry::getKey)
+                .toList();
+
+        for (Integer scheduleId : schedulesWithSmallestCount) {
+            Scheduler scheduler = schedulerRepository.findById(scheduleId).get();
+            allStudentIds.addAll(List.of(scheduler.getStudentId().split(",")));
+        }
+        List<Scheduler> schedulersToAddStudent = schedulerRepository.findAllBySemesterIdAndStartDateAndEndDateAndIdNotIn(semesterId, startDateSearch, endDateSearch, schedulesWithSmallestCount);
+        schedulersToAddStudent.sort(Comparator.comparingInt(scheduler -> scheduler.getStudentId().split(",").length));
+        Iterator<String> studentIterator = allStudentIds.iterator();
+        while (studentIterator.hasNext()) {
+            for (Scheduler scheduler : schedulersToAddStudent) {
+                if (!studentIterator.hasNext()) {
+                    break; // No more students to add
+                }
+                String studentIdToAdd = studentIterator.next();
+                String updatedStudentId = scheduler.getStudentId() + "," + studentIdToAdd;
+                StudentSubject studentSubject = studentSubjectRepository.findById(Integer.valueOf(studentIdToAdd)).get();
+                if(!scheduler.getSubjectCode().contains(studentSubject.getSubjectCode())) {
+                    String subjectCodes = studentSubject.getSubjectCode() + "," + studentSubject.getSubjectCode();
+                    scheduler.setSubjectCode(subjectCodes);
+                }
+                scheduler.setStudentId(updatedStudentId);
+                schedulerRepository.save(scheduler);
+            }
+        }
+        schedulerRepository.deleteAllById(schedulesWithSmallestCount);
+    }
+
+    @Override
+    public void increaseNumberOfRoomsPerSlot(Integer semesterId, String startDate, String endDate, String type, Integer numberIncrease, String subject) throws Exception {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        if (startDate.isBlank() || endDate.isBlank()) {
+            throw new InvalidParameterException("Start date and end date cannot be empty");
+        }
+        LocalDateTime endDateSearch = LocalDateTime.parse(endDate, formatter);
+        LocalDateTime startDateSearch = LocalDateTime.parse(startDate, formatter);
+        List<Integer> labs = roomRepository.findAllBySemesterIdAndQuantityStudentGreaterThanAndNameContainingIgnoreCase(semesterId, 1, "Lab")
+                .stream()
+                .map(Room::getId)
+                .toList();
+        List<Scheduler> schedulers = schedulerRepository.findAllBySemesterIdAndStartDateAndEndDateAndTypeAndRoomIdNotIn(semesterId, startDateSearch, endDateSearch, type, labs);
+        List<Integer> roomUsed = schedulerRepository.findAllRoomIdBySemesterIdAndStartDateAndEndDate(semesterId,startDateSearch, endDateSearch);
+        List<Scheduler> schedulersDegreeStudent = new ArrayList<>();
+        if(!Objects.equals(subject, "")) {
+            for (Scheduler scheduler : schedulers) {
+                if(scheduler.getSubjectCode().equals(subject)) {
+                    schedulersDegreeStudent.add(scheduler);
+                }
+            }
+        } else {
+            for (Scheduler scheduler : schedulers) {
+                if (scheduler.getSubjectCode().split(",").length > 1 ||
+                        subjectRepository.findBySemesterIdAndSubjectCode(semesterId, scheduler.getSubjectCode()).getDontMix() == null) {
+                    schedulersDegreeStudent.add(scheduler);
+                }
+            }
+        }
+        List<Integer> roomIdsAvailable = roomRepository.findAllBySemesterIdAndIdNotIn(semesterId, roomUsed);
+        if (roomIdsAvailable.size() < numberIncrease || schedulersDegreeStudent.isEmpty()) {
+            throw new Exception("Not enough data to increase");
+        }
+        Comparator<Scheduler> studentCountComparator = Comparator.comparingInt(scheduler -> scheduler.getStudentId().split(",").length);
+        schedulersDegreeStudent.sort(studentCountComparator.reversed());
+        int numberOfStudentToNewRoom = numberIncrease * DBTableUtils.ROOM_NORMAL_QUANTITY;
+        Map<Integer, String> roomIdWithStudent = new HashMap<>();
+        Map<Integer, String> roomSubject = new HashMap<>();
+        int number = 0;
+        while (number <= numberOfStudentToNewRoom) {
+            // Iterate over available room IDs
+            for (int i = 0; i < numberIncrease; i++) {
+                String sIds = "";
+                String subjectCodes = "";
+                int numberStudentInRoom = 0;
+                // Iterate over schedulers until the room reaches its capacity or the total number of students assigned is reached
+                for (Scheduler schedule : schedulersDegreeStudent) {
+                    number++;
+                    numberStudentInRoom++;
+                    if (numberStudentInRoom >= DBTableUtils.ROOM_NORMAL_QUANTITY || number >= numberOfStudentToNewRoom) {
+                        break;
+                    }
+                    String[] studentIds = schedule.getStudentId().split(",");
+                    String lastStudentId = studentIds[studentIds.length - 1];
+                    StudentSubject s = studentSubjectRepository.findById(Integer.valueOf(lastStudentId)).get();
+                    if (!subjectCodes.contains(s.getSubjectCode())) {
+                        subjectCodes += s.getSubjectCode() + ",";
+                    }
+                    // Remove the last student ID from the scheduler
+                    schedule.setStudentId(String.join(",", Arrays.copyOf(studentIds, studentIds.length - 1)));
+
+                    // Add the last student ID to the current room's student list
+                    sIds += lastStudentId + ",";
+                }
+                // Add the student IDs assigned to the current room to the map
+                if(roomIdWithStudent.containsKey(roomIdsAvailable.get(i))) {
+                    roomIdWithStudent.put(roomIdsAvailable.get(i), roomIdWithStudent.get(roomIdsAvailable.get(i)) + sIds);
+                } else {
+                    roomIdWithStudent.put(roomIdsAvailable.get(i), sIds);
+                }
+                if(roomSubject.containsKey(roomIdsAvailable.get(i))) {
+                    roomSubject.put(roomIdsAvailable.get(i), roomSubject.get(roomIdsAvailable.get(i)) + subjectCodes);
+                } else {
+                    roomSubject.put(roomIdsAvailable.get(i), subjectCodes);
+                }
+            }
+        }
+        schedulerRepository.saveAll(schedulersDegreeStudent);
+        for (Map.Entry<Integer, String> entry : roomIdWithStudent.entrySet()) {
+            Scheduler scheduler = new Scheduler();
+            scheduler.setRoomId(entry.getKey());
+            scheduler.setStartDate(startDateSearch);
+            scheduler.setEndDate(endDateSearch);
+            scheduler.setStudentId(entry.getValue().substring(0, entry.getValue().length() - 1));
+            scheduler.setSemesterId(semesterId);
+            scheduler.setType(type);
+            scheduler.setSubjectCode(roomSubject.get(entry.getKey()).substring(0, roomSubject.get(entry.getKey()).length() - 1));
+            schedulerRepository.save(scheduler);
+        }
+    }
 }

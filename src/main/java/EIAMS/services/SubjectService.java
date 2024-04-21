@@ -30,6 +30,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -176,5 +177,16 @@ public class SubjectService implements SubjectServiceInterface {
     @Override
     public void deleteSemesterId(int id){
         subjectRepository.deleteBySemesterId(id);
+    }
+    @Override
+    public List<Subject> getSubjectDontMix(int semesterId, String dontMix) {
+        if(Objects.equals(dontMix, "1")) {
+            return subjectRepository.findBySemesterIdAndDontMix(semesterId);
+        }
+        else if(Objects.equals(dontMix, "0")) {
+            return subjectRepository.findBySemesterIdAndCanMix(semesterId);
+        } else {
+            return subjectRepository.findAllBySemesterId(semesterId);
+        }
     }
 }
