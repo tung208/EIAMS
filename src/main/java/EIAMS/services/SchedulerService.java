@@ -13,6 +13,7 @@ import java.security.InvalidParameterException;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -239,6 +240,7 @@ public class SchedulerService implements SchedulerServiceInterface {
             schedulerRepository.save(scheduler);
             schedulerRepository.save(schedulerSwap);
         }
+        calculateWorking(scheduler.getSemesterId());
     }
 
     @Override
@@ -891,6 +893,7 @@ public class SchedulerService implements SchedulerServiceInterface {
             }
         });
         schedulerRepository.saveAll(schedulersToSave);
+        calculateWorking(semesterId);
     }
 
     public boolean isNotHaveSlotExamOfLecturer(int semesterId, int lecturerId, Scheduler scheduler) {
@@ -919,6 +922,7 @@ public class SchedulerService implements SchedulerServiceInterface {
             scheduler.setLecturerId(lecturerId);
             schedulerRepository.save(scheduler);
         }
+        calculateWorking(scheduler.getSemesterId());
     }
 
     @Override
@@ -987,16 +991,16 @@ public class SchedulerService implements SchedulerServiceInterface {
                 .map(Room::getId)
                 .toList();
         List<Scheduler> schedulers;
-        if(Objects.equals(isLab, "true")) {
+        if (Objects.equals(isLab, "true")) {
             schedulers = schedulerRepository.findAllBySemesterIdAndStartDateAndEndDateAndTypeAndRoomIdIn(semesterId, startDateSearch, endDateSearch, type, labs);
         } else {
             schedulers = schedulerRepository.findAllBySemesterIdAndStartDateAndEndDateAndTypeAndRoomIdNotIn(semesterId, startDateSearch, endDateSearch, type, labs);
         }
         Map<Integer, Integer> roomStudentCount = new HashMap<>();
         List<String> allStudentIds = new ArrayList<>();
-        if(!Objects.equals(subject, "")) {
+        if (!Objects.equals(subject, "")) {
             for (Scheduler scheduler : schedulers) {
-                if(scheduler.getSubjectCode().equals(subject)) {
+                if (scheduler.getSubjectCode().equals(subject)) {
                     int numberOfStudents = scheduler.getStudentId().split(",").length;
                     roomStudentCount.put(scheduler.getId(), numberOfStudents);
                 }
@@ -1004,13 +1008,13 @@ public class SchedulerService implements SchedulerServiceInterface {
         } else {
             for (Scheduler scheduler : schedulers) {
                 String subjectCodes = scheduler.getSubjectCode();
-                if(subjectCodes.split(",").length > 1 || subjectRepository.findBySemesterIdAndSubjectCode(semesterId, subjectCodes).getDontMix() == null) {
+                if (subjectCodes.split(",").length > 1 || subjectRepository.findBySemesterIdAndSubjectCode(semesterId, subjectCodes).getDontMix() == null) {
                     int numberOfStudents = scheduler.getStudentId().split(",").length;
                     roomStudentCount.put(scheduler.getId(), numberOfStudents);
                 }
             }
         }
-        if(roomStudentCount.isEmpty() || roomStudentCount.size() < numberDecrease){
+        if (roomStudentCount.isEmpty() || roomStudentCount.size() < numberDecrease) {
             throw new Exception("No valid data to decrease room");
         }
         List<Integer> schedulesWithSmallestCount = roomStudentCount.entrySet().stream()
@@ -1034,7 +1038,7 @@ public class SchedulerService implements SchedulerServiceInterface {
                 String studentIdToAdd = studentIterator.next();
                 String updatedStudentId = scheduler.getStudentId() + "," + studentIdToAdd;
                 StudentSubject studentSubject = studentSubjectRepository.findById(Integer.valueOf(studentIdToAdd)).get();
-                if(!scheduler.getSubjectCode().contains(studentSubject.getSubjectCode())) {
+                if (!scheduler.getSubjectCode().contains(studentSubject.getSubjectCode())) {
                     String subjectCodes = studentSubject.getSubjectCode() + "," + studentSubject.getSubjectCode();
                     scheduler.setSubjectCode(subjectCodes);
                 }
@@ -1043,6 +1047,7 @@ public class SchedulerService implements SchedulerServiceInterface {
             }
         }
         schedulerRepository.deleteAllById(schedulesWithSmallestCount);
+        calculateWorking(semesterId);
     }
 
     @Override
@@ -1058,11 +1063,11 @@ public class SchedulerService implements SchedulerServiceInterface {
                 .map(Room::getId)
                 .toList();
         List<Scheduler> schedulers = schedulerRepository.findAllBySemesterIdAndStartDateAndEndDateAndTypeAndRoomIdNotIn(semesterId, startDateSearch, endDateSearch, type, labs);
-        List<Integer> roomUsed = schedulerRepository.findAllRoomIdBySemesterIdAndStartDateAndEndDate(semesterId,startDateSearch, endDateSearch);
+        List<Integer> roomUsed = schedulerRepository.findAllRoomIdBySemesterIdAndStartDateAndEndDate(semesterId, startDateSearch, endDateSearch);
         List<Scheduler> schedulersDegreeStudent = new ArrayList<>();
-        if(!Objects.equals(subject, "")) {
+        if (!Objects.equals(subject, "")) {
             for (Scheduler scheduler : schedulers) {
-                if(scheduler.getSubjectCode().equals(subject)) {
+                if (scheduler.getSubjectCode().equals(subject)) {
                     schedulersDegreeStudent.add(scheduler);
                 }
             }
@@ -1110,12 +1115,12 @@ public class SchedulerService implements SchedulerServiceInterface {
                     sIds += lastStudentId + ",";
                 }
                 // Add the student IDs assigned to the current room to the map
-                if(roomIdWithStudent.containsKey(roomIdsAvailable.get(i))) {
+                if (roomIdWithStudent.containsKey(roomIdsAvailable.get(i))) {
                     roomIdWithStudent.put(roomIdsAvailable.get(i), roomIdWithStudent.get(roomIdsAvailable.get(i)) + sIds);
                 } else {
                     roomIdWithStudent.put(roomIdsAvailable.get(i), sIds);
                 }
-                if(roomSubject.containsKey(roomIdsAvailable.get(i))) {
+                if (roomSubject.containsKey(roomIdsAvailable.get(i))) {
                     roomSubject.put(roomIdsAvailable.get(i), roomSubject.get(roomIdsAvailable.get(i)) + subjectCodes);
                 } else {
                     roomSubject.put(roomIdsAvailable.get(i), subjectCodes);
@@ -1133,6 +1138,38 @@ public class SchedulerService implements SchedulerServiceInterface {
             scheduler.setType(type);
             scheduler.setSubjectCode(roomSubject.get(entry.getKey()).substring(0, roomSubject.get(entry.getKey()).length() - 1));
             schedulerRepository.save(scheduler);
+        }
+    }
+
+    @Override
+    public void calculateWorking(int semesterId) {
+        List<Scheduler> allSchedulers = schedulerRepository.findAllBySemesterId(semesterId);
+        Map<Integer, Duration> lecturerMapHour = new HashMap<>();
+        Map<Integer, Integer> lecturerMapSlot = new HashMap<>();
+        for (Scheduler scheduler : allSchedulers) {
+            Duration time = Duration.between(scheduler.getStartDate(), scheduler.getEndDate());
+            if (scheduler.getLecturerId() != null) {
+                Integer lecturerId = scheduler.getLecturerId();
+                if (lecturerMapHour.containsKey(lecturerId)) {
+                    lecturerMapHour.put(lecturerId, lecturerMapHour.get(lecturerId).plus(time));
+                } else {
+                    lecturerMapHour.put(lecturerId, time);
+                }
+                if (lecturerMapSlot.containsKey(lecturerId)) {
+                    lecturerMapSlot.put(lecturerId, lecturerMapSlot.get(lecturerId) + 1);
+                } else {
+                    lecturerMapSlot.put(lecturerId, 1);
+                }
+            }
+        }
+        for (Map.Entry<Integer, Duration> entry : lecturerMapHour.entrySet()) {
+            Lecturer lecturer = lecturerRepository.findById(entry.getKey()).get();
+            lecturer.setTotalSlotActual(lecturerMapSlot.get(entry.getKey()));
+            long hours = entry.getValue().toHours();
+            long minutes = entry.getValue().minusHours(hours).toMinutes();
+            String totalTime = String.format("%dH%dM", hours, minutes);
+            lecturer.setTotalHour(totalTime);
+            lecturerRepository.save(lecturer);
         }
     }
 }

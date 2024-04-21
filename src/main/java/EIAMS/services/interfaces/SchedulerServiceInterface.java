@@ -23,4 +23,5 @@ public interface SchedulerServiceInterface {
     List<ScheduleToSwapDto> getListByTimeRange(Integer id, Integer semesterId, String startDate, String endDate);
     void decreaseNumberOfRoomsPerSlot(Integer semesterId, String startDate, String endDate,String type, Integer numberDecrease, String subject, String isLab) throws Exception;
     void increaseNumberOfRoomsPerSlot(Integer semesterId, String startDate, String endDate, String type, Integer numberDecrease, String subject) throws Exception;
+    void calculateWorking(int semesterId);
 }
