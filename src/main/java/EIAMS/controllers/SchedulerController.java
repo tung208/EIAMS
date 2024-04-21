@@ -41,13 +41,8 @@ public class SchedulerController {
             @RequestParam(name = "lecturer_id", required = false, defaultValue = "") String lecturer_id) {
         try {
             List<RoomScheduleDto> list = schedulerServiceInterface.list(semesterId, search, start_date, end_date, lecturer_id);
-            if (list.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-                        new ResponseObject("NOT FOUND", "", null));
-            } else {
-                return ResponseEntity.status(HttpStatus.OK).body(
-                        new ResponseObject("OK", "", list));
-            }
+            return ResponseEntity.status(HttpStatus.OK).body(
+                    new ResponseObject("OK", "", list));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
                     new ResponseObject("Fail", e.getMessage(), null));
@@ -63,13 +58,9 @@ public class SchedulerController {
             @RequestParam(name = "end_date", defaultValue = "") String end_date) {
         try {
             List<SchedulerDetailDto> list = schedulerServiceInterface.listSchedulerByRoom(semesterId, roomId, start_date, end_date, lecturerId);
-            if (list.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-                        new ResponseObject("NOT FOUND", "", null));
-            } else {
-                return ResponseEntity.status(HttpStatus.OK).body(
-                        new ResponseObject("OK", "", list));
-            }
+            return ResponseEntity.status(HttpStatus.OK).body(
+                    new ResponseObject("OK", "", list));
+
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
                     new ResponseObject("Fail", e.getMessage(), null));
@@ -83,13 +74,10 @@ public class SchedulerController {
             @RequestParam(name = "end_date", defaultValue = "") String end_date) {
         try {
             List<Integer> list = schedulerServiceInterface.getIdsByTimeRange(semesterId, start_date, end_date);
-            if (list.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-                        new ResponseObject("NOT FOUND", "", null));
-            } else {
-                return ResponseEntity.status(HttpStatus.OK).body(
-                        new ResponseObject("OK", "", list));
-            }
+
+            return ResponseEntity.status(HttpStatus.OK).body(
+                    new ResponseObject("OK", "", list));
+
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
                     new ResponseObject("Fail", e.getMessage(), null));
@@ -104,13 +92,10 @@ public class SchedulerController {
             @RequestParam(name = "end_date", defaultValue = "") String end_date) {
         try {
             List<ScheduleToSwapDto> list = schedulerServiceInterface.getListByTimeRange(schedulerId, semesterId, start_date, end_date);
-            if (list.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-                        new ResponseObject("NOT FOUND", "", null));
-            } else {
-                return ResponseEntity.status(HttpStatus.OK).body(
-                        new ResponseObject("OK", "", list));
-            }
+
+            return ResponseEntity.status(HttpStatus.OK).body(
+                    new ResponseObject("OK", "", list));
+
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
                     new ResponseObject("Fail", e.getMessage(), null));
@@ -155,13 +140,10 @@ public class SchedulerController {
             List<StudentScheduleDto> list = schedulerServiceInterface.getListStudentInARoom(
                     schedulerId, search
             );
-            if (list.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-                        new ResponseObject("NOT FOUND", "", null));
-            } else {
-                return ResponseEntity.status(HttpStatus.OK).body(
-                        new ResponseObject("OK", "", list));
-            }
+
+            return ResponseEntity.status(HttpStatus.OK).body(
+                    new ResponseObject("OK", "", list));
+
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
                     new ResponseObject("Fail", e.getMessage(), null));
@@ -176,13 +158,9 @@ public class SchedulerController {
             List<SchedulerDetailDto> list = schedulerServiceInterface.getListSchedulerBySubjectCode(
                     semesterId, subjectCode
             );
-            if (list.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-                        new ResponseObject("NOT FOUND", "", null));
-            } else {
-                return ResponseEntity.status(HttpStatus.OK).body(
-                        new ResponseObject("OK", "", list));
-            }
+            return ResponseEntity.status(HttpStatus.OK).body(
+                    new ResponseObject("OK", "", list));
+
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
                     new ResponseObject("Fail", e.getMessage(), null));
@@ -278,7 +256,7 @@ public class SchedulerController {
                                                        @RequestParam(name = "number") Integer number,
                                                        @RequestParam(name = "subject_code", defaultValue = "") String subjectCode) {
         try {
-            schedulerServiceInterface.increaseNumberOfRoomsPerSlot(semesterId,startTime, endTime, type, number, subjectCode);
+            schedulerServiceInterface.increaseNumberOfRoomsPerSlot(semesterId, startTime, endTime, type, number, subjectCode);
             return ResponseEntity.status(HttpStatus.OK).body(
                     new ResponseObject("OK", "Update Success", null));
         } catch (Exception e) {
@@ -296,7 +274,7 @@ public class SchedulerController {
                                                        @RequestParam(name = "subject_code", defaultValue = "") String subjectCode,
                                                        @RequestParam(name = "is_lab", defaultValue = "") String isLab) {
         try {
-            schedulerServiceInterface.decreaseNumberOfRoomsPerSlot(semesterId,startTime, endTime, type, number,subjectCode,isLab);
+            schedulerServiceInterface.decreaseNumberOfRoomsPerSlot(semesterId, startTime, endTime, type, number, subjectCode, isLab);
             return ResponseEntity.status(HttpStatus.OK).body(
                     new ResponseObject("OK", "Update Success", null));
         } catch (Exception e) {
