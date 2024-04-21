@@ -1,17 +1,13 @@
 package EIAMS.services;
 
 import EIAMS.dtos.LecturerDto;
-import EIAMS.entities.ExamCode;
 import EIAMS.entities.Lecturer;
-import EIAMS.entities.csvRepresentation.ExamCodeRepresentation;
 import EIAMS.entities.csvRepresentation.LecturerRepresentation;
 import EIAMS.exception.EntityExistException;
 import EIAMS.exception.EntityNotFoundException;
 import EIAMS.repositories.LecturerRepository;
-import EIAMS.services.excel.ExcelExamCode;
 import EIAMS.services.excel.ExcelLecturer;
 import EIAMS.services.interfaces.LecturerServiceInterface;
-import EIAMS.services.thread.SaveExamCode;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,9 +23,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 @Service
 @RequiredArgsConstructor
@@ -91,7 +84,7 @@ public class LecturerService implements LecturerServiceInterface {
     }
 
     @Override
-    public void update(int id, LecturerDto lecturerDto) throws EntityNotFoundException, EntityExistException {
+    public Lecturer update(int id, LecturerDto lecturerDto) throws EntityNotFoundException, EntityExistException {
         String codeName = lecturerDto.getCodeName();
         if (lecturerDto.getCodeName().trim().equals("")){
             int index = lecturerDto.getEmail().indexOf("@");
@@ -113,6 +106,7 @@ public class LecturerService implements LecturerServiceInterface {
                     .totalSlot(lecturerDto.getTotalSlot())
                     .build();
             lecturerRepository.save(lecturerUpdate);
+            return lecturer.get();
         } else throw new EntityNotFoundException("Not found lecturer");
     }
 

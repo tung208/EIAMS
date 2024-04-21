@@ -1,8 +1,6 @@
 package EIAMS.services;
 
 import EIAMS.dtos.SubjectDto;
-import EIAMS.entities.Semester;
-import EIAMS.entities.StudentSubject;
 import EIAMS.entities.Subject;
 import EIAMS.entities.csvRepresentation.DontMixRepresentation;
 import EIAMS.entities.csvRepresentation.NoLabRepresentation;
@@ -13,12 +11,10 @@ import EIAMS.services.excel.ExcelDontMix;
 import EIAMS.services.excel.ExcelNoLab;
 import EIAMS.services.excel.ExcelSubject;
 import EIAMS.services.interfaces.SubjectServiceInterface;
-import EIAMS.services.thread.SaveStudentSubject;
 import EIAMS.services.thread.SaveSubject;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.annotation.Order;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -135,7 +131,7 @@ public class SubjectService implements SubjectServiceInterface {
     }
 
     @Override
-    public void update(int id, SubjectDto subject) throws EntityNotFoundException {
+    public Subject update(int id, SubjectDto subject) throws EntityNotFoundException {
         Optional<Subject> s = subjectRepository.findById(subject.getId());
         if (s.isPresent()) {
             Subject subjectUpdate = Subject.builder()
@@ -150,6 +146,7 @@ public class SubjectService implements SubjectServiceInterface {
                     .replacedBy(subject.getReplacedBy())
                     .build();
             subjectRepository.save(subjectUpdate);
+            return s.get();
         } else throw new EntityNotFoundException("Not found subject");
     }
 

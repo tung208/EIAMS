@@ -33,4 +33,14 @@ public class Semester {
     @Column(name = "creator_id", nullable = false)
     private Integer creatorId;
 
+    @Override
+    public String toString(){
+        return "Semester{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", code='" + code + '\'' +
+                ", fromDate='" + fromDate + '\'' +
+                ", toDate='" + toDate + '\'' +
+                '}';
+    }
 }

@@ -1,9 +1,12 @@
 package EIAMS.configuration;
 
 import lombok.RequiredArgsConstructor;
+import org.apache.catalina.filters.CorsFilter;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -17,6 +20,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
+import java.util.List;
 
 import static org.springframework.http.HttpMethod.*;
 
@@ -33,13 +37,13 @@ public class SecurityConfiguration {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .cors(cors -> cors.disable())
+                .cors(Customizer.withDefaults())
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
-//                                "/api/v1/auth/authenticate",
-//                                "/api/v1/auth/refresh-token"
-                                "/api/v1/**"
+                                "/api/v1/auth/authenticate",
+                                "/api/v1/auth/refresh-token"
+//                                "/api/v1/**"
                         )
                         .permitAll()
                         .anyRequest()
@@ -72,4 +76,6 @@ public class SecurityConfiguration {
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
+
+
 }
