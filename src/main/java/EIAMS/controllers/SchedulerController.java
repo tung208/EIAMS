@@ -271,12 +271,24 @@ public class SchedulerController {
                                                        @RequestParam(name = "start_time") String startTime,
                                                        @RequestParam(name = "end_time") String endTime,
                                                        @RequestParam(name = "number") Integer number,
-                                                       @RequestParam(name = "subject_code", defaultValue = "") String subjectCode,
-                                                       @RequestParam(name = "is_lab", defaultValue = "") String isLab) {
+                                                       @RequestParam(name = "subject_code", defaultValue = "") String subjectCode) {
         try {
-            schedulerServiceInterface.decreaseNumberOfRoomsPerSlot(semesterId, startTime, endTime, type, number, subjectCode, isLab);
+            schedulerServiceInterface.decreaseNumberOfRoomsPerSlot(semesterId, startTime, endTime, type, number, subjectCode);
             return ResponseEntity.status(HttpStatus.OK).body(
                     new ResponseObject("OK", "Update Success", null));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    new ResponseObject("Fail", e.getMessage(), null));
+        }
+    }
+
+    @GetMapping(path = "subject/dont-mix")
+    public ResponseEntity<ResponseObject> listDontMix(@RequestParam(name = "semester_id") Integer semesterId,
+                                                      @RequestParam(name = "start_time") String startTime,
+                                                      @RequestParam(name = "end_time") String endTime) {
+        try {
+            return ResponseEntity.status(HttpStatus.OK).body(
+                    new ResponseObject("OK", "Found list", schedulerServiceInterface.listDontMix(semesterId, startTime, endTime)));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
                     new ResponseObject("Fail", e.getMessage(), null));
