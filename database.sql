@@ -111,7 +111,10 @@ CREATE TABLE `Lecturer` (
   `code_name` varchar(64),
   `email` varchar(64),
   `exam_subject` varchar(124),
-  `total_slot` int
+  `total_slot` int,
+  `total_slot_actual` int,
+  `total_hour` varchar(64)
+
 );
 
 CREATE TABLE `Status` (

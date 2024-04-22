@@ -31,6 +31,12 @@ public class Lecturer {
     @Column(name = "total_slot")
     private Integer totalSlot;
 
+    @Column(name = "total_slot_actual")
+    private Integer totalSlotActual;
+
+    @Column(name = "total_hour", length = 64)
+    private String totalHour;
+
     @Override
     public String toString(){
         return "Lecturer{" +
