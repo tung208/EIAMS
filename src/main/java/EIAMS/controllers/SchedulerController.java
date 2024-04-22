@@ -294,4 +294,15 @@ public class SchedulerController {
                     new ResponseObject("Fail", e.getMessage(), null));
         }
     }
+
+    @GetMapping(path = "semester/get-time-schedule")
+    public ResponseEntity<ResponseObject> getTime(@RequestParam(name = "semester_id") Integer semesterId) {
+        try {
+            return ResponseEntity.status(HttpStatus.OK).body(
+                    new ResponseObject("OK", "Found list", schedulerServiceInterface.getTimeSchedule(semesterId)));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    new ResponseObject("Fail", e.getMessage(), null));
+        }
+    }
 }

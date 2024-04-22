@@ -1180,12 +1180,32 @@ public class SchedulerService implements SchedulerServiceInterface {
         List<Scheduler> schedulerList = schedulerRepository.findAllBySemesterIdAndStartDateAndEndDate(semesterId, startDateSearch, endDateSearch);
         List<String> listDontMix = new ArrayList<>();
         for (Scheduler scheduler : schedulerList) {
-            if (scheduler.getSubjectCode().split(",").length == 1 &&
-                    subjectRepository.findBySemesterIdAndSubjectCode(semesterId, scheduler.getSubjectCode()).getDontMix() == 1) {
-                listDontMix.add(scheduler.getSubjectCode());
+            if (scheduler.getSubjectCode().split(",").length == 1) {
+            String subjectCode = scheduler.getSubjectCode();
+            if(subjectRepository.findBySemesterIdAndSubjectCode(semesterId, scheduler.getSubjectCode()) != null
+                    && subjectRepository.findBySemesterIdAndSubjectCode(semesterId, scheduler.getSubjectCode()).getDontMix() == 1
+                    && !listDontMix.contains(subjectCode)) {
+                    listDontMix.add(scheduler.getSubjectCode());
+            }
             }
         }
 
         return listDontMix;
+    }
+
+    @Override
+    public List<String> getTimeSchedule(int semesterId) {
+        List<PlanExam> planExamList = planExamRepository.findAllBySemesterId(semesterId);
+        List<Date> list = new ArrayList<>();
+        for (PlanExam planExam : planExamList) {
+            list.add(planExam.getExpectedDate());
+        }
+        Collections.sort(list);
+        Date earliestDate = list.get(0);
+        Date latestDate = list.get(list.size() - 1);
+        List<String> result = new ArrayList<>();
+        result.add(earliestDate.toString());
+        result.add(latestDate.toString());
+        return result;
     }
 }

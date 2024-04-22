@@ -25,4 +25,5 @@ public interface SchedulerServiceInterface {
     void increaseNumberOfRoomsPerSlot(Integer semesterId, String startDate, String endDate, String type, Integer numberDecrease, String subject) throws Exception;
     void calculateWorking(int semesterId);
     List<String> listDontMix(int semesterId, String startDate, String endDate);
+    List<String> getTimeSchedule(int semesterId);
 }
