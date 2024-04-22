@@ -2,11 +2,13 @@ package EIAMS.controllers;
 
 import EIAMS.dtos.PlanExamDto;
 import EIAMS.entities.PlanExam;
+import EIAMS.entities.Scheduler;
 import EIAMS.entities.Semester;
 import EIAMS.entities.responeObject.PageResponse;
 import EIAMS.entities.responeObject.ResponseObject;
 import EIAMS.exception.EntityNotFoundException;
 import EIAMS.services.PlanExamService;
+import EIAMS.services.SchedulerService;
 import EIAMS.services.StatusService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +21,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.text.ParseException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -29,6 +35,9 @@ public class PlanExamController {
 
     @Autowired
     StatusService statusService;
+
+    @Autowired
+    SchedulerService schedulerService;
 
     @PostMapping("/import")
     public ResponseEntity<ResponseObject> importPlanExam(@RequestParam("file") MultipartFile file,
@@ -78,5 +87,41 @@ public class PlanExamController {
                 new ResponseObject("OK",
                         "Delete Success",
                         ""));
+    }
+
+    @GetMapping("/get-list-date")
+    public PageResponse<String> getListDate(@RequestParam(defaultValue = "1") Integer pageNo,
+                                              @RequestParam(defaultValue = "2") Integer pageSize,
+                                              @RequestParam(defaultValue = "id") String sortBy,
+                                              @RequestParam(defaultValue = "") Integer semesterId
+    ){
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        List<LocalDate> dates = new ArrayList<>();
+        Page<String> page =  planExamService.getListDate(pageNo, pageSize, semesterId);
+        System.out.println(page.getContent());
+        return new PageResponse<>(page.getNumber() + 1, page.getTotalPages(), page.getSize(), page.getTotalElements(),page.getContent());
+    }
+
+    @GetMapping("/get-list-time")
+    public PageResponse<PlanExam> getListTime(@RequestParam(defaultValue = "1") Integer pageNo,
+                                            @RequestParam(defaultValue = "2") Integer pageSize,
+                                            @RequestParam(defaultValue = "id") String sortBy,
+                                            @RequestParam(defaultValue = "") Integer semesterId,
+                                            @RequestParam(defaultValue = "") String expectedDate
+    ) throws ParseException {
+        Page<PlanExam> page =  planExamService.getListTime(pageNo, pageSize, semesterId, expectedDate);
+        return new PageResponse<>(page.getNumber() + 1, page.getTotalPages(), page.getSize(), page.getTotalElements(),page.getContent());
+    }
+
+    @GetMapping("/get-list-slot")
+    public PageResponse<Scheduler> getListSlot(@RequestParam(defaultValue = "1") Integer pageNo,
+                                               @RequestParam(defaultValue = "2") Integer pageSize,
+                                               @RequestParam(defaultValue = "id") String sortBy,
+                                               @RequestParam(defaultValue = "") Integer semesterId,
+                                               @RequestParam(defaultValue = "") String expectedDate,
+                                               @RequestParam(defaultValue = "") String expectedTime
+    ) throws ParseException {
+        Page<Scheduler> page =  schedulerService.getListSlot(pageNo, pageSize, semesterId, expectedDate, expectedTime);
+        return new PageResponse<>(page.getNumber() + 1, page.getTotalPages(), page.getSize(), page.getTotalElements(),page.getContent());
     }
 }

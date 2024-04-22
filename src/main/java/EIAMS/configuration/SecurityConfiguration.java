@@ -42,7 +42,10 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/api/v1/auth/authenticate",
-                                "/api/v1/auth/refresh-token"
+                                "/api/v1/auth/refresh-token",
+                                "/api/v1/plan-exam/get-list-date",
+                                "/api/v1/plan-exam/get-list-time",
+                                "/api/v1/plan-exam/get-list-slot"
 //                                "/api/v1/**"
                         )
                         .permitAll()

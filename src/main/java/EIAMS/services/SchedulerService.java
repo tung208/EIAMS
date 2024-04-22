@@ -6,6 +6,10 @@ import EIAMS.entities.*;
 import EIAMS.repositories.*;
 import EIAMS.services.interfaces.SchedulerServiceInterface;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,10 +17,7 @@ import java.security.InvalidParameterException;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.Duration;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -1207,5 +1208,26 @@ public class SchedulerService implements SchedulerServiceInterface {
         result.add(earliestDate.toString());
         result.add(latestDate.toString());
         return result;
+    }
+
+    public Page<Scheduler> getListSlot(Integer page, Integer limit, Integer semesterId, String expectedDate, String expectedTime) throws ParseException {
+        // Ngày đầu vào
+        LocalDate date = LocalDate.parse(expectedDate);
+
+        // Tách thời gian thành thời gian bắt đầu và kết thúc
+        String[] timeParts = expectedTime.split("-");
+        String startTimeString = timeParts[0].replace("H", ":");
+        String endTimeString = timeParts[1].replace("H", ":");
+
+        // Chuyển đổi chuỗi thời gian thành LocalTime
+        LocalTime startTime = LocalTime.parse(startTimeString, DateTimeFormatter.ofPattern("HH:mm"));
+        LocalTime endTime = LocalTime.parse(endTimeString, DateTimeFormatter.ofPattern("HH:mm"));
+
+        // Kết hợp ngày và thời gian thành LocalDateTime
+        LocalDateTime startDateTime = LocalDateTime.of(date, startTime);
+        LocalDateTime endDateTime = LocalDateTime.of(date, endTime);
+
+        Pageable pageable = PageRequest.of(page - 1, limit, Sort.by("id").descending());
+        return schedulerRepository.findBySemesterIdAndStartDateAndEndDate(semesterId, startDateTime, endDateTime, pageable);
     }
 }
