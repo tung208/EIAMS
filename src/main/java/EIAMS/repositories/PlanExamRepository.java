@@ -38,4 +38,19 @@ public interface PlanExamRepository extends JpaRepository<PlanExam, Integer> {
     void deleteBySemesterId(Integer semesterId);
 
     int countAllBySemesterId(Integer semesterId);
+
+    @Query("""
+            SELECT DISTINCT s.expectedDate 
+            FROM PlanExam s 
+            WHERE s.semesterId = :semesterId
+            """)
+    Page<String> findDistinctExpectedDateBySemesterId(Integer semesterId, Pageable pageable);
+
+    @Query("""
+            SELECT s
+            FROM PlanExam s 
+            WHERE s.semesterId = :semesterId
+            AND s.expectedDate = :expectedDate
+            """)
+    Page<PlanExam> findDistinctExpectedTimeBySemesterIdAndExpectedDate(Integer semesterId,Date expectedDate,Pageable pageable);
 }

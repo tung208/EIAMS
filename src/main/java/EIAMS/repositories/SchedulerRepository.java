@@ -1,6 +1,9 @@
 package EIAMS.repositories;
 
+import EIAMS.entities.PlanExam;
 import EIAMS.entities.Scheduler;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -8,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 
 public interface SchedulerRepository extends JpaRepository<Scheduler, Integer> {
@@ -180,5 +184,14 @@ public interface SchedulerRepository extends JpaRepository<Scheduler, Integer> {
     List<Scheduler> findAllBySemesterIdAndStartDateAfterAndEndDateBeforeAndIdNot(Integer semesterId, LocalDateTime startDate, LocalDateTime endDate, Integer id, Integer lecturerId);
 
     List<Scheduler> findAllBySemesterIdAndStartDateAndEndDate(int semesterId, LocalDateTime startDate, LocalDateTime endDate);
+
+    @Query("""
+            SELECT s
+            FROM Scheduler s 
+            WHERE s.semesterId = :semesterId
+            AND s.startDate = :startDate
+            AND s.endDate = :endDate
+            """)
+    Page<Scheduler> findBySemesterIdAndStartDateAndEndDate(Integer semesterId, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
 }
 

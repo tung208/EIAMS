@@ -95,13 +95,6 @@ CREATE TABLE `Slot` (
   `end_time` datetime
 );
 
-CREATE TABLE `Test` (
-  `id` int(11) PRIMARY KEY AUTO_INCREMENT,
-  `member_code` varchar(64),
-  `roll_number` varchar(64),
-  `full_name` varchar(64)
-);
-
 CREATE TABLE `PlanExam` (
   `id` int(11) PRIMARY KEY AUTO_INCREMENT,
   `semester_id` int,

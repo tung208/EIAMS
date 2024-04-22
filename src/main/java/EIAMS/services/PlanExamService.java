@@ -156,4 +156,16 @@ public class PlanExamService implements PlanExamServiceInterface {
     public void deleteSemesterId(int id){
         planExamRepository.deleteBySemesterId(id);
     }
+
+    public Page<String> getListDate(Integer page, Integer limit, Integer semesterId){
+        Pageable pageable = PageRequest.of(page - 1, limit, Sort.by("id").descending());
+        return planExamRepository.findDistinctExpectedDateBySemesterId(semesterId, pageable);
+    }
+
+    public Page<PlanExam> getListTime(Integer page, Integer limit, Integer semesterId, String expectedDate) throws ParseException {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        Date fromDate = (Date) dateFormat.parse(expectedDate);
+        Pageable pageable = PageRequest.of(page - 1, limit, Sort.by("id").descending());
+        return planExamRepository.findDistinctExpectedTimeBySemesterIdAndExpectedDate(semesterId, fromDate,pageable);
+    }
 }
