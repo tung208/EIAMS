@@ -650,8 +650,9 @@ public class SchedulerService implements SchedulerServiceInterface {
     @Override
     public void setExamCode(int semesterId) throws Exception {
         List<Scheduler> schedulers = schedulerRepository.findAll();
-        if (schedulers.isEmpty()) return;
-
+        if (schedulers.isEmpty()){
+            throw new Exception("Not enough data to set");
+        }
         for (Scheduler s : schedulers) {
             String subjectCodes = s.getSubjectCode();
             String[] subjectCodesArray = subjectCodes.split(",");
