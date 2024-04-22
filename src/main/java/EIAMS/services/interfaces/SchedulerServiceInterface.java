@@ -21,7 +21,9 @@ public interface SchedulerServiceInterface {
     SchedulerDetailDto get(int schedulerId);
     List<Integer> getIdsByTimeRange(Integer semesterId, String startDate, String endDate);
     List<ScheduleToSwapDto> getListByTimeRange(Integer id, Integer semesterId, String startDate, String endDate);
-    void decreaseNumberOfRoomsPerSlot(Integer semesterId, String startDate, String endDate,String type, Integer numberDecrease, String subject, String isLab) throws Exception;
+    void decreaseNumberOfRoomsPerSlot(Integer semesterId, String startDate, String endDate,String type, Integer numberDecrease, String subject) throws Exception;
     void increaseNumberOfRoomsPerSlot(Integer semesterId, String startDate, String endDate, String type, Integer numberDecrease, String subject) throws Exception;
     void calculateWorking(int semesterId);
+    List<String> listDontMix(int semesterId, String startDate, String endDate);
+    List<String> getTimeSchedule(int semesterId);
 }

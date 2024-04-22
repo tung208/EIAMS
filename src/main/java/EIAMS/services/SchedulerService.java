@@ -979,7 +979,7 @@ public class SchedulerService implements SchedulerServiceInterface {
     }
 
     @Override
-    public void decreaseNumberOfRoomsPerSlot(Integer semesterId, String startDate, String endDate, String type, Integer numberDecrease, String subject, String isLab) throws Exception {
+    public void decreaseNumberOfRoomsPerSlot(Integer semesterId, String startDate, String endDate, String type, Integer numberDecrease, String subject) throws Exception {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         if (startDate.isBlank() || endDate.isBlank()) {
             throw new InvalidParameterException("Start time and end time cannot be empty");
@@ -991,11 +991,7 @@ public class SchedulerService implements SchedulerServiceInterface {
                 .map(Room::getId)
                 .toList();
         List<Scheduler> schedulers;
-        if (Objects.equals(isLab, "true")) {
-            schedulers = schedulerRepository.findAllBySemesterIdAndStartDateAndEndDateAndTypeAndRoomIdIn(semesterId, startDateSearch, endDateSearch, type, labs);
-        } else {
-            schedulers = schedulerRepository.findAllBySemesterIdAndStartDateAndEndDateAndTypeAndRoomIdNotIn(semesterId, startDateSearch, endDateSearch, type, labs);
-        }
+        schedulers = schedulerRepository.findAllBySemesterIdAndStartDateAndEndDateAndTypeAndRoomIdNotIn(semesterId, startDateSearch, endDateSearch, type, labs);
         Map<Integer, Integer> roomStudentCount = new HashMap<>();
         List<String> allStudentIds = new ArrayList<>();
         if (!Objects.equals(subject, "")) {
@@ -1171,5 +1167,45 @@ public class SchedulerService implements SchedulerServiceInterface {
             lecturer.setTotalHour(totalTime);
             lecturerRepository.save(lecturer);
         }
+    }
+
+    @Override
+    public List<String> listDontMix(int semesterId, String startDate, String endDate) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        if (startDate.isBlank() || endDate.isBlank()) {
+            throw new InvalidParameterException("Start time and end time cannot be empty");
+        }
+        LocalDateTime endDateSearch = LocalDateTime.parse(endDate, formatter);
+        LocalDateTime startDateSearch = LocalDateTime.parse(startDate, formatter);
+        List<Scheduler> schedulerList = schedulerRepository.findAllBySemesterIdAndStartDateAndEndDate(semesterId, startDateSearch, endDateSearch);
+        List<String> listDontMix = new ArrayList<>();
+        for (Scheduler scheduler : schedulerList) {
+            if (scheduler.getSubjectCode().split(",").length == 1) {
+            String subjectCode = scheduler.getSubjectCode();
+            if(subjectRepository.findBySemesterIdAndSubjectCode(semesterId, scheduler.getSubjectCode()) != null
+                    && subjectRepository.findBySemesterIdAndSubjectCode(semesterId, scheduler.getSubjectCode()).getDontMix() == 1
+                    && !listDontMix.contains(subjectCode)) {
+                    listDontMix.add(scheduler.getSubjectCode());
+            }
+            }
+        }
+
+        return listDontMix;
+    }
+
+    @Override
+    public List<String> getTimeSchedule(int semesterId) {
+        List<PlanExam> planExamList = planExamRepository.findAllBySemesterId(semesterId);
+        List<Date> list = new ArrayList<>();
+        for (PlanExam planExam : planExamList) {
+            list.add(planExam.getExpectedDate());
+        }
+        Collections.sort(list);
+        Date earliestDate = list.get(0);
+        Date latestDate = list.get(list.size() - 1);
+        List<String> result = new ArrayList<>();
+        result.add(earliestDate.toString());
+        result.add(latestDate.toString());
+        return result;
     }
 }

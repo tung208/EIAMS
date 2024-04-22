@@ -1,8 +1,6 @@
 package EIAMS.repositories;
 
 import EIAMS.entities.Scheduler;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -10,19 +8,26 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 
 public interface SchedulerRepository extends JpaRepository<Scheduler, Integer> {
     List<Scheduler> findAllBySemesterId(Integer semesterId);
+
     List<Scheduler> findAllBySemesterIdOrderByStartDate(Integer semesterId);
+
     List<Scheduler> findAllBySemesterIdAndSubjectCodeContainingOrderByStartDate(Integer semesterId, String subjectCode);
+
     Scheduler findBySemesterIdAndRoomIdAndStartDateAndEndDate(Integer semesterId, Integer roomId, LocalDateTime startDate, LocalDateTime endDate);
+
     List<Scheduler> findAllBySemesterIdAndStartDateAndEndDateAndTypeAndRoomIdNotIn(Integer semesterId, LocalDateTime startDate, LocalDateTime endDate, String type, Collection<Integer> roomId);
+
     List<Scheduler> findAllBySemesterIdAndStartDateAndEndDateAndTypeAndRoomIdIn(Integer semesterId, LocalDateTime startDate, LocalDateTime endDate, String type, Collection<Integer> roomId);
+
     List<Scheduler> findAllBySemesterIdAndStartDateAndEndDateAndIdNotIn(Integer semesterId, LocalDateTime startDate, LocalDateTime endDate, Collection<Integer> id);
+
     @Query("select s.roomId from Scheduler s where s.semesterId = ?1 and ((s.startDate >= ?2 and s.endDate <= ?3) or (s.startDate < ?2 and s.endDate > ?2) or (s.startDate < ?3 and s.endDate > ?3))")
     List<Integer> findAllRoomIdBySemesterIdAndStartDateAndEndDate(Integer semesterId, LocalDateTime startDate, LocalDateTime endDate);
+
     @Query("""
             select s from Scheduler s
             where s.semesterId = ?1 and s.subjectCode <> ?2 and s.startDate = ?3 and s.endDate = ?4""")
@@ -75,6 +80,7 @@ public interface SchedulerRepository extends JpaRepository<Scheduler, Integer> {
             order by s.startDate asc
             """)
     List<Object[]> findAllRoomByDate(LocalDateTime startDate, LocalDateTime endDate, Integer semesterId);
+
     @Query("""
              select DISTINCT s.roomId, function('date', s.startDate) from Scheduler s
             where s.lecturerId is null and function('date', s.startDate) >= function('date', ?1) and function('date', s.endDate) <= function('date', ?2) and s.semesterId = ?3
@@ -123,15 +129,18 @@ public interface SchedulerRepository extends JpaRepository<Scheduler, Integer> {
             order by s.startDate asc
             """)
     List<Object> findAllByStartDateAfterAndEndDateBeforeAndSubjectCodeContains(LocalDateTime startDate, LocalDateTime endDate, String subjectCode);
+
     @Query("select distinct s.subjectCode, s.startDate, s.endDate from Scheduler s where s.subjectCode like concat('%', ?1, '%')" +
             "order by s.startDate asc")
     List<Object> findAllBySubjectCodeContains(String subjectCode);
+
     @Query("""
             select distinct s.subjectCode, s.startDate, s.endDate from Scheduler s
             where s.startDate > ?1 and s.subjectCode like concat('%', ?2, '%')
             order by s.startDate asc
             """)
     List<Object> findAllByStartDateAfterAndSubjectCodeContains(LocalDateTime startDate, String subjectCode);
+
     @Query("""
             select distinct s.subjectCode, s.startDate, s.endDate from Scheduler s
             where s.endDate < ?1 and s.subjectCode like concat('%', ?2, '%')
@@ -160,6 +169,7 @@ public interface SchedulerRepository extends JpaRepository<Scheduler, Integer> {
 
     @Query("select s from Scheduler s where s.roomId = ?1 and s.startDate >= ?2 and s.endDate <= ?3 and s.semesterId = ?4")
     List<Scheduler> findAllByRoomIdAndStartDateAfterAndEndDateBefore(Integer roomId, LocalDateTime startDate, LocalDateTime endDate, Integer semesterId);
+
     List<Scheduler> findAllBySemesterIdAndRoomIdAndStartDateAfterAndEndDateBeforeAndLecturerId(Integer semesterId, Integer roomId, LocalDateTime startDate, LocalDateTime endDate, Integer lecturerId);
 
     @Query("select s.id from Scheduler s where s.semesterId = ?1 and s.startDate >= ?2 and s.endDate <= ?3")
@@ -168,4 +178,7 @@ public interface SchedulerRepository extends JpaRepository<Scheduler, Integer> {
 
     @Query("select s from Scheduler s where s.semesterId = ?1 and s.startDate > ?2 and s.endDate < ?3 and s.id <> ?4 and s.lecturerId <> ?5")
     List<Scheduler> findAllBySemesterIdAndStartDateAfterAndEndDateBeforeAndIdNot(Integer semesterId, LocalDateTime startDate, LocalDateTime endDate, Integer id, Integer lecturerId);
+
+    List<Scheduler> findAllBySemesterIdAndStartDateAndEndDate(int semesterId, LocalDateTime startDate, LocalDateTime endDate);
 }
+
