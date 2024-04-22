@@ -158,7 +158,7 @@ public class PlanExamService implements PlanExamServiceInterface {
     }
 
     public Page<String> getListDate(Integer page, Integer limit, Integer semesterId){
-        Pageable pageable = PageRequest.of(page - 1, limit, Sort.by("id").descending());
+        Pageable pageable = PageRequest.of(page - 1, limit);
         return planExamRepository.findDistinctExpectedDateBySemesterId(semesterId, pageable);
     }
 

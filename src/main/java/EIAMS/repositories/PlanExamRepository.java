@@ -40,7 +40,7 @@ public interface PlanExamRepository extends JpaRepository<PlanExam, Integer> {
     int countAllBySemesterId(Integer semesterId);
 
     @Query("""
-            SELECT DISTINCT s.expectedDate 
+            SELECT DISTINCT s.expectedDate
             FROM PlanExam s 
             WHERE s.semesterId = :semesterId
             """)
