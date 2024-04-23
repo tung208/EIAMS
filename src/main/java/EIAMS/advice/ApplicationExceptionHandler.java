@@ -4,9 +4,12 @@ import EIAMS.entities.responeObject.ResponseObject;
 import EIAMS.exception.EntityExistException;
 import EIAMS.exception.EntityNotFoundException;
 import EIAMS.exception.StudentNotFoundException;
+import io.jsonwebtoken.ExpiredJwtException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -33,9 +36,41 @@ public class ApplicationExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ResponseObject> handleAllException(Exception ex, WebRequest request) {
         // quá trình kiểm soat lỗi diễn ra ở đây
+        if (ex instanceof BadCredentialsException){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
+                    new ResponseObject("NOT OK", "Authentication failure", "BadCredentials"));
+        }
+
+        if (ex instanceof ExpiredJwtException){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
+                    new ResponseObject("NOT OK", "Authentication failure", "JWT expired"));
+        }
+
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
                 new ResponseObject("NOT OK", "Action Fail", ex.getMessage()));
     }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ResponseObject> handleAccessDeniedException(Exception ex, WebRequest request) {
+        // quá trình kiểm soat lỗi diễn ra ở đây
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(
+                new ResponseObject("NOT OK", "Action Fail", ex.getMessage()));
+    }
+
+//    @ExceptionHandler(ExpiredJwtException.class)
+//    public ResponseEntity<ResponseObject> jwtExpiredException(Exception ex, WebRequest request) {
+//        // quá trình kiểm soat lỗi diễn ra ở đây
+//        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
+//                new ResponseObject("NOT OK", "Action Fail", "JWT Expired"));
+//    }
+//
+//    @ExceptionHandler(BadCredentialsException.class)
+//    public ResponseEntity<ResponseObject> jwtExpired1Exception(Exception ex, WebRequest request) {
+//        // quá trình kiểm soat lỗi diễn ra ở đây
+//        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
+//                new ResponseObject("NOT OK", "Action Fail", "JWT Expired"));
+//    }
+
 
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<ResponseObject> objectNotFound(EntityNotFoundException exception, WebRequest webRequest){
