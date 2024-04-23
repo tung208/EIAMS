@@ -6,6 +6,7 @@ import EIAMS.entities.PlanExam;
 import EIAMS.entities.Room;
 import EIAMS.entities.Scheduler;
 import EIAMS.entities.Semester;
+import EIAMS.entities.responeObject.DashboardResponse;
 import EIAMS.entities.responeObject.PageResponse;
 import EIAMS.entities.responeObject.ResponseObject;
 import EIAMS.exception.EntityNotFoundException;
@@ -122,12 +123,12 @@ public class PlanExamController {
     }
 
     @GetMapping("/get-list-slot")
-    public PageResponse<SchedulerSlotDto> getListSlot(@RequestParam(defaultValue = "1") Integer pageNo,
-                                               @RequestParam(defaultValue = "2") Integer pageSize,
-                                               @RequestParam(defaultValue = "id") String sortBy,
-                                               @RequestParam(defaultValue = "") Integer semesterId,
-                                               @RequestParam(defaultValue = "") String expectedDate,
-                                               @RequestParam(defaultValue = "") String expectedTime
+    public ResponseEntity<DashboardResponse> getListSlot(@RequestParam(defaultValue = "1") Integer pageNo,
+                                         @RequestParam(defaultValue = "2") Integer pageSize,
+                                         @RequestParam(defaultValue = "id") String sortBy,
+                                         @RequestParam(defaultValue = "") Integer semesterId,
+                                         @RequestParam(defaultValue = "") String expectedDate,
+                                         @RequestParam(defaultValue = "") String expectedTime
     ) throws ParseException {
         Page<Scheduler> page =  schedulerService.getListSlot(pageNo, pageSize, semesterId, expectedDate, expectedTime);
 
@@ -143,6 +144,7 @@ public class PlanExamController {
         });
         List<SchedulerSlotDto> schedulerSlotDtos = new ArrayList<>();
 
+        final int[] totalStudent = {0};
         schedulers.stream().forEach(element -> {
             SchedulerSlotDto schedulerSlotDto = SchedulerSlotDto.builder()
                     .id(element.getId())
@@ -153,8 +155,12 @@ public class PlanExamController {
                     .endDate(element.getEndDate())
                     .type(element.getType())
                     .build();
+            String[] studentIds = element.getStudentId().split(",");
+            totalStudent[0] += studentIds.length;
             schedulerSlotDtos.add(schedulerSlotDto);
         });
-        return new PageResponse<>(page.getNumber() + 1, page.getTotalPages(), page.getSize(), page.getTotalElements(),schedulerSlotDtos);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(new DashboardResponse(page.getNumber() + 1, page.getTotalPages(),
+                        page.getSize(), page.getTotalElements(), totalStudent[0], schedulerSlotDtos));
     }
 }
