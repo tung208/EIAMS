@@ -22,19 +22,12 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
-@RequiredArgsConstructor
+//@RequiredArgsConstructor
 @EnableWebMvc
 public class ApplicationConfig implements WebMvcConfigurer {
 
-    private final AccountRepository accountRepository;
-
-//    @Autowired
-//    @Qualifier("handleAllException")
-//    private HandlerExceptionResolver exceptionResolver;
-//    @Bean
-//    public JwtAuthenticationFilter jwtAuthenticationFilter(){
-//        return new JwtAuthenticationFilter(exceptionResolver);
-//    }
+    @Autowired
+    private AccountRepository accountRepository;
 
     @Bean
     public UserDetailsService userDetailsService() {
