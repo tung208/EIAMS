@@ -122,6 +122,7 @@ public class PlanExamController {
                                                @RequestParam(defaultValue = "") String expectedTime
     ) throws ParseException {
         Page<Scheduler> page =  schedulerService.getListSlot(pageNo, pageSize, semesterId, expectedDate, expectedTime);
-        return new PageResponse<>(page.getNumber() + 1, page.getTotalPages(), page.getSize(), page.getTotalElements(),page.getContent());
+        List<Scheduler> schedulers = page.getContent();
+        return new PageResponse<>(page.getNumber() + 1, page.getTotalPages(), page.getSize(), page.getTotalElements(),schedulers);
     }
 }
