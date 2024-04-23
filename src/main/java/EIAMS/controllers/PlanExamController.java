@@ -1,12 +1,16 @@
 package EIAMS.controllers;
 
 import EIAMS.dtos.PlanExamDto;
+import EIAMS.dtos.SchedulerSlotDto;
 import EIAMS.entities.PlanExam;
+import EIAMS.entities.Room;
 import EIAMS.entities.Scheduler;
 import EIAMS.entities.Semester;
+import EIAMS.entities.responeObject.DashboardResponse;
 import EIAMS.entities.responeObject.PageResponse;
 import EIAMS.entities.responeObject.ResponseObject;
 import EIAMS.exception.EntityNotFoundException;
+import EIAMS.repositories.RoomRepository;
 import EIAMS.services.PlanExamService;
 import EIAMS.services.SchedulerService;
 import EIAMS.services.StatusService;
@@ -24,7 +28,9 @@ import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
@@ -38,6 +44,9 @@ public class PlanExamController {
 
     @Autowired
     SchedulerService schedulerService;
+
+    @Autowired
+    RoomRepository roomRepository;
 
     @PostMapping("/import")
     public ResponseEntity<ResponseObject> importPlanExam(@RequestParam("file") MultipartFile file,
@@ -114,14 +123,44 @@ public class PlanExamController {
     }
 
     @GetMapping("/get-list-slot")
-    public PageResponse<Scheduler> getListSlot(@RequestParam(defaultValue = "1") Integer pageNo,
-                                               @RequestParam(defaultValue = "2") Integer pageSize,
-                                               @RequestParam(defaultValue = "id") String sortBy,
-                                               @RequestParam(defaultValue = "") Integer semesterId,
-                                               @RequestParam(defaultValue = "") String expectedDate,
-                                               @RequestParam(defaultValue = "") String expectedTime
+    public ResponseEntity<DashboardResponse> getListSlot(@RequestParam(defaultValue = "1") Integer pageNo,
+                                         @RequestParam(defaultValue = "2") Integer pageSize,
+                                         @RequestParam(defaultValue = "id") String sortBy,
+                                         @RequestParam(defaultValue = "") Integer semesterId,
+                                         @RequestParam(defaultValue = "") String expectedDate,
+                                         @RequestParam(defaultValue = "") String expectedTime
     ) throws ParseException {
         Page<Scheduler> page =  schedulerService.getListSlot(pageNo, pageSize, semesterId, expectedDate, expectedTime);
-        return new PageResponse<>(page.getNumber() + 1, page.getTotalPages(), page.getSize(), page.getTotalElements(),page.getContent());
+
+//        prepare data
+        List<Scheduler> schedulers = page.getContent();
+        List<Integer> roomId = schedulers.stream()
+                .map(obj -> ((Scheduler) obj).getRoomId())
+                .collect(Collectors.toList());
+        List<Room> rooms = roomRepository.findAllById(roomId);
+        Hashtable<Integer,String> roomHashtable = new Hashtable<>();
+        rooms.stream().forEach(element -> {
+            roomHashtable.put(element.getId(), element.getName());
+        });
+        List<SchedulerSlotDto> schedulerSlotDtos = new ArrayList<>();
+
+        final int[] totalStudent = {0};
+        schedulers.stream().forEach(element -> {
+            SchedulerSlotDto schedulerSlotDto = SchedulerSlotDto.builder()
+                    .id(element.getId())
+                    .semesterId(element.getSemesterId())
+                    .roomId(element.getRoomId())
+                    .roomName(roomHashtable.get(element.getRoomId()))
+                    .startDate(element.getStartDate())
+                    .endDate(element.getEndDate())
+                    .type(element.getType())
+                    .build();
+            String[] studentIds = element.getStudentId().split(",");
+            totalStudent[0] += studentIds.length;
+            schedulerSlotDtos.add(schedulerSlotDto);
+        });
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(new DashboardResponse(page.getNumber() + 1, page.getTotalPages(),
+                        page.getSize(), page.getTotalElements(), totalStudent[0], schedulerSlotDtos));
     }
 }
