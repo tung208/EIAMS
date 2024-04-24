@@ -1074,9 +1074,8 @@ public class SchedulerService implements SchedulerServiceInterface {
             }
         } else {
             for (Scheduler scheduler : schedulers) {
-                if (scheduler.getSubjectCode().split(",").length > 1 ||
-                        ( subjectRepository.findBySemesterIdAndSubjectCode(semesterId, scheduler.getSubjectCode()) != null
-                                && ( subjectRepository.findBySemesterIdAndSubjectCode(semesterId, scheduler.getSubjectCode()).getDontMix() == null))) {
+                if (subjectRepository.findBySemesterIdAndSubjectCode(semesterId, scheduler.getSubjectCode()) == null ||
+                        subjectRepository.findBySemesterIdAndSubjectCode(semesterId, scheduler.getSubjectCode()).getDontMix() == null) {
                     schedulersDegreeStudent.add(scheduler);
                 }
             }
