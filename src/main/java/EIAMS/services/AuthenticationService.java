@@ -129,6 +129,28 @@ public class AuthenticationService {
         }
     }
 
+    public ResponseObject refreshToken(
+            String refreshToken
+    ) throws IOException {
+        final String userEmail;
+        userEmail = jwtService.extractUsername(refreshToken);
+        if (userEmail != null) {
+            var user = this.accountRepository.findByEmail(userEmail)
+                    .orElseThrow();
+            if (jwtService.isTokenValid(refreshToken, user)) {
+                var accessToken = jwtService.generateToken(user);
+                revokeAllUserTokens(user);
+                saveUserToken(user, accessToken);
+                var authResponse = AuthenticationResponse.builder()
+                        .accessToken(accessToken)
+                        .refreshToken(refreshToken)
+                        .build();
+                return new ResponseObject("OK", "Refresh Successfull", authResponse);
+            }
+        }
+        return null;
+    }
+
     public void changePass(ChangePassDto changePassDto) throws EntityNotFoundException {
         // Lấy thông tin xác thực hiện tại
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
