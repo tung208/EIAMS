@@ -142,4 +142,6 @@ CREATE INDEX semester_index ON Subject(semester_id);
 CREATE INDEX semester_index1 ON StudentSubject(semester_id);
 create index student_roll_number on Student(roll_number);
 
+INSERT INTO Account (active, email, password, role, username)
+VALUES (1, 'Admin@gmail.com', '$2a$10$QdprJun5c1PkBUDQKwGWq.CL8XJLC61MvUgmV5Tpyev/F9pfqjNgq', 'ADMIN', 'ADMIN');
 -- CREATE INDEX semester_index2 ON ExamCode(semester_id);
