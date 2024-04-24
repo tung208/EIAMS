@@ -986,6 +986,9 @@ public class SchedulerService implements SchedulerServiceInterface {
         if (startDate.isBlank() || endDate.isBlank()) {
             throw new InvalidParameterException("Start time and end time cannot be empty");
         }
+        if(numberDecrease == 0){
+            throw new Exception("Number decrease invalid");
+        }
         LocalDateTime endDateSearch = LocalDateTime.parse(endDate, formatter);
         LocalDateTime startDateSearch = LocalDateTime.parse(startDate, formatter);
         List<Integer> labs = roomRepository.findAllBySemesterIdAndQuantityStudentGreaterThanAndNameContainingIgnoreCase(semesterId, 1, "Lab")
@@ -996,7 +999,7 @@ public class SchedulerService implements SchedulerServiceInterface {
         schedulers = schedulerRepository.findAllBySemesterIdAndStartDateAndEndDateAndTypeAndRoomIdNotIn(semesterId, startDateSearch, endDateSearch, type, labs);
         Map<Integer, Integer> roomStudentCount = new HashMap<>();
         List<String> allStudentIds = new ArrayList<>();
-        if (!Objects.equals(subject, "")) {
+        if (!subject.isBlank()) {
             for (Scheduler scheduler : schedulers) {
                 if (scheduler.getSubjectCode().equals(subject)) {
                     int numberOfStudents = scheduler.getStudentId().split(",").length;
@@ -1063,7 +1066,7 @@ public class SchedulerService implements SchedulerServiceInterface {
         List<Scheduler> schedulers = schedulerRepository.findAllBySemesterIdAndStartDateAndEndDateAndTypeAndRoomIdNotIn(semesterId, startDateSearch, endDateSearch, type, labs);
         List<Integer> roomUsed = schedulerRepository.findAllRoomIdBySemesterIdAndStartDateAndEndDate(semesterId, startDateSearch, endDateSearch);
         List<Scheduler> schedulersDegreeStudent = new ArrayList<>();
-        if (!Objects.equals(subject, "")) {
+        if (!subject.isBlank()) {
             for (Scheduler scheduler : schedulers) {
                 if (scheduler.getSubjectCode().equals(subject)) {
                     schedulersDegreeStudent.add(scheduler);
@@ -1083,7 +1086,9 @@ public class SchedulerService implements SchedulerServiceInterface {
         }
         Comparator<Scheduler> studentCountComparator = Comparator.comparingInt(scheduler -> scheduler.getStudentId().split(",").length);
         schedulersDegreeStudent.sort(studentCountComparator.reversed());
-        int numberOfStudentToNewRoom = numberIncrease * DBTableUtils.ROOM_NORMAL_QUANTITY;
+        int totalRoomSchedule = schedulersDegreeStudent.size();
+        int quantityOfNewRoom = totalRoomSchedule - numberIncrease;
+        int numberOfStudentToNewRoom = quantityOfNewRoom * numberIncrease;
         Map<Integer, String> roomIdWithStudent = new HashMap<>();
         Map<Integer, String> roomSubject = new HashMap<>();
         int number = 0;
@@ -1097,7 +1102,7 @@ public class SchedulerService implements SchedulerServiceInterface {
                 for (Scheduler schedule : schedulersDegreeStudent) {
                     number++;
                     numberStudentInRoom++;
-                    if (numberStudentInRoom >= DBTableUtils.ROOM_NORMAL_QUANTITY || number >= numberOfStudentToNewRoom) {
+                    if (numberStudentInRoom >= quantityOfNewRoom || number >= numberOfStudentToNewRoom) {
                         break;
                     }
                     String[] studentIds = schedule.getStudentId().split(",");
