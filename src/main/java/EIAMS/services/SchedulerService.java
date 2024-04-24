@@ -227,9 +227,9 @@ public class SchedulerService implements SchedulerServiceInterface {
                 .findFirst()
                 .orElse("");
 
-        if (!Arrays.asList(subjectCodes).contains(subjectSwapMatch) || !Arrays.asList(subjectCodesSwap).contains(subjectMatch)) {
-            throw new Exception("This is room have special subject. Need to choose a teacher who can proctor this subject ");
-        }
+//        if (!Arrays.asList(subjectCodes).contains(subjectSwapMatch) || !Arrays.asList(subjectCodesSwap).contains(subjectMatch)) {
+//            throw new Exception("This is room have special subject. Need to choose a teacher who can proctor this subject ");
+//        }
         if (!schedulerRepository.findAllBySemesterIdAndStartDateAndEndDateAndIdNotAndLectureId(
                 scheduler.getSemesterId(), newStartDate, newEndDate, scheduler.getId(), scheduler.getLecturerId()).isEmpty()
                 || !schedulerRepository.findAllBySemesterIdAndStartDateAndEndDateAndIdNotAndLectureId(
